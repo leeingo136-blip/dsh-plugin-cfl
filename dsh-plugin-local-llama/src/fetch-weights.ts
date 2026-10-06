@@ -13,7 +13,7 @@
  * happily load.
  */
 import { createWriteStream } from 'node:fs'
-import { mkdir, rename, stat } from 'node:fs/promises'
+import { mkdir, open, rename, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
@@ -67,12 +67,15 @@ export async function downloadWeights(
       let received = 0
       let lastReport = 0
       const progress = new TransformStream<Uint8Array, Uint8Array>({
-        transform(chunk) {
+        transform(chunk, controller) {
           received += chunk.byteLength
           if (received - lastReport >= REPORT_STEP || (total > 0 && received >= total)) {
             lastReport = received
             report(received, total)
           }
+          // Progress counting alone swallows the bytes: the stream must
+          // forward every chunk or the file lands empty.
+          controller.enqueue(chunk)
         },
       })
       await pipeline(
@@ -84,6 +87,10 @@ export async function downloadWeights(
       )
       await rename(temporary, target)
       const done = await stat(target)
+      if (total > 0 && done.size !== total) {
+        throw new Error(`下载不完整（${done.size} / ${total} 字节）`)
+      }
+      await verifyGguf(target)
       report(done.size, done.size)
       return
     } catch (error) {
@@ -94,4 +101,23 @@ export async function downloadWeights(
     }
   }
   throw lastError instanceof Error ? lastError : new Error(String(lastError))
+}
+
+/**
+ * Confirm the downloaded file really is a GGUF (magic `GGUF` in the first
+ * four bytes). A mirror or captive portal can answer 200 with an HTML page;
+ * failing here gives a clear card message instead of llama.cpp's cryptic
+ * "Invalid GGUF magic".
+ */
+async function verifyGguf(path: string): Promise<void> {
+  const handle = await open(path, 'r')
+  try {
+    const header = Buffer.alloc(4)
+    await handle.read(header, 0, 4, 0)
+    if (header.toString('latin1') !== 'GGUF') {
+      throw new Error('下载内容不是有效的 GGUF 文件（镜像可能返回了错误页面），请重试')
+    }
+  } finally {
+    await handle.close()
+  }
 }
