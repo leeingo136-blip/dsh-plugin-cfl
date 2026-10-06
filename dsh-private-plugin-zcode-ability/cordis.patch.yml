@@ -70,7 +70,7 @@
             name: '@deepseek-ai/dsh-skill-filesystem'
             config:
               customSkillDirs:
-                - /Users/infinite/WorkBuddy/20260424114504/dsh-private-plugin-zcode-ability/skills
+                - /Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/dsh-private-plugin-zcode-ability/skills
           - id: tool-skill
             name: '@deepseek-ai/dsh-tool-skill'
           # --- ZCode: the "load a skill before you act" reminder gate ---

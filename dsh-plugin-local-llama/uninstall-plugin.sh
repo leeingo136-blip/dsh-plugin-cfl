@@ -13,7 +13,7 @@
 set -eu
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-REPO="${1:-$HOME/WorkBuddy/20260424114504/deepseek-harness}"
+REPO="${1:-$HOME/Projects/DeepSeekHarnessPrivate/deepseek-harness}"
 PROFILE="$REPO/apps/desktop/.desktop-build/development/home/profiles/desktop"
 NODE="${NODE:-$(command -v node || echo /Users/infinite/.workbuddy/binaries/node/versions/22.22.2-6/bin/node)}"
 

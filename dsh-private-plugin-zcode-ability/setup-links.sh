@@ -8,7 +8,7 @@
 #
 set -eu
 
-REPO="${1:-$HOME/WorkBuddy/20260424114504/deepseek-harness}"
+REPO="${1:-$HOME/Projects/DeepSeekHarnessPrivate/deepseek-harness}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 mkdir -p "$HERE/node_modules/@deepseek-ai"
 
