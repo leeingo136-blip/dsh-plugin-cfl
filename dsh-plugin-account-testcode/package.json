@@ -1,0 +1,14 @@
+{
+  "name": "dsh-private-plugin-account-testcode",
+  "description": "External TestCode account plugin: dialog sign-in (123/abc), a fake 'TestCode Acc' inference provider with aav/vvi model groups, and a TestOK reply",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "license": "MIT"
+}

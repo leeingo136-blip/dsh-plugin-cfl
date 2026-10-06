@@ -1,0 +1,87 @@
+# 本地 GGUF 模型账号插件
+
+在 Harness 内直接运行一个本地小模型，由 llama.cpp 在本进程内解码。不联网、不需要账号、不改动 Harness 源码。
+
+默认加载 **xLAM-2-3B-fc-r**（Qwen2.5 底座，专为函数调用训练），可在 Harness 内触发技能/工具循环；若 `models/` 里没有 xLAM 权重，则自动回退到 **Qwen3-0.6B**（纯对话，不调用工具）。权重文件由 `scripts/fetch-model.mjs` 下载，不在仓库内。
+
+## 一、为什么是 GGUF 而不是 ONNX
+
+最早的版本用 ONNX Runtime + `Qwen3-0.6B-ONNX`，编译、加载都正常，但**一发消息应用立刻崩溃**（退出码 133，无任何报错）。原因是桌面壳跑的是 Electron，而原生模块是针对某个运行时的 ABI 编译的：
+
+| 运行时 | Node 版本 | ABI 号 | 首次推理 |
+|---|---|---|---|
+| 系统 Node 22 | 22.22.2 | 127 | 正常 |
+| 系统 Node 24 | 24.14.1 | 137 | 正常 |
+| Electron 44（插件实际运行处） | 24.18.1 | **149** | **SIGTRAP 崩溃** |
+
+加载能通过，真正解码时内存布局错乱。限制线程数无效，插件侧改代码也绕不过——这是编译层面的不匹配。
+
+换成 llama.cpp 的绑定后同一进程一切正常（实测：加载 1.3 秒，生成 0.5–0.8 秒）。代价是原生二进制按平台分发，做不到"一个包通吃所有系统"。
+
+> 中途试过纯 WASM 方案（`@wllama/wllama`）：它内部依赖浏览器的 `Worker` 与 `self` 全局，在 Node/Electron 主进程不存在，无法使用。
+
+## 二、目录与装入方式
+
+```
+dsh-plugin-local-llama/
+├── src/index.ts          # 服务 + adapter + 账号卡（direct 模式）
+├── src/local-model.ts    # 推理引擎：懒加载、串行队列、流式桥接、思考块拆分
+├── scripts/fetch-model.mjs  # 权重下载器（--list / --variant / --force）
+├── models/               # 权重，不进仓库（484 MB）
+├── node_modules/         # 运行时依赖，随包分发
+├── setup-links.sh        # 建立 @deepseek-ai/* 链接场（编译期必需）
+├── install-plugin.sh     # 接入桌面 dev home
+└── uninstall-plugin.sh   # 精确反向卸载
+```
+
+安装：
+
+```bash
+sh setup-links.sh          # 编译期：@deepseek-ai/* 链接
+npm install                # 拉取 node-llama-cpp（按平台取原生二进制）
+node scripts/fetch-model.mjs
+npx tsc -p tsconfig.build.json
+sh install-plugin.sh       # 写入 dev home 三处
+```
+
+卸载：`sh uninstall-plugin.sh`（插件目录默认保留，加 `--purge` 删除）。
+
+## 三、权重
+
+默认 `Qwen3-0.6B-Q4_K_M.gguf`（484 MB），来自 `lmstudio-community/Qwen3-0.6B-GGUF`。
+
+```bash
+node scripts/fetch-model.mjs --list                       # 列出全部精度与体积
+node scripts/fetch-model.mjs --variant Qwen3-0.6B-Q8_0.gguf
+```
+
+换精度后要同步改 `src/local-model.ts` 的 `MODEL_FILE` 常量，再重新编译。
+
+## 四、使用
+
+1. 重启应用 → **设置-账号** → 找到「本地 Qwen3 模型」→ 点「启用本地模型」；
+2. 卡片状态 `加载中… → 已就绪`；启用会发布注册中心变更事件，模型选择器的目录随即重载，无需重启；
+3. 在模型选择器里选 `Qwen3-0.6B（本地）`，发一句话。
+
+停用后模型组从目录消失，权重也不再驻留内存。
+
+## 五、实现取舍
+
+**懒加载 + 预热。** node-llama-cpp 是动态导入的，插件挂载本身不付加载成本；点「启用」才在后台读入权重，失败会落成卡片状态而不是一句看不懂的异常。
+
+**每次生成独立上下文。** 上下文持有 KV cache，跨轮复用会让无关会话读到彼此的状态；用完即释放。
+
+**串行队列。** 引擎一次只跑一个生成，顺带避免多个会话同时分配 KV cache。
+
+**预算要留够。** Qwen3 默认先输出思考块，token 预算太小会全部消耗在思考里、正文为空——默认 1024，可在设置里调。思考内容会自动拆成独立的推理块，界面上折叠显示。
+
+**输入裁剪。** 上下文 4096，而它按请求分配、超长会在引擎内部失败而不是降级，所以按 6000 字符从旧的一侧裁剪——回复要接的是最近的几轮。
+
+**不支持工具。** 0.6B 级模型没有可信的 function-calling，`resolveModel` 照实不声明工具能力；工具声明被忽略而不是转发。
+
+## 六、已知限制
+
+- 原生二进制绑定平台：macOS 与 Windows 需各自安装一次（跨平台不能复用同一份 `node_modules`）；
+- 换模型需改常量并重新编译；
+- 纯 CPU 解码，长回复需要等待；
+- 会话里若选过本模型，卸载后需手动把该会话切到其它模型（模型选择以字符串记录在会话里）。

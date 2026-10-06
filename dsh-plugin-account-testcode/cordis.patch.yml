@@ -1,0 +1,11 @@
+# The external TestCode account plugin's own patch layer, applied by the
+# profile once this package is installed as a profile dependency. The bare
+# name resolves through the package's `main` (dist/index.js), so rebuild dist
+# after editing src.
+- insert:
+    - id: testcode-account-external
+      name: 'dsh-private-plugin-account-testcode'
+      # The schema is a plain z.object, which rejects `undefined`; the empty
+      # config makes a default install a valid activation (modelGroup is
+      # optional and is later written here by the hub card's Save).
+      config: {}

@@ -1,0 +1,16 @@
+# Dependencies are re-linked via setup-links.sh (symlinks into harness packages)
+node_modules/
+
+# Build output — rebuild with: tsc -p tsconfig.build.json
+dist/
+
+# Model weights — exceed Gitee single-file limit; fetch via scripts/fetch-model.mjs
+models/
+
+# Runtime state (e.g. local-llama enabled flag)
+.state/
+
+# TypeScript incremental cache
+*.tsbuildinfo
+
+.DS_Store

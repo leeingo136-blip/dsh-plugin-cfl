@@ -1,0 +1,14 @@
+{
+  "name": "dsh-private-plugin-z.ai-account",
+  "description": "Z.ai / GLM account component of dsh-private-plugin-zcode-ability: browser sign-in or pasted API key, the credential they produce, the Z.ai-account inference provider, and the account-hub registration whose declarative card renders the whole settings row. A component installed alongside presets, never inside one.",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "default": "./dist/index.js"
+    }
+  },
+  "license": "MIT"
+}

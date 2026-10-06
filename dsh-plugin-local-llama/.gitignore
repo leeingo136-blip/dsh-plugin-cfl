@@ -1,0 +1,6 @@
+# Runtime state written by the plugin (enabled flag across restarts)
+.state/
+
+# Build / dependency artifacts
+dist/
+node_modules/

@@ -1,0 +1,14 @@
+{
+  "name": "dsh-private-plugin-account-deepseek",
+  "description": "External DeepSeek account plugin: platform OAuth sign-in, account-token inference provider, and dsh-account-hub registration",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "license": "MIT"
+}

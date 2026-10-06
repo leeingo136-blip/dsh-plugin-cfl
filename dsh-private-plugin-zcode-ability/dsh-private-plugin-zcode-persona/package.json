@@ -1,0 +1,10 @@
+{
+  "name": "dsh-private-plugin-zcode-persona",
+  "description": "ZCode persona posture: the 「你是谁 / 怎么干」 reminder injected as a system-prompt section for 「zCode之剑」 sessions.",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": { ".": { "default": "./dist/index.js" } },
+  "license": "MIT"
+}
