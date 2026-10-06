@@ -26,7 +26,8 @@
 dsh-plugin-local-llama/
 ├── src/index.ts          # 服务 + adapter + 账号卡（direct 模式）
 ├── src/local-model.ts    # 推理引擎：懒加载、串行队列、流式桥接、思考块拆分
-├── scripts/fetch-model.mjs  # 权重下载器（--list / --variant / --force）
+├── src/fetch-weights.ts  # 应用内权重下载器（启用时自动拉取，带镜像回退）
+├── scripts/fetch-model.mjs  # 离线权重下载器（--list / --variant / --force）
 ├── models/               # 权重，不进仓库（xLAM 约 1.93 GB / Qwen3 约 484 MB）
 ├── node_modules/         # 运行时依赖，随包分发
 ├── setup-links.sh        # 建立 @deepseek-ai/* 链接场（编译期必需）
@@ -48,7 +49,11 @@ sh install-plugin.sh       # 写入 dev home 三处
 
 ## 三、权重
 
-权重不进仓库（Gitee 单文件 100 MB 上限，单个 GGUF 均超限），克隆后用脚本从 HuggingFace 下载：
+权重不进仓库（Gitee 单文件 100 MB 上限，单个 GGUF 均超限）。获取途径有两条：
+
+**应用内自动下载（推荐）**：在「设置-账号」点「启用本地模型」，若 `models/` 下没有权重，插件自动开始下载默认 xLAM 权重，卡片状态显示 `下载中… 870 MB / 1.93 GB（45%）`；下载完成后自动启用并加载。下载失败会落成卡片上的「下载失败 · 原因」，再次点启用即重试；下载中途停用会中止传输。
+
+**脚本离线下载**：装机前预取，或在无法联网的机器上手动拷入 `models/`：
 
 ```bash
 node scripts/fetch-model.mjs                # 默认下载 xLAM-2-3B-fc-r-Q4_K_M.gguf（1.93 GB）
@@ -61,8 +66,8 @@ node scripts/fetch-model.mjs --force        # 强制重新下载
 
 ## 四、使用
 
-1. 重启应用 → **设置-账号** → 找到「本地模型」→ 点「启用本地模型」；
-2. 卡片状态 `加载中… → 已就绪`；启用会发布注册中心变更事件，模型选择器的目录随即重载，无需重启；
+1. 重启应用 → **设置-账号** → 找到「本地模型」→ 点「启用本地模型」（权重缺失时自动下载，见第三节）；
+2. 卡片状态 `下载中…（首次）/ 加载中… → 已就绪`；启用会发布注册中心变更事件，模型选择器的目录随即重载，无需重启；
 3. 在模型选择器里选「本地模型」，发一句话。
 
 停用后模型组从目录消失，权重也不再驻留内存。

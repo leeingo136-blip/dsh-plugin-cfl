@@ -117,6 +117,15 @@ export function weightsPresent(): boolean {
   return model.file !== '' && existsSync(model.path)
 }
 
+/**
+ * Forget the cached model scan. The cache remembers a "nothing downloaded"
+ * result, so after an in-app download lands the next `weightsPresent()` /
+ * `currentModelId()` must re-read `models/` to see the new file.
+ */
+export function resetModelSelection(): void {
+  cachedSelection = undefined
+}
+
 /** The error raised when nothing was downloaded yet. */
 function missingWeights(): Error {
   const model = selectModel()

@@ -27,10 +27,12 @@ import type { AccountHubCardDescriptor, AccountHubCardState } from '@deepseek-ai
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import zschema from '@deepseek-ai/schemastery'
 import {
-  buildToolAliases, currentModelId, generate, isXLAMModel, loadEnabled, modelRoot, normalizeToolArgs,
-  parseToolCalls, resolveBarePaths, saveEnabled, toChatMessages, warmup, weightsPresent,
+  buildToolAliases, currentModelId, generate, isXLAMModel, loadEnabled, normalizeToolArgs,
+  parseToolCalls, resetModelSelection, resolveBarePaths, saveEnabled, toChatMessages, warmup,
+  weightsPresent,
   type ToolAliasSet, type ToolSpec,
 } from './local-model.ts'
+import { downloadWeights } from './fetch-weights.ts'
 
 /** Stable identity: hub account id and provider route. */
 export const name = 'local-llama-account'
@@ -366,6 +368,12 @@ export default class LocalLlamaAccount extends Service {
   /** Whether the pipeline has finished loading in this process. */
   private ready = false
   private loadFailure: string | undefined
+  /** Progress line of an in-flight weight download, undefined when idle. */
+  private downloadProgress: string | undefined
+  /** Why the last weight download failed, undefined otherwise. */
+  private downloadError: string | undefined
+  /** Aborts the in-flight download when the user disables mid-fetch. */
+  private downloadAbort: AbortController | undefined
   private view: AccountHubCardState = { text: '未启用', level: 'warn', signedIn: false, brand: BRAND }
 
   /** @param ctx - host context. @param config - plugin configuration. */
@@ -470,15 +478,23 @@ export default class LocalLlamaAccount extends Service {
   /**
    * Adopt the local model: advertise it, then load it off the request path.
    *
-   * A missing download is reported instead of throwing — the card's modal is
-   * the only place the user can read what to run, and nothing about it is
-   * recoverable inside the process.
+   * When no weight has been downloaded yet, enabling becomes the fetch
+   * trigger: the download starts in the background, the card reads 「下载中…」
+   * until it lands, and the engine arms itself right after — one gesture, no
+   * terminal visit.
    */
   private async enable(): Promise<JsonValue> {
-    if (!weightsPresent()) {
+    if (this.downloadAbort !== undefined) {
       return {
-        message: `尚未安装权重。请在插件目录 ${modelRoot()} 执行：node scripts/fetch-model.mjs`,
-        error: true,
+        message: `权重正在下载中：${this.downloadProgress ?? '准备中…'}。完成后将自动启用。`,
+        close: true,
+      }
+    }
+    if (!weightsPresent()) {
+      this.startDownload()
+      return {
+        message: '本地未找到权重，已开始自动下载 xLAM-2-3B-fc-r（约 1.93 GB，卡片区可见进度）。下载完成后将自动启用。',
+        close: true,
       }
     }
     this.arm()
@@ -486,11 +502,59 @@ export default class LocalLlamaAccount extends Service {
     return { message: '已启用本地模型，正在加载权重（首次加载约数秒）。', close: true }
   }
 
-  /** Retire the provider: the models page drops the row immediately. */
+  /** Retire the provider: the models page drops the row immediately. A download
+   *  in flight is aborted — a disabled account should not keep pulling GBs. */
   private async disable(): Promise<JsonValue> {
+    this.downloadAbort?.abort()
+    this.downloadAbort = undefined
+    this.downloadProgress = undefined
+    this.downloadError = undefined
     this.disarm()
     saveEnabled(false)
     return { message: '已停用本地模型。', close: true }
+  }
+
+  /**
+   * Kick off the background weight download. While it runs the card shows the
+   * progress line; on success the selection cache is dropped (it remembers the
+   * "nothing downloaded" scan), the flag persists and the engine arms. A
+   * failure lands on the card as a retryable error, leaving the account
+   * disabled so the next 「启用」 starts a fresh download.
+   */
+  private startDownload(): void {
+    const controller = new AbortController()
+    this.downloadAbort = controller
+    this.downloadProgress = '准备中…'
+    this.downloadError = undefined
+    this.publish()
+    void downloadWeights((text) => {
+      this.downloadProgress = text
+      this.publish()
+    }, controller.signal).then(
+      () => {
+        this.downloadAbort = undefined
+        this.downloadProgress = undefined
+        // The user disabled mid-download and the fetch raced to completion:
+        // stay retired instead of arming a disabled account.
+        if (controller.signal.aborted) {
+          this.publish()
+          return
+        }
+        resetModelSelection()
+        saveEnabled(true)
+        this.arm()
+      },
+      (error: unknown) => {
+        this.downloadAbort = undefined
+        this.downloadProgress = undefined
+        if (controller.signal.aborted) {
+          this.publish()
+          return
+        }
+        this.downloadError = error instanceof Error ? error.message : String(error)
+        this.publish()
+      },
+    )
   }
 
   /**
@@ -527,6 +591,7 @@ export default class LocalLlamaAccount extends Service {
     this.enabled = false
     this.ready = false
     this.loadFailure = undefined
+    this.downloadError = undefined
     this.publish()
     this.announceCatalogChange()
   }
@@ -537,7 +602,11 @@ export default class LocalLlamaAccount extends Service {
    *  what matters about a local engine: whether it is armed, whether its
    *  weights are present, and whether this process has them resident. */
   private publish(): void {
-    if (!this.enabled) {
+    if (this.downloadProgress !== undefined) {
+      this.view = { text: `下载中… ${this.downloadProgress}`, level: 'warn', signedIn: false, brand: BRAND }
+    } else if (this.downloadError !== undefined) {
+      this.view = { text: `下载失败 · ${this.downloadError}`, level: 'error', signedIn: false, brand: BRAND }
+    } else if (!this.enabled) {
       this.view = { text: '未启用', level: 'warn', signedIn: false, brand: BRAND }
     } else if (this.loadFailure !== undefined) {
       this.view = { text: `加载失败 · ${this.loadFailure}`, level: 'error', signedIn: true, brand: BRAND }
