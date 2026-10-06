@@ -27,7 +27,7 @@ dsh-plugin-local-llama/
 ├── src/index.ts          # 服务 + adapter + 账号卡（direct 模式）
 ├── src/local-model.ts    # 推理引擎：懒加载、串行队列、流式桥接、思考块拆分
 ├── scripts/fetch-model.mjs  # 权重下载器（--list / --variant / --force）
-├── models/               # 权重，不进仓库（484 MB）
+├── models/               # 权重，不进仓库（xLAM 约 1.93 GB / Qwen3 约 484 MB）
 ├── node_modules/         # 运行时依赖，随包分发
 ├── setup-links.sh        # 建立 @deepseek-ai/* 链接场（编译期必需）
 ├── install-plugin.sh     # 接入桌面 dev home
@@ -48,20 +48,22 @@ sh install-plugin.sh       # 写入 dev home 三处
 
 ## 三、权重
 
-默认 `Qwen3-0.6B-Q4_K_M.gguf`（484 MB），来自 `lmstudio-community/Qwen3-0.6B-GGUF`。
+权重不进仓库（Gitee 单文件 100 MB 上限，单个 GGUF 均超限），克隆后用脚本从 HuggingFace 下载：
 
 ```bash
-node scripts/fetch-model.mjs --list                       # 列出全部精度与体积
-node scripts/fetch-model.mjs --variant Qwen3-0.6B-Q8_0.gguf
+node scripts/fetch-model.mjs                # 默认下载 xLAM-2-3B-fc-r-Q4_K_M.gguf（1.93 GB）
+node scripts/fetch-model.mjs --list         # 列出全部变体与体积
+node scripts/fetch-model.mjs --variant qwen3-0.6b   # 追加 Qwen3-0.6B-Q4_K_M.gguf（484 MB）
+node scripts/fetch-model.mjs --force        # 强制重新下载
 ```
 
-换精度后要同步改 `src/local-model.ts` 的 `MODEL_FILE` 常量，再重新编译。
+引擎启动时自动扫描 `models/` 下的 `.gguf`，两者并存时优先 xLAM；**换模型只是多下载一个文件，无需改代码、无需重新编译**。
 
 ## 四、使用
 
-1. 重启应用 → **设置-账号** → 找到「本地 Qwen3 模型」→ 点「启用本地模型」；
+1. 重启应用 → **设置-账号** → 找到「本地模型」→ 点「启用本地模型」；
 2. 卡片状态 `加载中… → 已就绪`；启用会发布注册中心变更事件，模型选择器的目录随即重载，无需重启；
-3. 在模型选择器里选 `Qwen3-0.6B（本地）`，发一句话。
+3. 在模型选择器里选「本地模型」，发一句话。
 
 停用后模型组从目录消失，权重也不再驻留内存。
 
@@ -75,13 +77,12 @@ node scripts/fetch-model.mjs --variant Qwen3-0.6B-Q8_0.gguf
 
 **预算要留够。** Qwen3 默认先输出思考块，token 预算太小会全部消耗在思考里、正文为空——默认 1024，可在设置里调。思考内容会自动拆成独立的推理块，界面上折叠显示。
 
-**输入裁剪。** 上下文 4096，而它按请求分配、超长会在引擎内部失败而不是降级，所以按 6000 字符从旧的一侧裁剪——回复要接的是最近的几轮。
+**输入裁剪。** 上下文 8192 token，按 8000 字符从旧的一侧裁剪，system 消息永不裁切——回复要接的是最近的几轮。
 
-**不支持工具。** 0.6B 级模型没有可信的 function-calling，`resolveModel` 照实不声明工具能力；工具声明被忽略而不是转发。
+**工具调用（仅 xLAM）。** xLAM-2-3B-fc-r 专为函数调用训练：插件向 system 注入带别名的工具清单，纯文本生成后解析其 JSON 输出为工具调用，驱动 Harness 的工具循环。Qwen3-0.6B 级别没有可信的 function-calling，回退到它时工具声明被忽略。
 
 ## 六、已知限制
 
 - 原生二进制绑定平台：macOS 与 Windows 需各自安装一次（跨平台不能复用同一份 `node_modules`）；
-- 换模型需改常量并重新编译；
 - 纯 CPU 解码，长回复需要等待；
 - 会话里若选过本模型，卸载后需手动把该会话切到其它模型（模型选择以字符串记录在会话里）。
