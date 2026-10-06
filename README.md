@@ -11,7 +11,6 @@ All private external plugins for the DeepSeek Harness (`PrivateModification` bra
 | `dsh-plugin-account-testcode` | TestCode 测试账号插件（direct 模式） |
 | `dsh-plugin-deepseek-account` | DeepSeek 官方账号插件（credential-inject 模式） |
 | `dsh-plugin-local-llama` | 本地 GGUF 推理插件：xLAM-2-3B-fc-r（函数调用）/ Qwen3-0.6B 兜底，node-llama-cpp 引擎，工具调用走别名注入 + 解析回环 |
-| `dsh-plugin-local-onnx` | （已由 local-llama 取代）ONNX Runtime 本地推理插件 |
 | `dsh-private-plugin-zcode-ability` | ZCode 移植容器：persona / skills / plan / workflow / environment（zCode之剑 预设）+ z.ai-account 账号 + 8 个技能 |
 
 ## 仓库不含的内容 / Not included
