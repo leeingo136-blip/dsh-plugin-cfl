@@ -25,7 +25,7 @@ import { EntryGroup } from '@deepseek-ai/cordis-plugin-loader'
 import z from '@deepseek-ai/schemastery'
 import type { PresetDefinition } from '@deepseek-ai/dsh-agent-preset-registry'
 import type {} from '@deepseek-ai/dsh-agent-preset-registry'
-import { presetDefinition } from './definition.ts'
+import { presetDefinition, resolvePresetPaths } from './definition.ts'
 
 /** Definition submitted to the preset registry. */
 export type Config = PresetDefinition
@@ -46,7 +46,10 @@ export default class ZcodeSwordPreset {
   constructor(private readonly ctx: Context, private readonly config: Config = presetDefinition() as Config) {}
 
   async* [Service.init]() {
-    yield await this.ctx.agentPresets.register(this.config)
+    // The declarative patch names container paths (e.g. `skills`) relative to
+    // the container root because YAML has no module anchor; resolve them here,
+    // on the host that owns the files, before handing the definition over.
+    yield await this.ctx.agentPresets.register(resolvePresetPaths(this.config) as Config)
   }
 }
 

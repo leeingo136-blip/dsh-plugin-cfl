@@ -1,9 +1,9 @@
 {
-  "extends": "../deepseek-harness/tsconfig.base.json",
+  "extends": "../../DeepSeekHarnessPrivate/deepseek-harness/tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
     "rootDir": "src",
-    "typeRoots": ["../deepseek-harness/node_modules/@types"],
+    "typeRoots": ["../../DeepSeekHarnessPrivate/deepseek-harness/node_modules/@types"],
     "types": ["node"],
     "paths": {}
   },

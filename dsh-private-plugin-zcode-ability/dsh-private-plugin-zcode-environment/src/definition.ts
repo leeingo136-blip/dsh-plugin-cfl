@@ -26,6 +26,37 @@ import { fileURLToPath } from 'node:url'
  */
 const SKILL_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../skills')
 
+/** This package's dist directory — the anchor for container-relative paths. */
+const PACKAGE_DIST = dirname(fileURLToPath(import.meta.url))
+
+/** Is the path already device-specific (POSIX absolute or Windows drive)? */
+function isAbsoluteish(path: string): boolean {
+  return path.startsWith('/') || /^[A-Za-z]:[/\\]/.test(path)
+}
+
+/**
+ * Resolve relative `customSkillDirs` entries against the container root.
+ *
+ * The declarative patch cannot use `import.meta.url`, so it names container
+ * paths relative to the container root (e.g. `skills`). Absolute entries —
+ * including the programmatic path's `SKILL_ROOT` — pass through untouched.
+ * Must run on the host that owns the files, hence here and not in the YAML.
+ */
+export function resolvePresetPaths(config: unknown): unknown {
+  if (config === null || typeof config !== 'object') return config
+  const cloned = structuredClone(config) as {
+    plugins?: { config?: { customSkillDirs?: string[] } }[]
+  }
+  for (const entry of cloned.plugins ?? []) {
+    const dirs = entry.config?.customSkillDirs
+    if (!Array.isArray(dirs)) continue
+    entry.config!.customSkillDirs = dirs.map((dir) =>
+      isAbsoluteish(dir) ? dir : join(PACKAGE_DIST, '../..', dir),
+    )
+  }
+  return cloned
+}
+
 /**
  * One per ported capability — a component package name, mounted under its own
  * `zcode-*` cell in the preset tree.

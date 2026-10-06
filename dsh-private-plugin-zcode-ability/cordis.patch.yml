@@ -69,8 +69,11 @@
           - id: skill-filesystem
             name: '@deepseek-ai/dsh-skill-filesystem'
             config:
+              # Container-relative: the environment component resolves
+              # non-absolute entries against the container root at register
+              # time (YAML has no module anchor), so this stays device-portable.
               customSkillDirs:
-                - /Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/dsh-private-plugin-zcode-ability/skills
+                - skills
           - id: tool-skill
             name: '@deepseek-ai/dsh-tool-skill'
           # --- ZCode: the "load a skill before you act" reminder gate ---
