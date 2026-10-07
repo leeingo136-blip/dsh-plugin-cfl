@@ -73,7 +73,11 @@ export interface AccountRow {
 }
 /** @returns the localized display name for the section nav. */
 export declare function sectionLabel(t: (key: AccountHubKey) => string): string;
-/** Services required by the account column. */
+/** Services required by the account column. `remote.accountHub` is NOT a
+ * required inject: this plugin mounts its own remote contribution (below), so
+ * requiring the namespace up front would deadlock the boot activation check —
+ * the mount completes inside this plugin's apply, never before it. The face
+ * methods await the mount promise instead. */
 export declare const inject: string[];
 /**
  * Register the account column. Both renderers run this: the Desktop shell and

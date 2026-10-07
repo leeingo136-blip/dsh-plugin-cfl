@@ -5401,12 +5401,15 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 		function sectionLabel(t) {
 			return t("nav");
 		}
-		/** Services required by the account column. */
+		/** Services required by the account column. `remote.accountHub` is NOT a
+		* required inject: this plugin mounts its own remote contribution (below), so
+		* requiring the namespace up front would deadlock the boot activation check —
+		* the mount completes inside this plugin's apply, never before it. The face
+		* methods await the mount promise instead. */
 		const inject = [
 			"slots",
 			"locale",
 			"remote",
-			"remote.accountHub",
 			"theme"
 		];
 		/**
@@ -5416,8 +5419,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 		* by a surface-specific bridge. @param ctx - client plugin context.
 		*/
 		function apply(ctx) {
+			let mounted = Promise.resolve();
 			ctx.effect(() => {
 				const disposer = ctx.remote.$mount(TYPERT_REMOTE);
+				mounted = disposer.then(() => {});
 				return () => {
 					disposer.then((dispose) => dispose());
 				};
@@ -5430,6 +5435,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 			const face = {
 				t,
 				list: async () => {
+					await mounted;
 					const result = await ctx.remote.accountHub.list();
 					if (!result.ok) throw new Error(result.error.message);
 					return result.value.map((view) => ({
@@ -5438,32 +5444,40 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 					}));
 				},
 				subscribe: (onChange) => {
-					const stream = ctx.remote.$stream({
-						name: "accountHub",
-						open: (signal) => ctx.remote.accountHub.watch(signal),
-						ended: () => /* @__PURE__ */ new Error("account hub stream ended")
-					});
+					let stream;
+					let disposed = false;
 					(async () => {
+						await mounted;
+						if (disposed) return;
+						stream = ctx.remote.$stream({
+							name: "accountHub",
+							open: (signal) => ctx.remote.accountHub.watch(signal),
+							ended: () => /* @__PURE__ */ new Error("account hub stream ended")
+						});
 						for await (const frame of stream) {
 							frame.accept();
 							onChange();
 						}
 					})();
 					return () => {
-						stream.dispose();
+						disposed = true;
+						stream?.dispose();
 					};
 				},
 				invoke: async (accountId, method, args) => {
+					await mounted;
 					const result = await ctx.remote.accountHub.invoke(accountId, method, args);
 					if (!result.ok) throw new Error(result.error.message);
 					return result.value;
 				},
 				readParams: async (accountId) => {
+					await mounted;
 					const result = await ctx.remote.accountHub.readParams(accountId);
 					if (!result.ok) throw new Error(result.error.message);
 					return result.value;
 				},
 				commitParams: async (accountId, ops) => {
+					await mounted;
 					const result = await ctx.remote.accountHub.commitParams(accountId, ops);
 					if (!result.ok) throw new Error(result.error.message);
 				},
