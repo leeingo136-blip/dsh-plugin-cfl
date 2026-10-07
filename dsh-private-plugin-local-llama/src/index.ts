@@ -337,22 +337,51 @@ async function *streamReply(
 }
 
 /**
- * Plugin configuration type. Every field is `.volatile()`, so at runtime each
- * arrives as a lazy box rather than the raw value — an official plugin reads
- * them through `.get()` so a settings write lands without a fiber restart
- * race. They are also why the settings namespace exists at all: the settings
- * service projects only volatile fields, and a namespace that projects
- * nothing takes its models-page row with it.
+ * Display value of the read-only model field: the id the engine will load, or
+ * a placeholder while no weight is on disk yet. Evaluated when the schema is
+ * built — at module load, and again after each in-app download via
+ * `refreshSettingsSchema` — which covers exactly the moments the engine could
+ * pick a different weight.
+ */
+function modelDisplayValue(): string {
+  return weightsPresent() ? currentModelId() : '未下载权重'
+}
+
+/**
+ * Plugin configuration type. Every scalar field is `.volatile()`, so at
+ * runtime each arrives as a lazy box rather than the raw value — an official
+ * plugin reads them through `.get()` so a settings write lands without a
+ * fiber restart race. They are also why the settings namespace exists at all:
+ * the settings service projects only volatile fields, and a namespace that
+ * projects nothing takes its models-page row with it. `model` carries no
+ * service state; it is a read-only mirror of the engine's weight choice.
  */
 export interface Config {
+  model?: { readonly get: () => string }
   maxTokens?: { readonly get: () => number }
   temperature?: { readonly get: () => number }
 }
 
-export const Config = zschema.object({
-  maxTokens: zschema.number().min(64).max(4096).step(64).default(1024).volatile(),
-  temperature: zschema.number().min(0).max(2).step(0.1).default(0.7).volatile(),
-})
+/**
+ * Build the settings schema. `model` is `.disabled()`: the settings page
+ * renders it as a grayed, non-editable input mirroring `currentModelId()`.
+ * Every field stays volatile — the settings write path rejects any
+ * non-volatile scalar ("Config field is not volatile"), so a display-only
+ * field must still be volatile to keep the rest of the form savable.
+ */
+function buildConfig() {
+  return zschema.object({
+    model: zschema.string()
+      .default(modelDisplayValue())
+      .description('实际加载的本地模型（按 models/ 目录自动选择，不可修改）')
+      .disabled()
+      .volatile(),
+    maxTokens: zschema.number().min(64).max(4096).step(64).default(1024).volatile(),
+    temperature: zschema.number().min(0).max(2).step(0.1).default(0.7).volatile(),
+  })
+}
+
+export const Config = buildConfig()
 
 /**
  * The account service. `llm` and `accountHub` arrive through injection; there
@@ -541,6 +570,7 @@ export default class LocalLlamaAccount extends Service {
           return
         }
         resetModelSelection()
+        this.refreshSettingsSchema()
         saveEnabled(true)
         this.arm()
       },
@@ -555,6 +585,19 @@ export default class LocalLlamaAccount extends Service {
         this.publish()
       },
     )
+  }
+
+  /**
+   * Swap the registered config schema for a freshly built copy so the
+   * read-only model field mirrors the weight that just landed without
+   * waiting for a plugin reload. Cordis snapshots `plugin.Config` into the
+   * runtime record once at registration; the record property is mutable, and
+   * the settings service re-reads `fiber.runtime.Config` on every describe,
+   * so the new default reaches the settings page immediately.
+   */
+  private refreshSettingsSchema(): void {
+    const runtime = this.ctx.fiber?.runtime
+    if (runtime !== null && runtime !== undefined) runtime.Config = buildConfig()
   }
 
   /**
