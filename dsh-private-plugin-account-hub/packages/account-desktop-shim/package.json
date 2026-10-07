@@ -1,0 +1,9 @@
+{
+  "name": "@deepseek-ai/dsh-api-account-desktop-shim",
+  "description": "Compatibility shim for the stock desktop shell's `account` Remote namespace: keeps the native welcome/readWelcomeState path answering so the app boots straight into the workspace while the built-in account product is disabled",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "license": "MIT"
+}

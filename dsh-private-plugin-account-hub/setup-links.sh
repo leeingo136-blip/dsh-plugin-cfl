@@ -21,7 +21,7 @@ link() {
   esac
 }
 
-for c in packages/api-account-hub packages/ui-account-hub packages/ui-settings-models packages/typert-protocol; do
+for c in packages/api-account-hub packages/ui-account-hub packages/ui-settings-models packages/typert-protocol packages/account-desktop-shim; do
   link "$c" "vendor/cordis" "@deepseek-ai/cordis"
   link "$c" "vendor/cosmokit" "@deepseek-ai/cosmokit"
   link "$c" "vendor/schemastery" "@deepseek-ai/schemastery"
@@ -29,6 +29,9 @@ for c in packages/api-account-hub packages/ui-account-hub packages/ui-settings-m
   link "$c" "packages/settings/settings" "@deepseek-ai/dsh-settings"
   link "$c" "packages/typert/protocol" "@deepseek-ai/dsh-typert-protocol"
 done
+
+# The desktop-shim imports the loader types only; keep the link for tsc.
+link packages/account-desktop-shim "vendor/loader" "@deepseek-ai/cordis-plugin-loader"
 
 # Extracted siblings resolve to the container copies in every component, and
 # each component links itself so manifest-driven tooling can find it by name.
@@ -79,7 +82,7 @@ node_module() {
   fi
 }
 
-for c in packages/api-account-hub packages/ui-account-hub packages/ui-settings-models packages/typert-protocol; do
+for c in packages/api-account-hub packages/ui-account-hub packages/ui-settings-models packages/typert-protocol packages/account-desktop-shim; do
   node_module "$c" zod
   node_module "$c" "@types/node"
 done
