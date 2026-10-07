@@ -8,6 +8,8 @@ packages:
   - dsh-private-plugin-zcode-ability/dsh-private-plugin-*
   - dsh-private-plugin-qwen-ability
   - dsh-private-plugin-qwen-ability/dsh-private-plugin-*
+  - dsh-private-plugin-codex-ability
+  - dsh-private-plugin-codex-ability/dsh-private-plugin-*
 patchedDependencies:
   '@earendil-works/pi-ai@0.87.1': patches/@earendil-works__pi-ai@0.87.1.patch
 allowBuilds:
