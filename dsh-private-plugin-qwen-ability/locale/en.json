@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Qwen Code Extensions",
+    "description": "Qwen Code session capabilities: the Qwen OAuth account, the loop scheduler with its four tools, the ported system-prompt posture and the Qwen Code preset."
+  }
+}

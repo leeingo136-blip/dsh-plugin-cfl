@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Qwen Code组件",
+    "description": "Qwen Code 会话内能力：Qwen OAuth 账号、loop 定时器及其四工具、移植的系统提示词姿态与 Qwen Code 预设。"
+  }
+}
