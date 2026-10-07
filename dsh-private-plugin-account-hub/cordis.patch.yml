@@ -1,0 +1,26 @@
+# External account-hub container. The three rows keep the ids and package
+# names the harness web patch used before the extraction, so account plugins,
+# the settings shell, and the client module table resolve them unchanged.
+#
+# The official account UI (`@deepseek-ai/dsh-client-ui-settings-account`)
+# registers every built-in DeepSeek account surface in one apply() — the
+# `settings.section[id=account]` column, the settings launcher menu, the
+# models-page sign-in seat, the quota notice, and the desktop onboarding
+# overlays. This container's `ui-account-hub` registers the same
+# `settings.section[id=account]` seat (order -10), so the official plugin is
+# disabled wholesale: slots can only be appended, never removed, and letting
+# the declarer not load is the clean removal semantics the loader already
+# supports. Consequence: DeepSeek sign-in/out UI, the quota notice, and the
+# onboarding overlays all disappear with it (the host-side account provider
+# route is unaffected). Re-enable it by removing this row.
+- id: ui-settings-account
+  disabled: true
+
+- id: account-hub
+  name: '@deepseek-ai/dsh-api-account-hub'
+
+- id: ui-account-hub
+  name: '@deepseek-ai/dsh-client-ui-account-hub'
+
+- id: ui-settings-models
+  name: '@deepseek-ai/dsh-client-ui-settings-models'

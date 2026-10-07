@@ -1,0 +1,27 @@
+{
+  "extends": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types"
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/vendor/cosmokit"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/vendor/cordis"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/settings/settings"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/typert/protocol"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/util/values"
+    }
+  ]
+}

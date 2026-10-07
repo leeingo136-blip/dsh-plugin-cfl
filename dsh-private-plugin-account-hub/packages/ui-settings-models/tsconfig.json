@@ -1,0 +1,45 @@
+{
+  "extends": "../../tsconfig.base.client.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types"
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/host/webserver"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/vendor/schemastery"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/vendor/cordis"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/client/ui-slots"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/client/store"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/client/ui-primitives"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/client/ui-renderer"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/client/ui-settings/tsconfig.client.json"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/client/locale/tsconfig.client.json"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/api/remotes/tsconfig.client.json"
+    },
+    {
+      "path": "../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/client/product-analytics/tsconfig.client.json"
+    }
+  ]
+}

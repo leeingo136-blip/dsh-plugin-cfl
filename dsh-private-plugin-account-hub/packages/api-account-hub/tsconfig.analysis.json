@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "../../",
+    "noEmit": true,
+    "paths": {
+      "@deepseek-ai/dsh-typert-protocol": [
+        "../typert-protocol/src/index.ts"
+      ],
+      "@deepseek-ai/dsh-typert-protocol/types": [
+        "../typert-protocol/src/types.ts"
+      ]
+    }
+  }
+}
