@@ -16,6 +16,14 @@
 - id: ui-settings-account
   disabled: true
 
+# On the official app this row exists (the stock models page is built in);
+# disable it there so only this container's copy mounts — otherwise the
+# insert below duplicates the id and both pages mount side by side. On the
+# private harness (where the package was extracted away) the row is absent
+# and the loader warns and skips this retarget.
+- id: ui-settings-models
+  disabled: true
+
 # The three component rows ride an explicit `insert:` — a bare `- id:` entry
 # only retargets an existing row and is silently ignored for a new one.
 - insert:
