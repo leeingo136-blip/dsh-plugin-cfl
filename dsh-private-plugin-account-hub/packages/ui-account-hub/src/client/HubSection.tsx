@@ -59,7 +59,7 @@ function Loaded({ face, renderSlot }: { face: AccountHubSectionFace; renderSlot:
   }, [face])
   return (
     <div>
-      {failed !== null ? <p>{face.t('loadFailed')}</p>
+      {failed !== null ? <p>{face.t('loadFailed')}{' — '}{failed}</p>
         : rows.length === 0 ? <p>{face.t('empty')}</p>
           : rows.map(({ row }) => row.card !== undefined ? (
             <HubAccountCard

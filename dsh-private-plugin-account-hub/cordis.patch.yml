@@ -24,11 +24,18 @@
 - id: ui-settings-models
   disabled: true
 
-# The three component rows ride an explicit `insert:` — a bare `- id:` entry
-# only retargets an existing row and is silently ignored for a new one.
+# The four component rows ride an explicit `insert:` — a bare `- id:` entry
+# only retargets an existing row and is silently ignored for a new one. The
+# mount row precedes the column row: it parks on the bare remote carrier and
+# mounts the hub's remote contribution, so `ui-account-hub` (which injects
+# `remote.accountHub`) unparks only once the namespace methods exist — the
+# same shape as the stock app, where the remotes assembly mounts every
+# namespace ahead of the consuming UI plugins.
 - insert:
     - id: account-hub
       name: '@deepseek-ai/dsh-api-account-hub'
+    - id: account-hub-mount
+      name: '@deepseek-ai/dsh-client-account-hub-mount'
     - id: ui-account-hub
       name: '@deepseek-ai/dsh-client-ui-account-hub'
     - id: ui-settings-models

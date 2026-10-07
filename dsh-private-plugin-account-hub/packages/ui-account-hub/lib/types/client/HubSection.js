@@ -1,4 +1,4 @@
-import { jsx as _jsx } from "react/jsx-runtime";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 /**
  * Rendered seats of the settings account column: the section wrapper, its
  * loaded row list, and one account's models-page provider card. Split from the
@@ -43,7 +43,7 @@ function Loaded({ face, renderSlot }) {
         const dispose = face.subscribe(refresh);
         return () => { alive = false; dispose(); };
     }, [face]);
-    return (_jsx("div", { children: failed !== null ? _jsx("p", { children: face.t('loadFailed') })
+    return (_jsx("div", { children: failed !== null ? _jsxs("p", { children: [face.t('loadFailed'), ' — ', failed] })
             : rows.length === 0 ? _jsx("p", { children: face.t('empty') })
                 : rows.map(({ row }) => row.card !== undefined ? (_jsx(HubAccountCard, { t: face.t, row: row, invoke: (method, args) => face.invoke(row.id, method, args), readParams: () => face.readParams(row.id), commitParams: ops => face.commitParams(row.id, ops) }, row.id)) : renderSlot('account.hub.row', {
                     accountId: row.id, displayName: row.displayName, state: row.state,

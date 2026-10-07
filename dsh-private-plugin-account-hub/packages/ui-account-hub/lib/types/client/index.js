@@ -1,4 +1,3 @@
-import accountHubRemote from '@deepseek-ai/dsh-api-account-hub/remote';
 import { en, zh } from "./locales.js";
 import { AccountHubSection, ProviderModelsCard } from "./HubSection.js";
 export { AccountHubSection, ProviderModelsCard };
@@ -6,12 +5,11 @@ export { AccountHubSection, ProviderModelsCard };
 export function sectionLabel(t) {
     return t('nav');
 }
-/** Services required by the account column. `remote.accountHub` is NOT a
- * required inject: this plugin mounts its own remote contribution (below), so
- * requiring the namespace up front would deadlock the boot activation check —
- * the mount completes inside this plugin's apply, never before it. The face
- * methods await the mount promise instead. */
-export const inject = ['slots', 'locale', 'remote', 'theme'];
+/** Services required by the account column. `remote.accountHub` is mounted
+ * by the account-hub-mount plugin, which activates off the bare remote
+ * carrier; this plugin's activation parks on the namespace service until the
+ * mount lands, so apply() sees it fully populated. */
+export const inject = ['slots', 'locale', 'remote', 'remote.accountHub', 'theme'];
 /**
  * Register the account column. Both renderers run this: the Desktop shell and
  * the Browser settings panel render the same `settings.section` seat, and the
@@ -19,22 +17,11 @@ export const inject = ['slots', 'locale', 'remote', 'theme'];
  * by a surface-specific bridge. @param ctx - client plugin context.
  */
 export function apply(ctx) {
-    // The hub remote no longer rides the official remotes assembly: this plugin
-    // mounts its own contribution so `ctx.remote.accountHub` exists client-side.
-    // The face methods await `mounted` before their first namespace access —
-    // slot dispatches happen on user interaction, long after activation.
-    let mounted = Promise.resolve();
-    ctx.effect(() => {
-        const disposer = ctx.remote.$mount(accountHubRemote);
-        mounted = disposer.then(() => { });
-        return () => { void disposer.then(dispose => dispose()); };
-    }, 'accountHub: remote contribution');
     ctx.effect(() => ctx.locale.register('settings.accountHub', { en, zh }), 'accountHub: dictionaries');
     const t = ctx.locale.bind('settings.accountHub');
     const face = {
         t,
         list: async () => {
-            await mounted;
             const result = await ctx.remote.accountHub.list();
             if (!result.ok)
                 throw new Error(result.error.message);
@@ -43,41 +30,31 @@ export function apply(ctx) {
             return result.value.map(view => ({ ...view, state: view.state }));
         },
         subscribe: (onChange) => {
-            // The stream opens asynchronously after the mount completes, so a
-            // dispose before that just cancels the open.
-            let stream;
-            let disposed = false;
+            const stream = ctx.remote.$stream({
+                name: 'accountHub', open: signal => ctx.remote.accountHub.watch(signal),
+                ended: () => new Error('account hub stream ended'),
+            });
             void (async () => {
-                await mounted;
-                if (disposed)
-                    return;
-                stream = ctx.remote.$stream({
-                    name: 'accountHub', open: signal => ctx.remote.accountHub.watch(signal),
-                    ended: () => new Error('account hub stream ended'),
-                });
                 for await (const frame of stream) {
                     frame.accept();
                     onChange();
                 }
             })();
-            return () => { disposed = true; void stream?.dispose(); };
+            return () => { void stream.dispose(); };
         },
         invoke: async (accountId, method, args) => {
-            await mounted;
             const result = await ctx.remote.accountHub.invoke(accountId, method, args);
             if (!result.ok)
                 throw new Error(result.error.message);
             return result.value;
         },
         readParams: async (accountId) => {
-            await mounted;
             const result = await ctx.remote.accountHub.readParams(accountId);
             if (!result.ok)
                 throw new Error(result.error.message);
             return result.value;
         },
         commitParams: async (accountId, ops) => {
-            await mounted;
             const result = await ctx.remote.accountHub.commitParams(accountId, ops);
             if (!result.ok)
                 throw new Error(result.error.message);
