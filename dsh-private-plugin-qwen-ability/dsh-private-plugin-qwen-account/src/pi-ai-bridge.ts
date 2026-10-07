@@ -5,14 +5,14 @@
  * `dsh-llm-pi-ai` serves the adapter and the wire, its published surface stops
  * at {@link PiAiAdapter}, and a hand-declared route builds its resolved
  * profile against pi-ai's public types. The protocol differs — this route
- * speaks `openai-completions` (DashScope's OpenAI-compatible endpoint),
- * because that is the wire the Qwen OAuth tokens are bound to.
+ * speaks `openai-completions` (DashScope's OpenAI-compatible endpoint, the
+ * wire the ModelStudio API key authenticates).
  *
- * The auth story differs too: the credential is a rotating OAuth access
- * token, not a static key. The adapter's `resolveApiKey` override calls back
- * into the account service, which refreshes the token lazily before returning
- * it — the highest-priority auth pi-ai knows, so the collection-level store
- * has nothing stored and the ambient context answers "unset".
+ * The auth story differs too: the credential is a static API key pasted into
+ * the configuration, not a rotating token. The adapter's `resolveApiKey`
+ * override calls back into the account service and reads the configured key
+ * per request — the highest-priority auth pi-ai knows, so the collection-level
+ * store has nothing stored and the ambient context answers "unset".
  *
  * @module qwen-account/pi-ai-bridge
  */
@@ -44,9 +44,9 @@ export interface RouteModelSpec {
   maxTokens?: number
 }
 
-/** The api-key auth of a harness-authenticated route: the token arrives per
- *  request as the `apiKey` override — for this account, the freshly refreshed
- *  OAuth access token. */
+/** The api-key auth of a harness-authenticated route: the key arrives per
+ *  request as the `apiKey` override — for this account, the configured
+ *  ModelStudio API key. */
 function harnessApiKeyAuth(name: string): ApiKeyAuth {
   return {
     name,
@@ -58,8 +58,8 @@ function harnessApiKeyAuth(name: string): ApiKeyAuth {
 }
 
 /**
- * Build the resolved profile for the one OpenAI-compatible route the Qwen
- * OAuth tokens serve. Every default matches the harness resolver's.
+ * Build the resolved profile for the one OpenAI-compatible route the
+ * ModelStudio API key serves. Every default matches the harness resolver's.
  * @param input - the route's facts: identity, endpoint, credential reference
  *   name, and the adopted model catalog.
  * @returns the profile to hand {@link PiAiAdapter}.
@@ -78,8 +78,8 @@ export function resolveOpenAiProfile(input: {
     api: 'openai-completions',
     provider: input.provider,
     baseUrl: input.baseURL,
-    // The OAuth catalog's sole model is a hybrid reasoning model with vision;
-    // reasoning levels are resolved server-side (no level map is declared).
+    // DashScope models are hybrid reasoning models; reasoning levels are
+    // resolved server-side (no level map is declared).
     reasoning: true,
     input: ['text', 'image'],
     cost: NO_COST,
@@ -116,7 +116,7 @@ export function resolveOpenAiProfile(input: {
 
 /**
  * The collection-level credential store for this plugin's route: nothing is
- * ever stored here — the token rotates through the account service, not a
+ * ever stored here — the key flows through the account service, not a
  * stored pi-ai credential.
  * @returns the empty store to hand {@link PiAiAdapter}.
  */
@@ -125,7 +125,7 @@ export function emptyCredentialStore(): CredentialStore {
     read: () => Promise.resolve(undefined),
     list: () => Promise.resolve([]),
     modify: () => Promise.reject(new LlmError(
-      'Qwen 账号的路由通过按请求刷新的 OAuth 令牌鉴权，不存储 pi-ai 凭据。',
+      'Qwen 账号的路由通过配置中的百炼 API Key 鉴权，不存储 pi-ai 凭据。',
       'UNSTORABLE_PROVIDER_ID',
     )),
     delete: () => Promise.resolve(),

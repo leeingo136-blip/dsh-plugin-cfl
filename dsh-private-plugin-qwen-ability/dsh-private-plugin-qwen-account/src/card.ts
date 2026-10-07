@@ -3,9 +3,9 @@
  * code ships with the plugin: the descriptor, the state, and the invoke seam
  * are the whole surface.
  *
- * The sign-in gesture opens the Qwen device-authorization page in the user's
- * browser; the account column's note carries the user_code while the poll is
- * in flight (the attempt view's text, not this static note, shows it).
+ * The sign-in gesture opens the ModelStudio console's API-key page in the
+ * user's browser; the paste step happens in this component's configuration
+ * form, and storing the key is the whole login.
  */
 
 import type { AccountHubCardDescriptor } from '@dsh-private/api-account-hub'
@@ -13,8 +13,8 @@ import type { AccountHubCardDescriptor } from '@dsh-private/api-account-hub'
 export const CARD: AccountHubCardDescriptor = {
   fields: [
     {
-      key: 'signInDevice', kind: 'button', surface: 'account', when: 'signed-out',
-      action: 'sign-in', label: 'Qwen 设备码登录', tone: 'primary', busyLabel: '等待授权确认…',
+      key: 'getApiKey', kind: 'button', surface: 'account', when: 'signed-out',
+      action: 'sign-in', label: '获取 API Key', tone: 'primary', busyLabel: '正在打开控制台…',
     },
     {
       key: 'signOut', kind: 'button', surface: 'account', when: 'signed-in',
@@ -22,11 +22,11 @@ export const CARD: AccountHubCardDescriptor = {
     },
     {
       key: 'note', kind: 'note', surface: 'account',
-      label: '登录走 Qwen 设备码流程：弹出浏览器打开授权页并自动轮询确认，无需粘贴任何密钥；令牌过期后插件自动刷新。',
+      label: '登录改为百炼 API Key 模式（Qwen OAuth 免费通道已于 2026-04-15 停用）：点「获取 API Key」打开控制台创建密钥，粘贴到本组件配置中保存即完成登录；密钥按请求使用，无需刷新。',
     },
     {
       key: 'hint', kind: 'note', surface: 'models', placement: 'catalog',
-      label: '点击「获取可用模型」拉取该账号可见的模型，勾选加入目录并保存即可使用。',
+      label: '点击「获取可用模型」拉取该端点可见的模型，勾选加入目录并保存即可使用。',
     },
   ],
 }

@@ -171,12 +171,19 @@ export interface Config {
   models?: VolatileBox<ModelRow[]>
 }
 
+/** The schema class instance type, nameable without dragging cosmokit into
+ *  the declaration surface (any raw `object()` inference is not — its type
+ *  intersects cosmokit's `Dict`). */
+type SchemaNode = InstanceType<typeof zschema>
+
+/** The configuration schema. The value is the plain schemastery object; the
+ *  assertion only keeps the emitted declaration portable. */
 export const Config = zschema.object({
   apiKeyEnv: zschema.string().volatile(),
   zaiOrigin: zschema.string().volatile(),
   zcodeOrigin: zschema.string().volatile(),
   models: zschema.array(modelRow).volatile(),
-})
+}) as unknown as SchemaNode
 
 /** The bundled mark, inlined as a data URI so the hub can draw it without any
  *  plugin-served route. */
