@@ -137,6 +137,11 @@ const device = z.object({ id: z.string().min(1), user: z.unknown().optional() })
 const ATTEMPT_TIMEOUT_MS = 600_000
 const REQUEST_TIMEOUT_MS = 30_000
 
+/** Minimum spacing between on-view balance reads. The official account
+ *  mechanism has no timer — it reads when a viewer looks — so this only keeps
+ *  the publish → re-pull → getState cycle from re-triggering the read. */
+const VIEW_REFRESH_THROTTLE_MS = 30_000
+
 /** A volatile Config field arrives from schemastery as a frozen lazy box. */
 export interface VolatileBox<T> {
   readonly get: () => T
@@ -215,6 +220,9 @@ export default class ZaiAccountExternal extends Service {
   /** The Z.ai plan-balance rows behind the signed-in card; `undefined` means
    *  the row degrades to the console link. */
   private balanceCache: readonly BalanceRow[] | undefined
+  /** On-view refresh throttle and in-flight guard (see refreshBalanceOnView). */
+  private lastBalanceRequest = 0
+  private balanceRead: Promise<void> | undefined
   private attemptText: string | undefined
   private removing: Promise<void> | undefined
   private view: AccountHubCardState = { text: '未登录', level: 'warn', signedIn: false, brand: BRAND }
@@ -415,7 +423,10 @@ export default class ZaiAccountExternal extends Service {
       workMode: 'credential-inject',
       card: CARD,
       invoke: (method: string) => this.invoke(method),
-      getState: () => this.view as unknown as JsonValue,
+      getState: () => {
+        this.refreshBalanceOnView()
+        return this.view as unknown as JsonValue
+      },
     })
     ctx.effect(() => dispose, 'zai-account-external: hub registration')
   }
@@ -485,8 +496,8 @@ export default class ZaiAccountExternal extends Service {
    *  monetary wallet (CNY, console account-report endpoint); Z.ai shows the
    *  Start Plan quota rows, falling back to its own wallet (USD) when the
    *  account holds no plan. API keys keep the console link. */
-  private refreshBalance(): void {
-    void (async (): Promise<void> => {
+  private refreshBalance(): Promise<void> {
+    return (async (): Promise<void> => {
       const stored = await this.readGrant()
       const zcodeJwt = stored?.kind === 'oauth' ? stored.zcodeJwt?.trim() : undefined
       if (stored === null || stored.kind !== 'oauth' || stored.token === '') {
@@ -523,6 +534,21 @@ export default class ZaiAccountExternal extends Service {
       }
       this.publish()
     })().catch(() => undefined)
+  }
+
+  /** On-view balance refresh, mirroring the official account mechanism: the
+   *  official client re-reads the wallets whenever a viewer opens the account
+   *  surface and on every watch frame, with no background timer. The hub
+   *  equivalent of "a viewer is looking" is `getState()` — the browser pulls
+   *  it on mount and after each pushed change — so the read starts there,
+   *  throttled so a publish → re-pull → getState cycle cannot re-arm itself
+   *  into a fetch loop. */
+  private refreshBalanceOnView(): void {
+    if (!this.signedIn) return
+    const now = Date.now()
+    if (this.balanceRead !== undefined || now - this.lastBalanceRequest < VIEW_REFRESH_THROTTLE_MS) return
+    this.lastBalanceRequest = now
+    this.balanceRead = this.refreshBalance().finally(() => { this.balanceRead = undefined })
   }
 
   // ---- stored state ----------------------------------------------------------

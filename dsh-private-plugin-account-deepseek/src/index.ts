@@ -60,6 +60,11 @@ setClientPlatform(process.versions.electron !== undefined
 const PLATFORM_ORIGIN = 'https://platform.deepseek.com'
 const INFERENCE_ORIGIN = 'https://api.deepseek.com'
 
+/** Minimum spacing between on-view balance reads. The official mechanism has
+ *  no timer — it reads when a viewer looks — so this only keeps the
+ *  publish → re-pull → getState cycle from re-triggering the read. */
+const VIEW_REFRESH_THROTTLE_MS = 30_000
+
 const KEY = credentialKey(ID, 'default')
 const DEVICE = credentialKey(ID, 'device')
 
@@ -211,6 +216,9 @@ export default class DeepSeekAccountExternal extends Service {
   private profileCache: AccountProfile | null = null
   /** undefined = load in flight, null = failed, value = the wallet lists. */
   private balanceCache: AccountWallets | null | undefined = undefined
+  /** On-view refresh throttle and in-flight guard (see refreshBalanceOnView). */
+  private lastBalanceRequest = 0
+  private balanceRead: Promise<void> | undefined
   private attempt: Attempt | undefined
   private attemptView: AttemptView | undefined
   private view: AccountStateView = { text: '未登录', level: 'warn' }
@@ -323,7 +331,10 @@ export default class DeepSeekAccountExternal extends Service {
       workMode: 'credential-inject',
       card: CARD,
       invoke: (method: string, args: JsonValue) => this.invoke(method, args),
-      getState: () => this.view as unknown as JsonValue,
+      getState: () => {
+        this.refreshBalanceOnView()
+        return this.view as unknown as JsonValue
+      },
     })
     ctx.effect(() => dispose, 'deepseek-account-external: hub registration')
   }
@@ -461,6 +472,24 @@ export default class DeepSeekAccountExternal extends Service {
       if (current?.kind !== 'grant') return undefined
       return { kind: 'grant', payload: { ...(current.payload as Record<string, unknown>), user } }
     })
+  }
+
+  /** On-view balance refresh, mirroring the official account mechanism: the
+    * official client re-reads profile and balance whenever a viewer opens the
+    * account surface and on every watch frame, with no background timer. The
+    * hub equivalent of "a viewer is looking" is `getState()` — the browser
+    * pulls it on mount and after each pushed change — so the read starts
+    * there, throttled so a publish → re-pull → getState cycle cannot re-arm
+    * itself into a fetch loop. */
+  private refreshBalanceOnView(): void {
+    if (!this.signedIn) return
+    const now = Date.now()
+    if (this.balanceRead !== undefined || now - this.lastBalanceRequest < VIEW_REFRESH_THROTTLE_MS) return
+    this.lastBalanceRequest = now
+    this.balanceRead = (async () => {
+      const grant = await this.readCurrentGrant()
+      if (grant !== null) await this.refreshDetails(grant.token)
+    })().finally(() => { this.balanceRead = undefined })
   }
 
   /** Fetch the Platform profile and wallets for one token and republish; a
