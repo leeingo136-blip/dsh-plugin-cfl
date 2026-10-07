@@ -285,10 +285,12 @@ export default class ZaiAccountExternal extends Service {
    *  public types by the local bridge. Memoized by the facts that shape it:
    *  the profile only moves when the sign-in state, the platform, the
    *  reference name, or the adopted catalog changes — the adapter recognizes
-   *  an unchanged map by identity and keeps its collection. Empty while
-   *  signed out: an adapter that owns no route lists no models, so the
-   *  models page hides the row exactly while the account cannot
-   *  authenticate. */
+   *  an unchanged map by identity and keeps its collection. While signed out
+   *  the route stays **owned but empty**: a missing profile would make
+   *  `listModels` throw NO_ADAPTER, which the desktop model selector renders
+   *  as a「加载失败」warning bar; an owned profile with no models lists zero
+   *  models, so both the selector and the models page simply hide the row
+   *  (each derives visibility from a non-empty catalog group). */
   private routeProfiles(): ReadonlyMap<string, ResolvedPiAiProviderProfile> {
     const models = this.adoptedModelsValue
     const key = JSON.stringify([this.signedIn, this.providerCache, this.credentialRefName, models])
@@ -310,6 +312,14 @@ export default class ZaiAccountExternal extends Service {
           })),
         })
         next.set(ROUTE, profile)
+      } else {
+        next.set(ROUTE, resolveAnthropicProfile({
+          provider: ROUTE,
+          displayName: 'Z.ai 账号',
+          baseURL: ANTHROPIC_BASE_BY_PROVIDER[this.providerCache],
+          apiKeyEnv: this.credentialRefName,
+          models: [],
+        }))
       }
       this.routeProfileValue = next
       this.routeProfileKey = key
