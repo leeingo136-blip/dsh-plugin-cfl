@@ -3,22 +3,22 @@
  *
  * One account product the harness core does not ship: the Qwen login and the
  * account-hub registration whose declarative card renders the whole settings
- * row. The original OAuth device-authorization flow this component once
- * mirrored (qwen-code's grant against `chat.qwen.ai`) is dead server-side —
- * Alibaba discontinued the Qwen OAuth free tier on 2026-04-15; the authorize
- * page now serves an app-download banner and the token endpoint sits behind
- * an Aliyun WAF block rule answering 405. The login is therefore a ModelStudio
- * (百炼) API key: the card's gesture opens the console's key page, the key is
- * pasted into this component's configuration, and the route speaks
- * `openai-completions` against DashScope's OpenAI-compatible endpoint
- * (domestic or international station, or a custom endpoint — the Coding
- * Plan's dedicated base URL — when one is entered).
+ * row. The login mirrors what current qwen-code ships after the OAuth free
+ * tier was discontinued (2026-04-15): a ModelStudio key pasted against the
+ * endpoint tier it belongs to — Coding Plan, Token Plan, or the plain
+ * DashScope compatible-mode endpoint — with the endpoint preset table and
+ * console links taken straight from the official provider documentation.
+ * (The old device-code OAuth flow this component once mirrored is dead
+ * server-side: the authorize page serves an app-download banner and the
+ * token endpoint sits behind an Aliyun WAF block rule answering 405.)
  *
  * Work mode is credential-inject in its purest form: the account mounts its
  * own models-page route on the harness's pi-ai adapter family, and the
  * adapter's `resolveApiKey` calls back into this service, which reads the
- * configured key per request. A missing key means signed out; clearing the
- * field (the card's sign-out gesture unsets it) is the whole logout.
+ * key per request. The paste field lives in the component configuration;
+ * the fact is mirrored into the credentials store as a `grant` record — the
+ * management surface the hub's credential views read — and clearing it (the
+ * card's sign-out gesture) removes both sides.
  *
  * Model discovery probes the endpoint's `GET /models` for the adopted
  * catalog; the signed-out route stays **owned but empty** so the desktop
@@ -32,7 +32,8 @@
 
 import { Context, Service } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/cordis-plugin-loader'
-import type {} from '@deepseek-ai/dsh-credentials'
+import { credentialKey } from '@deepseek-ai/dsh-credentials'
+import type { CredentialKey } from '@deepseek-ai/dsh-credentials'
 import type {} from '@deepseek-ai/dsh-settings'
 import { LlmError, resolveImageAttachmentAccess } from '@deepseek-ai/dsh-llm'
 import type { LlmDiscoveredModel } from '@deepseek-ai/dsh-llm'
@@ -46,9 +47,8 @@ import { openNativePath } from '@deepseek-ai/dsh-native-command'
 import zschema from '@deepseek-ai/schemastery'
 import { CARD } from './card.ts'
 import { emptyCredentialStore, resolveOpenAiProfile, staticAuthContext } from './pi-ai-bridge.ts'
-import {
-  QWEN_BASE_URL_CN, QWEN_BASE_URL_INTL, QWEN_CONSOLE_URL_CN, QWEN_CONSOLE_URL_INTL, readModels,
-} from './protocol.ts'
+import { ENDPOINT_LABELS, ENDPOINT_PRESETS, readModels } from './protocol.ts'
+import type { EndpointPreset } from './protocol.ts'
 
 /** Stable identity: hub account id and entry id fallback. */
 export const name = 'qwen-account-external'
@@ -58,8 +58,7 @@ const REQUEST_TIMEOUT_MS = 30_000
 
 /** The pi-ai route this account mounts. */
 const ROUTE = 'Qwen-account'
-/** The credential reference name the profile renders (display only — the key
- *  is served per request by the resolve override). */
+/** The credential reference name the profile renders. */
 const DEFAULT_CREDENTIAL_REF_NAME = 'QWEN_API_KEY'
 
 /** The DashScope catalog's dependable coding default, used before any
@@ -102,13 +101,10 @@ export interface VolatileBox<T> {
  */
 export interface Config {
   apiKey?: VolatileBox<string>
-  endpoint?: VolatileBox<'国内站' | '国际站'>
+  endpoint?: VolatileBox<string>
   customBaseUrl?: VolatileBox<string>
   models?: VolatileBox<ModelRow[]>
 }
-
-/** The DashScope station presets the endpoint field offers. */
-const STATIONS = ['国内站', '国际站'] as const
 
 /** The schema class instance type, nameable without dragging cosmokit into
  *  the declaration surface (any raw `object()` inference is not — its type
@@ -120,7 +116,7 @@ type SchemaNode = InstanceType<typeof zschema>
  *  the emitted declaration portable. */
 export const Config = zschema.object({
   apiKey: zschema.string().volatile(),
-  endpoint: zschema.union([...STATIONS]).volatile(),
+  endpoint: zschema.union([...ENDPOINT_LABELS]).volatile(),
   customBaseUrl: zschema.string().volatile(),
   models: zschema.array(modelRow).volatile(),
 }) as unknown as SchemaNode
@@ -128,19 +124,38 @@ export const Config = zschema.object({
 /** The brand line both card states draw. */
 const BRAND = Object.freeze({ name: 'Qwen 账号' })
 
+/** The credential record key the pasted key is mirrored into. */
+const GRANT = credentialKey(ID, 'grant')
+
+/** The default tier: qwen-code's recommended Coding Plan entry. */
+const CODING_PLAN_CN: EndpointPreset = ENDPOINT_PRESETS[0] as EndpointPreset
+
+/** The grant payload mirrored into the credentials store. */
+interface StoredGrant {
+  readonly version: 1
+  readonly apiKey: string
+  readonly baseUrl: string
+  readonly endpointLabel: string
+}
+
 /**
- * The account service. Hosting services (llm, accountHub, settings) arrive
- * through injection; the plugin registers its route and hub card in its
- * constructor and republishes whenever the configured key or endpoint moves.
+ * The account service. Hosting services (llm, accountHub, settings,
+ * credentials) arrive through injection; the plugin registers its route and
+ * hub card in its constructor, and re-ingests whenever the configuration or
+ * the credential record moves — the pasted key and the stored grant mirror
+ * each other, with the configuration as the input and the credentials store
+ * as the management fact.
  */
 export default class QwenAccountExternal extends Service {
-  static inject = ['llm', 'accountHub', 'settings']
+  static inject = ['llm', 'accountHub', 'settings', 'credentials']
   static Config = Config
 
   private readonly settingsNs: string
   private readonly config: Config
   private readonly requestLifetime = new AbortController()
 
+  /** The mirrored grant, re-read by ingest; null when signed out. */
+  private stored: StoredGrant | null = null
   private view: AccountHubCardState = { text: '未登录', level: 'warn', signedIn: false, brand: BRAND }
 
   /** @param ctx - host context. @param config - plugin configuration. */
@@ -149,46 +164,124 @@ export default class QwenAccountExternal extends Service {
     this.settingsNs = ctx.fiber?.entry?.options.id ?? ID
     this.config = config
 
+    // Configuration edits re-sync the mirror; credential edits (from this
+    // mirror or any other writer) republish the card.
+    ctx.on('settings/document-updated', (ns: string) => {
+      if (ns !== this.settingsNs) return
+      void this.ingest()
+    })
+    ctx.on('credentials/record-updated', (key: CredentialKey) => {
+      if (key !== GRANT) return
+      void this.refreshStored()
+    })
+
     ctx.effect(() => () => { this.requestLifetime.abort() }, 'qwen-account-external: request lifetime')
 
     this.registerProvider(ctx)
     this.registerHub(ctx)
-    this.publish()
+    void this.ingest()
   }
 
   // ---- configuration reads --------------------------------------------------
 
-  /** The pasted ModelStudio API key, or '' when signed out. */
+  /** The pasted ModelStudio API key, or '' when the field is empty. */
   get apiKeyValue(): string {
     return this.config.apiKey?.get()?.trim() ?? ''
   }
 
-  /** Whether an API key is configured — the whole login fact. */
+  /** Whether a login fact exists — the pasted key or its stored mirror. */
   get signedIn(): boolean {
-    return this.apiKeyValue !== ''
+    return this.apiKeyValue !== '' || this.stored !== null
   }
 
-  /** The endpoint the configured key serves. A non-empty custom base URL
-   *  (e.g. the Coding Plan's dedicated endpoint) wins over the station
-   *  preset. */
+  /** The configured endpoint preset (falls back to qwen-code's recommended
+   *  Coding Plan entry when the field is unset). */
+  get endpointPreset(): EndpointPreset {
+    const label = this.config.endpoint?.get()?.trim() ?? ''
+    return ENDPOINT_PRESETS.find(preset => preset.label === label) ?? CODING_PLAN_CN
+  }
+
+  /** The endpoint the key serves. A non-empty custom base URL wins over the
+   *  preset (the escape hatch for endpoints the table does not list). */
   get baseUrlValue(): string {
     const custom = this.config.customBaseUrl?.get()?.trim() ?? ''
     if (custom !== '') return custom.replace(/\/+$/, '')
-    const station = this.config.endpoint?.get() ?? '国内站'
-    return (station === '国际站' ? QWEN_BASE_URL_INTL : QWEN_BASE_URL_CN).replace(/\/+$/, '')
+    const stored = this.stored
+    if (stored !== null && this.apiKeyValue === '') return stored.baseUrl.replace(/\/+$/, '')
+    return this.endpointPreset.baseUrl.replace(/\/+$/, '')
   }
 
-  /** The ModelStudio console page where a key is created, per station. */
+  /** The ModelStudio console page where this tier's key is created. */
   get consoleUrl(): string {
-    const custom = this.config.customBaseUrl?.get()?.trim() ?? ''
-    const station = this.config.endpoint?.get() ?? '国内站'
-    if (custom !== '' || station === '国际站') return QWEN_CONSOLE_URL_INTL
-    return QWEN_CONSOLE_URL_CN
+    return this.endpointPreset.consoleUrl
   }
 
   /** The adopted model catalog, if any. */
   get adoptedModelsValue(): readonly ModelRow[] {
     return this.config.models?.get() ?? []
+  }
+
+  /** The credential reference name the profile renders. */
+  get credentialRefName(): string {
+    return DEFAULT_CREDENTIAL_REF_NAME
+  }
+
+  // ---- credential mirror ------------------------------------------------------
+
+  private async readStored(): Promise<StoredGrant | null> {
+    const record = await this.ctx.credentials.readRecord(GRANT)
+    if (record?.kind !== 'grant') return null
+    const payload = record.payload as Partial<StoredGrant> | undefined
+    if (typeof payload?.apiKey !== 'string' || payload.apiKey === '') return null
+    return {
+      version: 1,
+      apiKey: payload.apiKey,
+      baseUrl: typeof payload.baseUrl === 'string' ? payload.baseUrl : this.endpointPreset.baseUrl,
+      endpointLabel: typeof payload.endpointLabel === 'string' ? payload.endpointLabel : '',
+    }
+  }
+
+  /** Re-read the stored grant and republish (credential-side changes). */
+  private async refreshStored(): Promise<void> {
+    this.stored = await this.readStored()
+    this.routeProfileKey = ''
+    this.publish()
+  }
+
+  /** Sync the pasted key into the credentials mirror — the whole login and
+   *  the whole logout, driven by configuration edits. */
+  private async ingest(): Promise<void> {
+    const pasted = this.apiKeyValue
+    const stored = await this.readStored()
+    if (pasted !== '') {
+      if (stored === null || stored.apiKey !== pasted
+        || stored.baseUrl !== this.baseUrlValue || stored.endpointLabel !== this.endpointPreset.label) {
+        const next: StoredGrant = {
+          version: 1,
+          apiKey: pasted,
+          baseUrl: this.baseUrlValue,
+          endpointLabel: this.endpointPreset.label,
+        }
+        await this.ctx.credentials.modifyRecord(GRANT, () => Promise.resolve({ kind: 'grant' as const, payload: next }))
+        this.stored = next
+      }
+    } else if (stored !== null) {
+      // The paste field was cleared: drop the mirror with it.
+      await this.ctx.credentials.deleteRecord(GRANT)
+      this.stored = null
+    }
+    this.routeProfileKey = ''
+    this.publish()
+  }
+
+  /** The key a request should present: the stored mirror first (the managed
+   *  fact), falling back to the paste field while the mirror catches up. */
+  private async resolveKey(): Promise<string> {
+    const stored = this.stored?.apiKey ?? (await this.readStored())?.apiKey
+    if (stored !== undefined && stored !== '') return stored
+    const pasted = this.apiKeyValue
+    if (pasted !== '') return pasted
+    throw new LlmError('Qwen 账号还没有登录：请在本组件配置中粘贴百炼 API Key。', 'MISSING_CREDENTIAL')
   }
 
   // ---- route registration -----------------------------------------------------
@@ -227,11 +320,6 @@ export default class QwenAccountExternal extends Service {
   private routeProfileKey = ''
   private routeProfileValue: ReadonlyMap<string, ResolvedPiAiProviderProfile> | undefined
 
-  /** The credential reference name the profile renders. */
-  get credentialRefName(): string {
-    return DEFAULT_CREDENTIAL_REF_NAME
-  }
-
   private registerProvider(ctx: Context): void {
     ctx.llm.registerConfigurableProviders([
       {
@@ -244,13 +332,7 @@ export default class QwenAccountExternal extends Service {
     ])
     ctx.llm.registerAdapter([ROUTE], new PiAiAdapter({
       profiles: () => this.routeProfiles(),
-      resolveApiKey: async (_provider, _profile) => {
-        const key = this.apiKeyValue
-        if (key === '') {
-          throw new LlmError('Qwen 账号还没有登录：请在本组件配置中粘贴百炼 API Key。', 'MISSING_CREDENTIAL')
-        }
-        return key
-      },
+      resolveApiKey: async (_provider, _profile) => this.resolveKey(),
       auth: { credentials: emptyCredentialStore(), authContext: staticAuthContext() },
       resolveAttachments: () => ctx.get('attachments'),
       resolveImageAccess: (attachments, ref) => resolveImageAttachmentAccess(
@@ -260,8 +342,7 @@ export default class QwenAccountExternal extends Service {
       ),
     }))
     ctx.llm.registerModelDiscovery(this.settingsNs, async (request): Promise<readonly LlmDiscoveredModel[]> => {
-      const key = this.apiKeyValue
-      if (key === '') throw new LlmError('Qwen 账号还没有登录：请先粘贴百炼 API Key。', 'MISSING_CREDENTIAL')
+      const key = await this.resolveKey()
       const baseUrl = typeof request.baseURL === 'string' && request.baseURL.trim() !== ''
         ? request.baseURL.trim()
         : this.baseUrlValue
@@ -298,7 +379,7 @@ export default class QwenAccountExternal extends Service {
       }
       case 'sign-out': {
         await this.signOut()
-        return { message: '已退出登录：配置中的 API Key 已清除。' }
+        return { message: '已退出登录：配置中的 API Key 与凭据记录均已清除。' }
       }
       default: throw new Error(`未知账号操作 "${method}"`)
     }
@@ -310,6 +391,7 @@ export default class QwenAccountExternal extends Service {
    *  brand row. */
   private publish(): void {
     if (this.signedIn) {
+      const endpoint = this.baseUrlValue
       this.view = {
         text: '已登录 · 百炼 API Key',
         level: 'ok',
@@ -321,7 +403,10 @@ export default class QwenAccountExternal extends Service {
           infoUrl: this.consoleUrl,
         },
         balance: {
-          rows: [{ label: '推理端点', value: this.baseUrlValue }],
+          rows: [
+            { label: '端点预设', value: this.endpointPreset.label },
+            { label: '推理端点', value: endpoint },
+          ],
           more: [{ label: '更多', links: [{ label: '百炼控制台', href: this.consoleUrl, primary: true }] }],
         },
       }
@@ -336,7 +421,8 @@ export default class QwenAccountExternal extends Service {
   /**
    * The sign-in gesture: open the ModelStudio console's key page in the
    * user's browser. The paste step happens in this component's configuration
-   * form; storing the key is the whole login.
+   * form — qwen-code's /auth dialog, transplanted: choose the tier, paste
+   * the key, done.
    */
   private async openConsole(): Promise<void> {
     try {
@@ -356,10 +442,16 @@ export default class QwenAccountExternal extends Service {
     this.ctx.emit(ACCOUNT_HUB_CHANGED, ID)
   }
 
-  /** Clear the configured key — the whole logout. The field is volatile, so
-   *  the unset lands without remounting the settings form. */
+  /** Clear the login on both sides: the paste field (settings unset) and the
+   *  stored mirror (credentials delete). */
   private async signOut(): Promise<void> {
-    await this.ctx.settings.mutate(this.settingsNs, [{ op: 'unset', path: ['apiKey'] }])
+    await this.ctx.settings.mutate(this.settingsNs, [
+      { op: 'unset', path: ['apiKey'] },
+      { op: 'unset', path: ['customBaseUrl'] },
+    ])
+    await this.ctx.credentials.deleteRecord(GRANT)
+    this.stored = null
+    this.routeProfileKey = ''
     this.publish()
   }
 }

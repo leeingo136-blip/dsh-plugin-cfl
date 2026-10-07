@@ -6,10 +6,9 @@
  * Alibaba discontinued the Qwen OAuth free tier on 2026-04-15 — the
  * `/authorize` page now serves an app-download banner and the token endpoint
  * is behind an Aliyun WAF block rule answering 405. The account therefore
- * authenticates with a ModelStudio (百炼) API key against DashScope's
- * OpenAI-compatible endpoint, the exact replacement the official client
- * documents: domestic and international hosts share one wire shape, and the
- * Coding Plan's dedicated endpoint can be entered as a custom base URL.
+ * authenticates the way current qwen-code does: a ModelStudio (百炼) key
+ * pasted against the endpoint tier it was issued for — Coding Plan, Token
+ * Plan, or the plain DashScope compatible-mode endpoint.
  *
  * @module qwen-account/protocol
  */
@@ -19,10 +18,32 @@ export const QWEN_BASE_URL_CN = 'https://dashscope.aliyuncs.com/compatible-mode/
 /** DashScope OpenAI-compatible endpoint, international station. */
 export const QWEN_BASE_URL_INTL = 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1'
 
-/** The ModelStudio console page where an API key is created (domestic). */
-export const QWEN_CONSOLE_URL_CN = 'https://bailian.console.aliyun.com/?apiKey=1#/api-key'
-/** The ModelStudio console page where an API key is created (international). */
-export const QWEN_CONSOLE_URL_INTL = 'https://bailian.console.alibabacloud.com/?apiKey=1#/api-key'
+/**
+ * The endpoint presets, mirroring qwen-code's official provider table
+ * (`docs/users/configuration/auth.md`): one subscription tier per endpoint,
+ * and the key belongs to the endpoint it was issued for. The console URL is
+ * the ModelStudio page where that tier's key is created, split by region.
+ */
+export interface EndpointPreset {
+  readonly label: string
+  readonly baseUrl: string
+  readonly consoleUrl: string
+}
+
+const CONSOLE_CN = 'https://bailian.console.aliyuncs.com/?apiKey=1#/api-key'
+const CONSOLE_INTL = 'https://bailian.console.alibabacloud.com/?apiKey=1#/api-key'
+
+export const ENDPOINT_PRESETS: readonly EndpointPreset[] = [
+  { label: 'Coding Plan（北京）', baseUrl: 'https://coding.dashscope.aliyuncs.com/v1', consoleUrl: CONSOLE_CN },
+  { label: 'Coding Plan（国际）', baseUrl: 'https://coding-intl.dashscope.aliyuncs.com/v1', consoleUrl: CONSOLE_INTL },
+  { label: 'Token Plan（北京）', baseUrl: 'https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1', consoleUrl: CONSOLE_CN },
+  { label: 'Token Plan（新加坡）', baseUrl: 'https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1', consoleUrl: CONSOLE_INTL },
+  { label: 'DashScope 兼容模式（国内）', baseUrl: QWEN_BASE_URL_CN, consoleUrl: CONSOLE_CN },
+  { label: 'DashScope 兼容模式（国际）', baseUrl: QWEN_BASE_URL_INTL, consoleUrl: CONSOLE_INTL },
+]
+
+/** The preset labels, in schema order. */
+export const ENDPOINT_LABELS: readonly string[] = ENDPOINT_PRESETS.map(preset => preset.label)
 
 const REQUEST_TIMEOUT_MS = 30_000
 
