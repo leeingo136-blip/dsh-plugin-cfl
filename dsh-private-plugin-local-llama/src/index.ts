@@ -78,22 +78,31 @@ const LOGO_DATA_URI = 'data:image/svg+xml;base64,'
 const BRAND = Object.freeze({ logoUrl: LOGO_DATA_URI, name: brandName() })
 
 /** The declarative card: one enable/disable gesture on the account column and
- *  a note on the models column. Nothing else — there is no credential to edit. */
-const CARD: AccountHubCardDescriptor = {
-  fields: [
-    {
-      key: 'enable', kind: 'button', surface: 'account', when: 'signed-out',
-      label: '启用本地模型', tone: 'primary', action: 'enable', busyLabel: '加载中…',
-    },
-    {
-      key: 'disable', kind: 'button', surface: 'account', when: 'signed-in',
-      label: '停用本地模型', action: 'disable', busyLabel: '卸载中…',
-    },
-    {
-      key: 'tagline', kind: 'note', surface: 'models',
-      label: tagline(),
-    },
-  ],
+ *  two notes on the models column — the callable model id (a `note` renders as
+ *  static copy, so the name is visible but nothing the user can edit) and the
+ *  marketing tagline. There is no credential to edit. Rebuilt on every hub
+ *  listing so the model note mirrors the weight the engine would load now. */
+function buildCard(): AccountHubCardDescriptor {
+  return {
+    fields: [
+      {
+        key: 'enable', kind: 'button', surface: 'account', when: 'signed-out',
+        label: '启用本地模型', tone: 'primary', action: 'enable', busyLabel: '加载中…',
+      },
+      {
+        key: 'disable', kind: 'button', surface: 'account', when: 'signed-in',
+        label: '停用本地模型', action: 'disable', busyLabel: '卸载中…',
+      },
+      {
+        key: 'model', kind: 'note', surface: 'models',
+        label: `可调用模型：${modelDisplayValue()}`,
+      },
+      {
+        key: 'tagline', kind: 'note', surface: 'models',
+        label: tagline(),
+      },
+    ],
+  }
 }
 
 /** One maybe-boxed number off the config, falling back when unset. */
@@ -467,7 +476,10 @@ export default class LocalLlamaAccount extends Service {
       // Direct production: the adapter builds its own StreamChunk stream and
       // hands it straight to harness. No credential, no HTTP.
       workMode: 'direct',
-      card: CARD,
+      // Live card: the hub re-reads `card` on every listing, so the model
+      // note always mirrors the weight the engine would load right now —
+      // including immediately after an in-app download.
+      get card() { return buildCard() },
       invoke: (method: string, args: JsonValue) => this.invoke(method, args),
       getState: () => this.view as unknown as JsonValue,
     })
