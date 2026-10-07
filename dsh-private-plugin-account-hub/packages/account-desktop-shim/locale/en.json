@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Desktop Account Shim",
+    "description": "Static signed-in stub for the desktop welcome RPC so boot skips the welcome window."
+  }
+}

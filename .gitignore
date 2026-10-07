@@ -1,4 +1,4 @@
-# Dependencies are re-linked via setup-links.sh (symlinks into harness packages)
+# Dependencies are declared per package; install via `pnpm install` at the repo root
 node_modules/
 
 # Build output — rebuild with: tsc -p tsconfig.build.json

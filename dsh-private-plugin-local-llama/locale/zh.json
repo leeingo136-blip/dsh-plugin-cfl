@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "llama本地模型",
+    "description": "基于 node-llama-cpp 的本地 GGUF 账号（xLAM 函数调用模型，权重随仓库分发）。"
+  }
+}

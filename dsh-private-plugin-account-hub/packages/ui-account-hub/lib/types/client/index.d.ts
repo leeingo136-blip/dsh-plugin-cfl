@@ -7,7 +7,7 @@
  * product, so an empty registry renders the section's empty-state copy.
  */
 import type { Context } from '@deepseek-ai/cordis';
-import type { AccountHubCardDescriptor } from '@deepseek-ai/dsh-api-account-hub';
+import type { AccountHubCardDescriptor } from '@dsh-private/api-account-hub';
 import type { SettingsPathOpView } from '@deepseek-ai/dsh-api-remotes/client';
 import { type AccountHubKey } from './locales.ts';
 import { AccountHubSection, ProviderModelsCard } from './HubSection.tsx';

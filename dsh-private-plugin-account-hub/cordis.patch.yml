@@ -69,13 +69,13 @@
 # namespace ahead of the consuming UI plugins.
 - insert:
     - id: account-hub
-      name: '@deepseek-ai/dsh-api-account-hub'
+      name: '@dsh-private/api-account-hub'
     - id: account-desktop-shim
-      name: '@deepseek-ai/dsh-api-account-desktop-shim'
+      name: '@dsh-private/account-desktop-shim'
     - id: account-hub-mount
-      name: '@deepseek-ai/dsh-client-account-hub-mount'
+      name: '@dsh-private/account-hub-mount'
     - id: ui-account-hub
-      name: '@deepseek-ai/dsh-client-ui-account-hub'
+      name: '@dsh-private/ui-account-hub'
     # The id must differ from the stock row's: the plugin manager addresses a
     # component by finding exactly one patch row with its id — the retarget
     # row above plus an insert of the same id would leave two candidates and
@@ -83,4 +83,4 @@
     # Nothing references the entry id (the settings section registers the
     # hardcoded id 'models'), so the rename is cosmetic to the manager only.
     - id: ui-settings-models-private
-      name: '@deepseek-ai/dsh-client-ui-settings-models'
+      name: '@dsh-private/ui-settings-models'

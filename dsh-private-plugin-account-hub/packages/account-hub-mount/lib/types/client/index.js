@@ -5,7 +5,7 @@
  * mount from the column mirrors the stock layout where the remotes assembly
  * mounts every namespace before the consuming UI plugins activate.
  */
-import accountHubRemote from '@deepseek-ai/dsh-api-account-hub/remote';
+import accountHubRemote from '@dsh-private/api-account-hub/remote';
 export const name = 'account-hub-mount';
 /** Only the remote carrier itself; the namespace appears when the mount lands. */
 export const inject = ['remote'];

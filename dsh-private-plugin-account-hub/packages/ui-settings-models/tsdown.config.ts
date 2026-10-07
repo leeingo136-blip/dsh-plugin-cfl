@@ -1,3 +1,3 @@
 import { clientBundle } from '../../../../../DeepSeekHarnessPrivate/deepseek-harness/packages/client/tsdown.client.ts'
 
-export default clientBundle('@deepseek-ai/dsh-client-ui-settings-models', ['lib/types/index.js'])
+export default clientBundle('@dsh-private/ui-settings-models', ['lib/types/index.js'])

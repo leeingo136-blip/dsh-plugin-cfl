@@ -84,13 +84,13 @@ const _deepseek_ai_dsh_api_account_hub_accountHub_watch_result$schema = () => (_
 }))
 
 export const TYPERT = {
-  package: '@deepseek-ai/dsh-api-account-hub',
+  package: '@dsh-private/api-account-hub',
   face: 'host',
   schemas: [
   ],
   invocations: [
     {
-      id: '@deepseek-ai/dsh-api-account-hub#accountHub/commitParams',
+      id: '@dsh-private/api-account-hub#accountHub/commitParams',
       service: 'accountHubController',
       namespace: 'accountHub',
       method: 'commitParams',
@@ -102,7 +102,7 @@ export const TYPERT = {
           source: 'json',
           codec: {
             mode: 'strict',
-            typeSymbol: '@deepseek-ai/dsh-api-account-hub#accountHub/commitParams:accountId',
+            typeSymbol: '@dsh-private/api-account-hub#accountHub/commitParams:accountId',
             create: _deepseek_ai_dsh_api_account_hub_accountHub_commitParams_parameter_0$schema,
           },
         },
@@ -112,20 +112,20 @@ export const TYPERT = {
           source: 'json',
           codec: {
             mode: 'strict',
-            typeSymbol: '@deepseek-ai/dsh-api-account-hub#accountHub/commitParams:ops',
+            typeSymbol: '@dsh-private/api-account-hub#accountHub/commitParams:ops',
             create: _deepseek_ai_dsh_api_account_hub_accountHub_commitParams_parameter_1$schema,
           },
         },
       ],
       result: {
         mode: 'strict',
-        typeSymbol: '@deepseek-ai/dsh-api-account-hub#accountHub/commitParams:result',
+        typeSymbol: '@dsh-private/api-account-hub#accountHub/commitParams:result',
         create: _deepseek_ai_dsh_api_account_hub_accountHub_commitParams_result$schema,
       },
       sourceLocation: {"file":"packages/api-account-hub/src/index.ts","line":155,"column":9},
     },
     {
-      id: '@deepseek-ai/dsh-api-account-hub#accountHub/invoke',
+      id: '@dsh-private/api-account-hub#accountHub/invoke',
       service: 'accountHubController',
       namespace: 'accountHub',
       method: 'invoke',
@@ -137,7 +137,7 @@ export const TYPERT = {
           source: 'json',
           codec: {
             mode: 'strict',
-            typeSymbol: '@deepseek-ai/dsh-api-account-hub#accountHub/invoke:accountId',
+            typeSymbol: '@dsh-private/api-account-hub#accountHub/invoke:accountId',
             create: _deepseek_ai_dsh_api_account_hub_accountHub_invoke_parameter_0$schema,
           },
         },
@@ -147,7 +147,7 @@ export const TYPERT = {
           source: 'json',
           codec: {
             mode: 'strict',
-            typeSymbol: '@deepseek-ai/dsh-api-account-hub#accountHub/invoke:method',
+            typeSymbol: '@dsh-private/api-account-hub#accountHub/invoke:method',
             create: _deepseek_ai_dsh_api_account_hub_accountHub_invoke_parameter_1$schema,
           },
         },
@@ -170,7 +170,7 @@ export const TYPERT = {
       sourceLocation: {"file":"packages/api-account-hub/src/index.ts","line":138,"column":9},
     },
     {
-      id: '@deepseek-ai/dsh-api-account-hub#accountHub/list',
+      id: '@dsh-private/api-account-hub#accountHub/list',
       service: 'accountHubController',
       namespace: 'accountHub',
       method: 'list',
@@ -179,13 +179,13 @@ export const TYPERT = {
       ],
       result: {
         mode: 'strict',
-        typeSymbol: '@deepseek-ai/dsh-api-account-hub#accountHub/list:result',
+        typeSymbol: '@dsh-private/api-account-hub#accountHub/list:result',
         create: _deepseek_ai_dsh_api_account_hub_accountHub_list_result$schema,
       },
       sourceLocation: {"file":"packages/api-account-hub/src/index.ts","line":129,"column":9},
     },
     {
-      id: '@deepseek-ai/dsh-api-account-hub#accountHub/readParams',
+      id: '@dsh-private/api-account-hub#accountHub/readParams',
       service: 'accountHubController',
       namespace: 'accountHub',
       method: 'readParams',
@@ -197,7 +197,7 @@ export const TYPERT = {
           source: 'json',
           codec: {
             mode: 'strict',
-            typeSymbol: '@deepseek-ai/dsh-api-account-hub#accountHub/readParams:accountId',
+            typeSymbol: '@dsh-private/api-account-hub#accountHub/readParams:accountId',
             create: _deepseek_ai_dsh_api_account_hub_accountHub_readParams_parameter_0$schema,
           },
         },
@@ -210,7 +210,7 @@ export const TYPERT = {
       sourceLocation: {"file":"packages/api-account-hub/src/index.ts","line":178,"column":9},
     },
     {
-      id: '@deepseek-ai/dsh-api-account-hub#accountHub/watch',
+      id: '@dsh-private/api-account-hub#accountHub/watch',
       service: 'accountHubController',
       namespace: 'accountHub',
       method: 'watch',
@@ -221,7 +221,7 @@ export const TYPERT = {
       cancellation: { parameter: 'signal' },
       result: {
         mode: 'strict',
-        typeSymbol: '@deepseek-ai/dsh-api-account-hub/types#AccountHubChange',
+        typeSymbol: '@dsh-private/api-account-hub/types#AccountHubChange',
         create: _deepseek_ai_dsh_api_account_hub_accountHub_watch_result$schema,
       },
       sourceLocation: {"file":"packages/api-account-hub/src/index.ts","line":195,"column":10},

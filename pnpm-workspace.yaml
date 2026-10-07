@@ -1,0 +1,14 @@
+packages:
+  - dsh-private-plugin-account-hub
+  - dsh-private-plugin-account-hub/packages/*
+  - dsh-private-plugin-account-deepseek
+  - dsh-plugin-account-testcode
+  - dsh-private-plugin-local-llama
+  - dsh-private-plugin-zcode-ability
+  - dsh-private-plugin-zcode-ability/dsh-private-plugin-*
+patchedDependencies:
+  '@earendil-works/pi-ai@0.87.1': patches/@earendil-works__pi-ai@0.87.1.patch
+allowBuilds:
+  node-llama-cpp: true
+  protobufjs: true
+  '@google/genai': true

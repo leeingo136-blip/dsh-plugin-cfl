@@ -1,0 +1,7 @@
+{
+  "name": "deep-seek-harness-private-plugin",
+  "private": true,
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

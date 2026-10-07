@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Account Registry",
+    "description": "Host-side account registry service aggregating every account plugin."
+  }
+}

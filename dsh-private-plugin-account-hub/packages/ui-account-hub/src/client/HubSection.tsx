@@ -7,7 +7,7 @@
  */
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { ProviderCardExtrasOwnerProps } from '@deepseek-ai/dsh-client-ui-settings-models/client'
+import type { ProviderCardExtrasOwnerProps } from '@dsh-private/ui-settings-models/client'
 import type { AccountHubRowOwnerProps, AccountHubSectionFace, AccountRow } from './index.ts'
 import { HubAccountCard } from './HubAccountCard.tsx'
 

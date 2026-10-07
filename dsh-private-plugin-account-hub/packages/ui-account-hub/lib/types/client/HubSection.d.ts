@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { ProviderCardExtrasOwnerProps } from '@deepseek-ai/dsh-client-ui-settings-models/client';
+import type { ProviderCardExtrasOwnerProps } from '@dsh-private/ui-settings-models/client';
 import type { AccountHubSectionFace } from './index.ts';
 /**
  * Render the settings account column: the registry read lives here, row

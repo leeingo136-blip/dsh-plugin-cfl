@@ -4,7 +4,7 @@ import type {
   RemoteStreamHandle,
   TypertRemoteContribution,
 } from '@deepseek-ai/dsh-typert-protocol'
-import type { AccountHubAccountView, AccountHubChange } from '@deepseek-ai/dsh-api-account-hub/types'
+import type { AccountHubAccountView, AccountHubChange } from '@dsh-private/api-account-hub/types'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 
 declare module '@deepseek-ai/dsh-typert-protocol' {

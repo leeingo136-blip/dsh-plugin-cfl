@@ -9,9 +9,9 @@
  */
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { AccountHubFieldDescriptor, AccountHubSelectOption } from '@deepseek-ai/dsh-api-account-hub'
+import type { AccountHubFieldDescriptor, AccountHubSelectOption } from '@dsh-private/api-account-hub'
 import type { SettingsPathOpView } from '@deepseek-ai/dsh-api-remotes/client'
-import type { ProviderCardEditorAccess } from '@deepseek-ai/dsh-client-ui-settings-models/client'
+import type { ProviderCardEditorAccess } from '@dsh-private/ui-settings-models/client'
 import { Button, Checkbox, IconRightUpOutlineRegular, IconUserOutlineMedium, Input, Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { AccountHubKey } from './locales.ts'

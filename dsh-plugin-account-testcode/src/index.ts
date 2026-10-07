@@ -22,9 +22,9 @@ import type {
   GenerateOptions, LlmDiscoveredModel, LlmModelInfo, LlmProviderInfo, LlmReasoningEffortInfo,
   LlmResolvedModelInfo, ReasoningEffortId, StreamChunk,
 } from '@deepseek-ai/dsh-llm'
-import type {} from '@deepseek-ai/dsh-api-account-hub'
-import { ACCOUNT_HUB_CHANGED } from '@deepseek-ai/dsh-api-account-hub'
-import type { AccountHubCardDescriptor, AccountHubCardState } from '@deepseek-ai/dsh-api-account-hub'
+import type {} from '@dsh-private/api-account-hub'
+import { ACCOUNT_HUB_CHANGED } from '@dsh-private/api-account-hub'
+import type { AccountHubCardDescriptor, AccountHubCardState } from '@dsh-private/api-account-hub'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import { z } from 'zod'
 import zschema from '@deepseek-ai/schemastery'

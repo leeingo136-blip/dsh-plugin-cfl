@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Account Namespace Mount",
+    "description": "Mounts the accountHub remote namespace ahead of its consumers."
+  }
+}

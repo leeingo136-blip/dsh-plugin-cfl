@@ -21,11 +21,17 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "jsx": "react-jsx",
-    "lib": ["ES2024", "DOM", "DOM.Iterable", "ESNext.Disposable"],
+    "lib": [
+      "ES2024",
+      "DOM",
+      "DOM.Iterable",
+      "ESNext.Disposable"
+    ],
     "typeRoots": [
-      "../../../DeepSeekHarnessPrivate/deepseek-harness/scripts/types",
       "./node_modules/@types"
     ],
-    "types": ["client-build-environment"]
+    "types": [
+      "client-build-environment"
+    ]
   }
 }

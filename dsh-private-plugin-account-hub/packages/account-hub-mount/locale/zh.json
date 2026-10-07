@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "账号命名空间挂载器",
+    "description": "先于消费者挂载 accountHub 远程命名空间。"
+  }
+}

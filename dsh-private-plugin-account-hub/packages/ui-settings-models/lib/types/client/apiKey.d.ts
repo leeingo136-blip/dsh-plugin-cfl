@@ -1,6 +1,6 @@
 /**
  * Browser-side judgement of a typed API key.
- * @module @deepseek-ai/dsh-client-ui-settings-models/apiKey
+ * @module @dsh-private/ui-settings-models/apiKey
  */
 /**
  * Copy key naming why a typed key cannot be saved. A wrapped paste reports the

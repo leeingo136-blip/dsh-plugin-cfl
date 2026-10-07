@@ -7,7 +7,7 @@
  * product, so an empty registry renders the section's empty-state copy.
  */
 import type { Context } from '@deepseek-ai/cordis'
-import type { AccountHubCardDescriptor } from '@deepseek-ai/dsh-api-account-hub'
+import type { AccountHubCardDescriptor } from '@dsh-private/api-account-hub'
 import type { SettingsPathOpView } from '@deepseek-ai/dsh-api-remotes/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
@@ -19,7 +19,7 @@ import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 // Type-only: pulls in the typert client-side augmentation that adds the
 // `accountHub` namespace to ClientRemote. The runtime mount lives in the
 // account-hub-mount plugin.
-import type {} from '@deepseek-ai/dsh-api-account-hub/remote'
+import type {} from '@dsh-private/api-account-hub/remote'
 import { en, zh, type AccountHubKey } from './locales.ts'
 import { AccountHubSection, ProviderModelsCard } from './HubSection.tsx'
 

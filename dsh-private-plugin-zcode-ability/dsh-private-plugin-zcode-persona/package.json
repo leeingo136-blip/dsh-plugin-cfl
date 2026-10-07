@@ -5,6 +5,16 @@
   "private": true,
   "type": "module",
   "main": "dist/index.js",
-  "exports": { ".": { "default": "./dist/index.js" } },
-  "license": "MIT"
+  "exports": {
+    ".": {
+      "default": "./dist/index.js"
+    }
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@deepseek-ai/cordis": "~4.0.4",
+    "@deepseek-ai/cordis-plugin-loader": "^1.0.5",
+    "@deepseek-ai/dsh-system-prompt": "0.2.0-rc.2",
+    "@deepseek-ai/schemastery": "~3.18.4"
+  }
 }

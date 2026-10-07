@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Local llama",
+    "description": "Local GGUF account backed by node-llama-cpp (xLAM function-calling model, weights bundled)."
+  }
+}

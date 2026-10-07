@@ -10,7 +10,7 @@
  * per sign-in platform, so no URL field is exposed).
  */
 
-import type { AccountHubCardDescriptor } from '@deepseek-ai/dsh-api-account-hub'
+import type { AccountHubCardDescriptor } from '@dsh-private/api-account-hub'
 
 export const CARD: AccountHubCardDescriptor = {
   fields: [

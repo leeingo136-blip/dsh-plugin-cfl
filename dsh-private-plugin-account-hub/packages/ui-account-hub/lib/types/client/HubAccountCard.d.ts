@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { SettingsPathOpView } from '@deepseek-ai/dsh-api-remotes/client';
-import type { ProviderCardEditorAccess } from '@deepseek-ai/dsh-client-ui-settings-models/client';
+import type { ProviderCardEditorAccess } from '@dsh-private/ui-settings-models/client';
 import type { AccountHubKey } from './locales.ts';
 import type { AccountRow } from './index.ts';
 /** Copy keys the generic card reads from the section dictionary. */

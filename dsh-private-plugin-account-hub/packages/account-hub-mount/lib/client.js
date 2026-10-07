@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-	id: "@deepseek-ai/dsh-client-account-hub-mount",
+	id: "@dsh-private/account-hub-mount",
 	factory: (require) => {
 		var module = { exports: {} };
 		var exports = module.exports;
@@ -4455,10 +4455,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 			]).optional()
 		});
 		const TYPERT_REMOTE = {
-			package: "@deepseek-ai/dsh-api-account-hub",
+			package: "@dsh-private/api-account-hub",
 			descriptors: [
 				{
-					id: "@deepseek-ai/dsh-api-account-hub#accountHub/commitParams",
+					id: "@dsh-private/api-account-hub#accountHub/commitParams",
 					service: "accountHubController",
 					namespace: "accountHub",
 					method: "commitParams",
@@ -4469,7 +4469,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 						source: "json",
 						codec: {
 							mode: "strict",
-							typeSymbol: "@deepseek-ai/dsh-api-account-hub#accountHub/commitParams:accountId",
+							typeSymbol: "@dsh-private/api-account-hub#accountHub/commitParams:accountId",
 							create: _deepseek_ai_dsh_api_account_hub_accountHub_commitParams_parameter_0$schema
 						}
 					}, {
@@ -4478,13 +4478,13 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 						source: "json",
 						codec: {
 							mode: "strict",
-							typeSymbol: "@deepseek-ai/dsh-api-account-hub#accountHub/commitParams:ops",
+							typeSymbol: "@dsh-private/api-account-hub#accountHub/commitParams:ops",
 							create: _deepseek_ai_dsh_api_account_hub_accountHub_commitParams_parameter_1$schema
 						}
 					}],
 					result: {
 						mode: "strict",
-						typeSymbol: "@deepseek-ai/dsh-api-account-hub#accountHub/commitParams:result",
+						typeSymbol: "@dsh-private/api-account-hub#accountHub/commitParams:result",
 						create: _deepseek_ai_dsh_api_account_hub_accountHub_commitParams_result$schema
 					},
 					sourceLocation: {
@@ -4494,7 +4494,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 					}
 				},
 				{
-					id: "@deepseek-ai/dsh-api-account-hub#accountHub/invoke",
+					id: "@dsh-private/api-account-hub#accountHub/invoke",
 					service: "accountHubController",
 					namespace: "accountHub",
 					method: "invoke",
@@ -4506,7 +4506,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 							source: "json",
 							codec: {
 								mode: "strict",
-								typeSymbol: "@deepseek-ai/dsh-api-account-hub#accountHub/invoke:accountId",
+								typeSymbol: "@dsh-private/api-account-hub#accountHub/invoke:accountId",
 								create: _deepseek_ai_dsh_api_account_hub_accountHub_invoke_parameter_0$schema
 							}
 						},
@@ -4516,7 +4516,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 							source: "json",
 							codec: {
 								mode: "strict",
-								typeSymbol: "@deepseek-ai/dsh-api-account-hub#accountHub/invoke:method",
+								typeSymbol: "@dsh-private/api-account-hub#accountHub/invoke:method",
 								create: _deepseek_ai_dsh_api_account_hub_accountHub_invoke_parameter_1$schema
 							}
 						},
@@ -4543,7 +4543,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 					}
 				},
 				{
-					id: "@deepseek-ai/dsh-api-account-hub#accountHub/list",
+					id: "@dsh-private/api-account-hub#accountHub/list",
 					service: "accountHubController",
 					namespace: "accountHub",
 					method: "list",
@@ -4551,7 +4551,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 					parameters: [],
 					result: {
 						mode: "strict",
-						typeSymbol: "@deepseek-ai/dsh-api-account-hub#accountHub/list:result",
+						typeSymbol: "@dsh-private/api-account-hub#accountHub/list:result",
 						create: _deepseek_ai_dsh_api_account_hub_accountHub_list_result$schema
 					},
 					sourceLocation: {
@@ -4561,7 +4561,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 					}
 				},
 				{
-					id: "@deepseek-ai/dsh-api-account-hub#accountHub/readParams",
+					id: "@dsh-private/api-account-hub#accountHub/readParams",
 					service: "accountHubController",
 					namespace: "accountHub",
 					method: "readParams",
@@ -4572,7 +4572,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 						source: "json",
 						codec: {
 							mode: "strict",
-							typeSymbol: "@deepseek-ai/dsh-api-account-hub#accountHub/readParams:accountId",
+							typeSymbol: "@dsh-private/api-account-hub#accountHub/readParams:accountId",
 							create: _deepseek_ai_dsh_api_account_hub_accountHub_readParams_parameter_0$schema
 						}
 					}],
@@ -4588,7 +4588,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 					}
 				},
 				{
-					id: "@deepseek-ai/dsh-api-account-hub#accountHub/watch",
+					id: "@dsh-private/api-account-hub#accountHub/watch",
 					service: "accountHubController",
 					namespace: "accountHub",
 					method: "watch",
@@ -4598,7 +4598,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 					cancellation: { parameter: "signal" },
 					result: {
 						mode: "strict",
-						typeSymbol: "@deepseek-ai/dsh-api-account-hub/types#AccountHubChange",
+						typeSymbol: "@dsh-private/api-account-hub/types#AccountHubChange",
 						create: _deepseek_ai_dsh_api_account_hub_accountHub_watch_result$schema
 					},
 					sourceLocation: {
