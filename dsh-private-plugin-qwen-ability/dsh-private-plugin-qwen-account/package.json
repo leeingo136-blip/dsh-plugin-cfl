@@ -1,6 +1,6 @@
 {
   "name": "@dsh-private/qwen-account",
-  "description": "Qwen OAuth account: RFC 8628 device-flow sign-in with PKCE, lazily refreshed token pair, and the OpenAI-compatible pi-ai route the tokens are bound to.",
+  "description": "Qwen 账号组件：对齐千问 Code 现行登录方式（选套餐端点 + 粘贴百炼 API Key），凭证镜像进凭据存储统一管理，服务 pi-ai openai-completions 路由。",
   "version": "0.1.0",
   "private": true,
   "type": "module",
