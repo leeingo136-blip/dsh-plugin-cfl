@@ -16,11 +16,12 @@
 - id: ui-settings-account
   disabled: true
 
-- id: account-hub
-  name: '@deepseek-ai/dsh-api-account-hub'
-
-- id: ui-account-hub
-  name: '@deepseek-ai/dsh-client-ui-account-hub'
-
-- id: ui-settings-models
-  name: '@deepseek-ai/dsh-client-ui-settings-models'
+# The three component rows ride an explicit `insert:` — a bare `- id:` entry
+# only retargets an existing row and is silently ignored for a new one.
+- insert:
+    - id: account-hub
+      name: '@deepseek-ai/dsh-api-account-hub'
+    - id: ui-account-hub
+      name: '@deepseek-ai/dsh-client-ui-account-hub'
+    - id: ui-settings-models
+      name: '@deepseek-ai/dsh-client-ui-settings-models'

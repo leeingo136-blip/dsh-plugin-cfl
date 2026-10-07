@@ -248,6 +248,7 @@ export { AccountHubController };
 /** Harness-side plugin: mount the registry and its remote face. */
 export const name = 'account-hub';
 export function apply(ctx) {
+    console.log('[account-hub] host apply: mounting registry and remote controller');
     ctx.plugin(AccountHub);
     ctx.plugin(AccountHubController);
 }

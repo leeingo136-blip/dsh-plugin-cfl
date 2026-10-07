@@ -234,6 +234,7 @@ export class AccountHubController extends TypertRemoteService {
 export const name = 'account-hub'
 
 export function apply(ctx: Context): void {
+  console.log('[account-hub] host apply: mounting registry and remote controller')
   ctx.plugin(AccountHub)
   ctx.plugin(AccountHubController)
 }
