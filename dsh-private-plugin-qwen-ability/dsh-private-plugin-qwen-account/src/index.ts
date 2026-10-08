@@ -43,7 +43,6 @@ import type {} from '@dsh-private/api-account-hub'
 import { ACCOUNT_HUB_CHANGED } from '@dsh-private/api-account-hub'
 import type { AccountHubCardState } from '@dsh-private/api-account-hub'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
-import { openNativePath } from '@deepseek-ai/dsh-native-command'
 import zschema from '@deepseek-ai/schemastery'
 import { CARD } from './card.ts'
 import { emptyCredentialStore, resolveOpenAiProfile, staticAuthContext } from './pi-ai-bridge.ts'
@@ -364,18 +363,27 @@ export default class QwenAccountExternal extends Service {
       modelsCard: true,
       workMode: 'credential-inject',
       card: CARD,
-      invoke: (method: string) => this.invoke(method),
+      invoke: (method: string, args: JsonValue) => this.invoke(method, args),
       getState: () => this.view as unknown as JsonValue,
     })
     ctx.effect(() => dispose, 'qwen-account-external: hub registration')
   }
 
-  /** Forward one hub-card operation to its implementation. */
-  private async invoke(method: string): Promise<JsonValue> {
+  /** Forward one hub-card operation to its implementation. Dialog submits
+   *  arrive as `{ values: { …card values, …dialog inputs } }` — the modal's
+   *  `apiKey` input is the whole sign-in. */
+  private async invoke(method: string, args?: JsonValue): Promise<JsonValue> {
     switch (method) {
       case 'sign-in': {
-        await this.openConsole()
-        return { message: '已打开百炼控制台：创建 API Key 后粘贴到本组件的配置中保存。' }
+        const values = (args !== null && typeof args === 'object' && 'values' in args
+          ? (args as { values: Record<string, unknown> }).values
+          : {}) ?? {}
+        const pasted = typeof values.apiKey === 'string' ? values.apiKey.trim() : ''
+        if (pasted === '') {
+          return { message: '请先粘贴百炼 API Key。', error: true }
+        }
+        await this.signIn(pasted)
+        return { message: '登录成功：API Key 已保存并同步到凭据管理。', close: true }
       }
       case 'sign-out': {
         await this.signOut()
@@ -411,35 +419,26 @@ export default class QwenAccountExternal extends Service {
         },
       }
     } else {
-      this.view = { text: '未登录', level: 'warn', signedIn: false, brand: BRAND }
+      this.view = {
+        text: `未登录 · 还没有密钥时先在百炼控制台创建（${this.consoleUrl}）`,
+        level: 'warn',
+        signedIn: false,
+        brand: BRAND,
+      }
     }
     this.ctx.emit(ACCOUNT_HUB_CHANGED, ID)
   }
 
   // ---- sign-in / sign-out -------------------------------------------------------
 
-  /**
-   * The sign-in gesture: open the ModelStudio console's key page in the
-   * user's browser. The paste step happens in this component's configuration
-   * form — qwen-code's /auth dialog, transplanted: choose the tier, paste
-   * the key, done.
-   */
-  private async openConsole(): Promise<void> {
-    try {
-      await openNativePath(this.consoleUrl, this.requestLifetime.signal)
-    } catch (error) {
-      console.info('[qwen-account] browser open failed', {
-        error: error instanceof Error ? error.message : String(error),
-        consoleUrl: this.consoleUrl,
-      })
-    }
-    this.view = {
-      text: `请在配置中粘贴 API Key（控制台：${this.consoleUrl}）`,
-      level: 'warn',
-      signedIn: false,
-      brand: BRAND,
-    }
-    this.ctx.emit(ACCOUNT_HUB_CHANGED, ID)
+  /** The sign-in gesture: store the pasted key into the namespace's `apiKey`
+   *  field. The settings event re-ingests, which mirrors the key into the
+   *  credentials store — the same path a manual config edit takes. */
+  private async signIn(apiKey: string): Promise<void> {
+    await this.ctx.settings.mutate(this.settingsNs, [
+      { op: 'set', path: ['apiKey'], value: apiKey },
+    ])
+    await this.ingest()
   }
 
   /** Clear the login on both sides: the paste field (settings unset) and the

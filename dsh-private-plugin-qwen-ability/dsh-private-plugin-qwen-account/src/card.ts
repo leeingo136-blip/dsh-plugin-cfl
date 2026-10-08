@@ -3,9 +3,11 @@
  * code ships with the plugin: the descriptor, the state, and the invoke seam
  * are the whole surface.
  *
- * The sign-in gesture opens the ModelStudio console's API-key page in the
- * user's browser; the paste step happens in this component's configuration
- * form, and storing the key is the whole login.
+ * The sign-in gesture is a hub modal: the key is pasted straight into the
+ * dialog and the submit stores it — no console round-trip. Creating a key
+ * still happens in the ModelStudio console, whose URL the signed-out state
+ * surfaces as copy (some networks cannot reach the console, so nothing on
+ * this card opens a browser automatically).
  */
 
 import type { AccountHubCardDescriptor } from '@dsh-private/api-account-hub'
@@ -13,8 +15,15 @@ import type { AccountHubCardDescriptor } from '@dsh-private/api-account-hub'
 export const CARD: AccountHubCardDescriptor = {
   fields: [
     {
-      key: 'getApiKey', kind: 'button', surface: 'account', when: 'signed-out',
-      action: 'sign-in', label: '获取 API Key', tone: 'primary', busyLabel: '正在打开控制台…',
+      key: 'signIn', kind: 'dialog', surface: 'account', when: 'signed-out',
+      action: 'sign-in', label: '粘贴 API Key 登录', tone: 'primary', busyLabel: '正在登录…',
+      dialog: {
+        title: '登录 Qwen 账号',
+        submitLabel: '登录',
+        fields: [
+          { key: 'apiKey', kind: 'password', label: '百炼 API Key', placeholder: 'sk-…' },
+        ],
+      },
     },
     {
       key: 'signOut', kind: 'button', surface: 'account', when: 'signed-in',
@@ -22,11 +31,11 @@ export const CARD: AccountHubCardDescriptor = {
     },
     {
       key: 'note', kind: 'note', surface: 'account',
-      label: '登录与千问 Code 现行 /auth 一致（OAuth 免费通道 2026-04-15 已停用）：选择端点套餐（Coding Plan / Token Plan / DashScope 兼容模式），点「获取 API Key」打开对应控制台创建密钥，粘贴到本组件配置中保存即完成登录；密钥同步存入凭据管理，退出登录一键清除。',
+      label: '点「粘贴 API Key 登录」在弹窗中直接输入密钥，保存即完成登录（与千问 Code 现行 /auth 一致：OAuth 免费通道 2026-04-15 已停用）。密钥会同步存入凭据管理，退出登录一键清除。还没有密钥时，先在端点预设对应的百炼控制台创建。',
     },
     {
       key: 'hint', kind: 'note', surface: 'models', placement: 'catalog',
-      label: '点击「获取可用模型」拉取该端点可见的模型，勾选加入目录并保存即可使用。',
+      label: '登录后点「获取可用模型」拉取该端点可见的模型，勾选加入目录并保存即可使用。',
     },
   ],
 }

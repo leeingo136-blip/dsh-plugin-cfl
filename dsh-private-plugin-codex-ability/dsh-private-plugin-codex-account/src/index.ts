@@ -439,22 +439,31 @@ export default class CodexAccountExternal extends Service {
       modelsCard: true,
       workMode: 'credential-inject',
       card: CARD,
-      invoke: (method: string) => this.invoke(method),
+      invoke: (method: string, args: JsonValue) => this.invoke(method, args),
       getState: () => this.view as unknown as JsonValue,
     })
     ctx.effect(() => dispose, 'codex-account-external: hub registration')
   }
 
-  /** Forward one hub-card operation to its implementation. */
-  private async invoke(method: string): Promise<JsonValue> {
+  /** Forward one hub-card operation to its implementation. Dialog submits
+   *  arrive as `{ values: { …card values, …dialog inputs } }` — the modal's
+   *  `apiKey` input is the whole Platform-key sign-in. */
+  private async invoke(method: string, args?: JsonValue): Promise<JsonValue> {
     switch (method) {
       case 'sign-in': {
         this.scheduleOauthLogin()
         return { message: '已打开 OpenAI 授权页：在浏览器完成登录后本页面会自动接住回调（本地端口 1455）。' }
       }
-      case 'open-console': {
-        await this.openConsole()
-        return { message: '已打开 OpenAI Platform 控制台：创建 API Key 后粘贴到本组件的配置中保存。' }
+      case 'paste-key': {
+        const values = (args !== null && typeof args === 'object' && 'values' in args
+          ? (args as { values: Record<string, unknown> }).values
+          : {}) ?? {}
+        const pasted = typeof values.apiKey === 'string' ? values.apiKey.trim() : ''
+        if (pasted === '') {
+          return { message: '请先粘贴 OpenAI Platform API Key。', error: true }
+        }
+        await this.signInWithKey(pasted)
+        return { message: '登录成功：API Key 已保存并同步到凭据管理，认证方式已切换为 API Key。', close: true }
       }
       case 'sign-out': {
         await this.signOut()
@@ -636,16 +645,16 @@ export default class CodexAccountExternal extends Service {
 
   // ---- sign-in / sign-out -------------------------------------------------------
 
-  /** The Platform console's key page in the user's browser. */
-  private async openConsole(): Promise<void> {
-    try {
-      await openNativePath(CONSOLE_URL, this.requestLifetime.signal)
-    } catch (error) {
-      console.info('[codex-account] browser open failed', {
-        error: error instanceof Error ? error.message : String(error),
-        consoleUrl: CONSOLE_URL,
-      })
-    }
+  /** The Platform-key sign-in gesture: store the pasted key and flip the
+   *  auth mode to API Key in one write. The settings event re-ingests,
+   *  which mirrors the key into the credentials store — the same path a
+   *  manual config edit takes. */
+  private async signInWithKey(apiKey: string): Promise<void> {
+    await this.ctx.settings.mutate(this.settingsNs, [
+      { op: 'set', path: ['apiKey'], value: apiKey },
+      { op: 'set', path: ['mode'], value: MODE_APIKEY },
+    ])
+    await this.ingest()
   }
 
   /** Clear every login fact: both credential records and the paste field. */
