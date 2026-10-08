@@ -4,10 +4,10 @@
  * are the whole surface.
  *
  * The sign-in gesture is a hub modal: the key is pasted straight into the
- * dialog and the submit stores it — no console round-trip. Creating a key
- * still happens in the ModelStudio console, whose URL the signed-out state
- * surfaces as copy (some networks cannot reach the console, so nothing on
- * this card opens a browser automatically).
+ * dialog and the submit stores it — no console round-trip. The signed-out
+ * card is the hub's single-line brand row (logo + name + action), so the
+ * descriptor carries no notes on the account surface; creating a key still
+ * happens in the ModelStudio console, at the user's initiative.
  */
 
 import type { AccountHubCardDescriptor } from '@dsh-private/api-account-hub'
@@ -16,7 +16,7 @@ export const CARD: AccountHubCardDescriptor = {
   fields: [
     {
       key: 'signIn', kind: 'dialog', surface: 'account', when: 'signed-out',
-      action: 'sign-in', label: '粘贴 API Key 登录', tone: 'primary', busyLabel: '正在登录…',
+      action: 'sign-in', label: 'API Key 登录', tone: 'primary', busyLabel: '正在登录…',
       dialog: {
         title: '登录 Qwen 账号',
         submitLabel: '登录',
@@ -28,10 +28,6 @@ export const CARD: AccountHubCardDescriptor = {
     {
       key: 'signOut', kind: 'button', surface: 'account', when: 'signed-in',
       action: 'sign-out', label: '退出登录', busyLabel: '退出中…',
-    },
-    {
-      key: 'note', kind: 'note', surface: 'account',
-      label: '点「粘贴 API Key 登录」在弹窗中直接输入密钥，保存即完成登录（与千问 Code 现行 /auth 一致：OAuth 免费通道 2026-04-15 已停用）。密钥会同步存入凭据管理，退出登录一键清除。还没有密钥时，先在端点预设对应的百炼控制台创建。',
     },
     {
       key: 'hint', kind: 'note', surface: 'models', placement: 'catalog',

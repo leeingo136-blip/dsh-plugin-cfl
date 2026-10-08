@@ -30,6 +30,7 @@
  * switches on.
  */
 
+import { readFileSync } from 'node:fs'
 import { Context, Service } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/cordis-plugin-loader'
 import { credentialKey } from '@deepseek-ai/dsh-credentials'
@@ -120,8 +121,17 @@ export const Config = zschema.object({
   models: zschema.array(modelRow).volatile(),
 }) as unknown as SchemaNode
 
-/** The brand line both card states draw. */
-const BRAND = Object.freeze({ name: 'Qwen 账号' })
+/** The brand line both card states draw; the logo lets the hub render the
+ *  signed-out card as the single-line brand row (logo + name + action). */
+const LOGO_DATA_URI: string | undefined = (() => {
+  try {
+    const svg = readFileSync(new URL('../assets/qwen-logo.svg', import.meta.url), 'utf8')
+    return `data:image/svg+xml;base64,${Buffer.from(svg, 'utf8').toString('base64')}`
+  } catch {
+    return undefined
+  }
+})()
+const BRAND = Object.freeze({ logoUrl: LOGO_DATA_URI, name: 'Qwen 账号' })
 
 /** The credential record key the pasted key is mirrored into. */
 const GRANT = credentialKey(ID, 'grant')
@@ -419,12 +429,7 @@ export default class QwenAccountExternal extends Service {
         },
       }
     } else {
-      this.view = {
-        text: `未登录 · 还没有密钥时先在百炼控制台创建（${this.consoleUrl}）`,
-        level: 'warn',
-        signedIn: false,
-        brand: BRAND,
-      }
+      this.view = { text: '未登录', level: 'warn', signedIn: false, brand: BRAND }
     }
     this.ctx.emit(ACCOUNT_HUB_CHANGED, ID)
   }
