@@ -47,7 +47,7 @@ import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import zschema from '@deepseek-ai/schemastery'
 import { CARD } from './card.ts'
 import { emptyCredentialStore, resolveOpenAiProfile, staticAuthContext } from './pi-ai-bridge.ts'
-import { ENDPOINT_LABELS, ENDPOINT_PRESETS, readModels } from './protocol.ts'
+import { ENDPOINT_PRESETS, findPreset, presetLabel, readModels } from './protocol.ts'
 import type { EndpointPreset } from './protocol.ts'
 
 /** Stable identity: hub account id and entry id fallback. */
@@ -101,7 +101,8 @@ export interface VolatileBox<T> {
  */
 export interface Config {
   apiKey?: VolatileBox<string>
-  endpoint?: VolatileBox<string>
+  plan?: VolatileBox<string>
+  region?: VolatileBox<string>
   customBaseUrl?: VolatileBox<string>
   models?: VolatileBox<ModelRow[]>
 }
@@ -116,7 +117,8 @@ type SchemaNode = InstanceType<typeof zschema>
  *  the emitted declaration portable. */
 export const Config = zschema.object({
   apiKey: zschema.string().volatile(),
-  endpoint: zschema.union([...ENDPOINT_LABELS]).volatile(),
+  plan: zschema.string().volatile(),
+  region: zschema.string().volatile(),
   customBaseUrl: zschema.string().volatile(),
   models: zschema.array(modelRow).volatile(),
 }) as unknown as SchemaNode
@@ -204,10 +206,16 @@ export default class QwenAccountExternal extends Service {
   }
 
   /** The configured endpoint preset (falls back to qwen-code's recommended
-   *  Coding Plan entry when the field is unset). */
+   *  Coding Plan entry when the pair is unset or unknown). */
   get endpointPreset(): EndpointPreset {
-    const label = this.config.endpoint?.get()?.trim() ?? ''
-    return ENDPOINT_PRESETS.find(preset => preset.label === label) ?? CODING_PLAN_CN
+    const plan = this.config.plan?.get()?.trim() ?? ''
+    const region = this.config.region?.get()?.trim() ?? ''
+    return findPreset(plan, region) ?? CODING_PLAN_CN
+  }
+
+  /** The preset's display label: 「套餐 · 区域」. */
+  get endpointLabel(): string {
+    return presetLabel(this.endpointPreset)
   }
 
   /** The endpoint the key serves. A non-empty custom base URL wins over the
@@ -264,12 +272,12 @@ export default class QwenAccountExternal extends Service {
     const stored = await this.readStored()
     if (pasted !== '') {
       if (stored === null || stored.apiKey !== pasted
-        || stored.baseUrl !== this.baseUrlValue || stored.endpointLabel !== this.endpointPreset.label) {
+        || stored.baseUrl !== this.baseUrlValue || stored.endpointLabel !== this.endpointLabel) {
         const next: StoredGrant = {
           version: 1,
           apiKey: pasted,
           baseUrl: this.baseUrlValue,
-          endpointLabel: this.endpointPreset.label,
+          endpointLabel: this.endpointLabel,
         }
         await this.ctx.credentials.modifyRecord(GRANT, () => Promise.resolve({ kind: 'grant' as const, payload: next }))
         this.stored = next
@@ -399,6 +407,19 @@ export default class QwenAccountExternal extends Service {
         await this.signOut()
         return { message: '已退出登录：配置中的 API Key 与凭据记录均已清除。' }
       }
+      case 'update-endpoint': {
+        const values = (args !== null && typeof args === 'object' && 'values' in args
+          ? (args as { values: Record<string, unknown> }).values
+          : {}) ?? {}
+        const plan = typeof values.plan === 'string' ? values.plan : ''
+        const region = typeof values.region === 'string' ? values.region : ''
+        const preset = findPreset(plan, region)
+        if (preset === undefined) {
+          return { message: '请先选择套餐与区域。', error: true }
+        }
+        await this.updateEndpoint(preset)
+        return { message: `已切换到 ${presetLabel(preset)}，推理端点：${preset.baseUrl}`, close: true }
+      }
       default: throw new Error(`未知账号操作 "${method}"`)
     }
   }
@@ -420,12 +441,12 @@ export default class QwenAccountExternal extends Service {
           infoLabel: '控制台',
           infoUrl: this.consoleUrl,
         },
-        balance: {
+        balance: {},
+        details: {
           rows: [
-            { label: '端点预设', value: this.endpointPreset.label },
+            { label: '端点预设', value: this.endpointLabel },
             { label: '推理端点', value: endpoint },
           ],
-          more: [{ label: '更多', links: [{ label: '百炼控制台', href: this.consoleUrl, primary: true }] }],
         },
       }
     } else {
@@ -442,6 +463,17 @@ export default class QwenAccountExternal extends Service {
   private async signIn(apiKey: string): Promise<void> {
     await this.ctx.settings.mutate(this.settingsNs, [
       { op: 'set', path: ['apiKey'], value: apiKey },
+    ])
+    await this.ingest()
+  }
+
+  /** The endpoint-switch gesture (the「插件设置」modal): store the chosen
+   *  (plan, region) pair. The settings event re-ingests, which re-mirrors
+   *  the grant's endpoint facts alongside. */
+  private async updateEndpoint(preset: EndpointPreset): Promise<void> {
+    await this.ctx.settings.mutate(this.settingsNs, [
+      { op: 'set', path: ['plan'], value: preset.plan },
+      { op: 'set', path: ['region'], value: preset.region },
     ])
     await this.ingest()
   }

@@ -465,7 +465,23 @@ window.__ModuleLoader__.load({
 						className: HubAccountCard_module_css_default.label,
 						htmlFor: `account-hub-dialog-${row.id}-${input.key}`,
 						children: input.label
-					}), (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
+					}), input.kind === "select" ? (0, react_jsx_runtime.jsxs)("select", {
+						id: `account-hub-dialog-${row.id}-${input.key}`,
+						className: HubAccountCard_module_css_default.select,
+						value: asString(dialogValues[input.key]),
+						autoComplete: "off",
+						"data-modal-autofocus": index === 0 ? "" : void 0,
+						onChange: (event) => {
+							setDialogValues((previous) => ({
+								...previous,
+								[input.key]: event.target.value
+							}));
+						},
+						children: [asString(dialogValues[input.key]) === "" && (0, react_jsx_runtime.jsx)("option", { value: "", children: "" }), (input.options ?? []).filter((option) => input.dependsOn === void 0 || option.when === void 0 || asString(dialogValues[input.dependsOn]) === option.when).map((option) => (0, react_jsx_runtime.jsx)("option", {
+							value: option.value,
+							children: option.label
+						}, option.value))]
+					}) : (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
 						id: `account-hub-dialog-${row.id}-${input.key}`,
 						type: input.kind,
 						value: asString(dialogValues[input.key]),
@@ -486,9 +502,11 @@ window.__ModuleLoader__.load({
 			});
 			const identity = asRecord(status.identity);
 			const balance = asRecord(status.balance);
+			const details = asRecord(status.details);
 			if (surface !== "models" && status.signedIn === true && (asString(identity.name) !== "" || asString(identity.contact) !== "" || asString(identity.avatarUrl) !== "" || asString(identity.infoUrl) !== "")) {
 				const balanceRows = Array.isArray(balance.rows) ? balance.rows : [];
 				const moreRows = Array.isArray(balance.more) ? balance.more : [];
+				const detailRows = Array.isArray(details.rows) ? details.rows : [];
 				const buttons = visibleFields.filter((field) => field.kind === "button" || field.kind === "dialog");
 				const rowLink = (raw) => {
 					const link = asRecord(raw);
@@ -563,6 +581,13 @@ window.__ModuleLoader__.load({
 											children: t("loading")
 										}) : rowLink(r.unavailable ?? null)]
 									})] }, `balance-${index}`);
+								}),
+								detailRows.map((raw, index) => {
+									const d = asRecord(raw);
+									return (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [(0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), (0, react_jsx_runtime.jsxs)("div", {
+										className: HubAccountCard_module_css_default.bRow,
+										children: [(0, react_jsx_runtime.jsx)("span", { children: asString(d.label) }), (0, react_jsx_runtime.jsx)("span", { children: asString(d.value) })]
+									})] }, `detail-${index}`);
 								}),
 								moreRows.map((raw, index) => {
 									const m = asRecord(raw);

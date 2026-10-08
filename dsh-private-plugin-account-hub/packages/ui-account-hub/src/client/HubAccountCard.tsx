@@ -401,15 +401,33 @@ export function HubAccountCard(props: HubAccountCardProps): ReactNode {
       {dialogField.dialog.fields.map((input, index) => (
         <div key={input.key} className={css.field}>
           <label className={css.label} htmlFor={`account-hub-dialog-${row.id}-${input.key}`}>{input.label}</label>
-          <Input
-            id={`account-hub-dialog-${row.id}-${input.key}`}
-            type={input.kind}
-            value={asString(dialogValues[input.key])}
-            placeholder={input.placeholder}
-            autoComplete="off"
-            data-modal-autofocus={index === 0 ? '' : undefined}
-            onChange={(event) => { setDialogValues(previous => ({ ...previous, [input.key]: event.target.value })) }}
-          />
+          {input.kind === 'select' ? (
+            <select
+              id={`account-hub-dialog-${row.id}-${input.key}`}
+              className={css.select}
+              value={asString(dialogValues[input.key])}
+              autoComplete="off"
+              data-modal-autofocus={index === 0 ? '' : undefined}
+              onChange={(event) => { setDialogValues(previous => ({ ...previous, [input.key]: event.target.value })) }}
+            >
+              {asString(dialogValues[input.key]) === '' && <option value=""></option>}
+              {(input.options ?? []).filter(option => input.dependsOn === undefined
+                || option.when === undefined
+                || asString(dialogValues[input.dependsOn]) === option.when).map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+            </select>
+          ) : (
+            <Input
+              id={`account-hub-dialog-${row.id}-${input.key}`}
+              type={input.kind}
+              value={asString(dialogValues[input.key])}
+              placeholder={input.placeholder}
+              autoComplete="off"
+              data-modal-autofocus={index === 0 ? '' : undefined}
+              onChange={(event) => { setDialogValues(previous => ({ ...previous, [input.key]: event.target.value })) }}
+            />
+          )}
         </div>
       ))}
       {dialogNotice !== null && (
@@ -424,6 +442,7 @@ export function HubAccountCard(props: HubAccountCardProps): ReactNode {
   // signed-out and models-page rendering.
   const identity = asRecord(status.identity)
   const balance = asRecord(status.balance)
+  const details = asRecord(status.details)
   const showRich = surface !== 'models' && status.signedIn === true
     && (asString(identity.name) !== '' || asString(identity.contact) !== ''
       || asString(identity.avatarUrl) !== '' || asString(identity.infoUrl) !== '')
@@ -431,6 +450,7 @@ export function HubAccountCard(props: HubAccountCardProps): ReactNode {
   if (showRich) {
     const balanceRows = Array.isArray(balance.rows) ? balance.rows : []
     const moreRows = Array.isArray(balance.more) ? balance.more : []
+    const detailRows = Array.isArray(details.rows) ? details.rows : []
     const buttons = visibleFields.filter(field => field.kind === 'button' || field.kind === 'dialog')
     const rowLink = (raw: JsonValue): ReactNode => {
       const link = asRecord(raw)
@@ -482,6 +502,18 @@ export function HubAccountCard(props: HubAccountCardProps): ReactNode {
                     : r.loading === true
                       ? <span className={css.unavailable}>{t('loading')}</span>
                       : rowLink(r.unavailable as JsonValue ?? null)}
+                </div>
+              </Fragment>
+            )
+          })}
+          {detailRows.map((raw, index) => {
+            const d = asRecord(raw)
+            return (
+              <Fragment key={`detail-${index}`}>
+                <div className={css.divider} />
+                <div className={css.bRow}>
+                  <span>{asString(d.label)}</span>
+                  <span>{asString(d.value)}</span>
                 </div>
               </Fragment>
             )

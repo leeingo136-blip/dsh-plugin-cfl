@@ -30,6 +30,35 @@ export const CARD: AccountHubCardDescriptor = {
       action: 'sign-out', label: '退出登录', busyLabel: '退出中…',
     },
     {
+      key: 'endpointSettings', kind: 'dialog', surface: 'account', when: 'signed-in',
+      action: 'update-endpoint', label: '插件设置', busyLabel: '正在保存…',
+      dialog: {
+        title: '插件设置',
+        submitLabel: '保存',
+        fields: [
+          {
+            key: 'plan', kind: 'select', label: '套餐',
+            options: [
+              { value: 'coding-plan', label: 'Coding Plan' },
+              { value: 'token-plan', label: 'Token Plan' },
+              { value: 'dashscope', label: 'DashScope 兼容模式' },
+            ],
+          },
+          {
+            key: 'region', kind: 'select', label: '区域', dependsOn: 'plan',
+            options: [
+              { value: 'cn', label: '北京 coding.dashscope.aliyuncs.com/v1', when: 'coding-plan' },
+              { value: 'intl', label: '新加坡 coding-intl.dashscope.aliyuncs.com/v1', when: 'coding-plan' },
+              { value: 'cn', label: '北京 token-plan.cn-beijing.maas.aliyuncs.com', when: 'token-plan' },
+              { value: 'intl', label: '新加坡 token-plan.ap-southeast-1.maas.aliyuncs.com', when: 'token-plan' },
+              { value: 'cn', label: '国内 dashscope.aliyuncs.com/compatible-mode/v1', when: 'dashscope' },
+              { value: 'intl', label: '国际 dashscope-intl.aliyuncs.com/compatible-mode/v1', when: 'dashscope' },
+            ],
+          },
+        ],
+      },
+    },
+    {
       key: 'hint', kind: 'note', surface: 'models', placement: 'catalog',
       label: '登录后点「获取可用模型」拉取该端点可见的模型，勾选加入目录并保存即可使用。',
     },

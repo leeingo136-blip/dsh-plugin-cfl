@@ -14,11 +14,25 @@ export interface AccountHubSelectOption {
 export interface AccountHubDialogInput {
   /** Value address: the input's key inside the submitted values. */
   key: string
-  kind: 'text' | 'password'
+  kind: 'text' | 'password' | 'select'
   /** Visible label above the input. */
   label: string
   /** Empty-state hint inside the input. */
   placeholder?: string
+  /** select only: fixed choices. An option carrying `when` renders only
+   *  while the sibling input named by this input's `dependsOn` holds that
+   *  value — the declarative cascade (region choices keyed by plan). */
+  options?: readonly {
+    /** Stored value written into the submitted values. */
+    value: string
+    /** Visible label. */
+    label: string
+    /** Show only while the `dependsOn` input holds this value. */
+    when?: string
+  }[]
+  /** select only: the sibling input key whose current value filters this
+   *  select's `when`-tagged options. Omit for an unconditional select. */
+  dependsOn?: string
 }
 
 /**
@@ -208,6 +222,17 @@ export interface AccountHubMoreRow {
   }[]
 }
 
+/** One read-only detail row: a labelled fact rendered as plain key-value
+ *  text — both sides in the row's base font (unlike balance rows, whose
+ *  amount side renders large). For configuration facts like the effective
+ *  endpoint that are set elsewhere, not wallet state. */
+export interface AccountHubDetailRow {
+  /** Row label, e.g. the localized 'Endpoint preset'. */
+  label: string
+  /** The fact's display value. */
+  value: string
+}
+
 /**
  * The state shape the hub's generic card understands beyond the plain status
  * line. getState() may return this (all fields optional; unknown keys are
@@ -241,6 +266,11 @@ export interface AccountHubCardState {
   balance?: {
     rows?: readonly AccountHubBalanceRow[]
     more?: readonly AccountHubMoreRow[]
+  }
+  /** Signed-in read-only fact rows, drawn between the balance rows and the
+   *  more rows; both sides in the base font. Absent draws nothing. */
+  details?: {
+    rows?: readonly AccountHubDetailRow[]
   }
 }
 

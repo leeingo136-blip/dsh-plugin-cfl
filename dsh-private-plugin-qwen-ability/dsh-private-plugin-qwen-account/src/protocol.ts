@@ -10,6 +10,10 @@
  * pasted against the endpoint tier it was issued for — Coding Plan, Token
  * Plan, or the plain DashScope compatible-mode endpoint.
  *
+ * The tier is addressed as a (plan, region) pair — the same two-step choice
+ * qwen-code's /auth wizard makes (provider, then region). The base URL is
+ * fixed by the pair; only the custom-provider escape hatch takes a free URL.
+ *
  * @module qwen-account/protocol
  */
 
@@ -18,14 +22,20 @@ export const QWEN_BASE_URL_CN = 'https://dashscope.aliyuncs.com/compatible-mode/
 /** DashScope OpenAI-compatible endpoint, international station. */
 export const QWEN_BASE_URL_INTL = 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1'
 
+/** The subscription tier families, mirroring qwen-code's provider table. */
+export type PlanId = 'coding-plan' | 'token-plan' | 'dashscope'
+/** The station the plan's key is issued for. */
+export type RegionId = 'cn' | 'intl'
+
 /**
- * The endpoint presets, mirroring qwen-code's official provider table
- * (`docs/users/configuration/auth.md`): one subscription tier per endpoint,
- * and the key belongs to the endpoint it was issued for. The console URL is
- * the ModelStudio page where that tier's key is created, split by region.
+ * One endpoint preset: a (plan, region) pair with the base URL it binds and
+ * the ModelStudio console page where that tier's key is created.
  */
 export interface EndpointPreset {
-  readonly label: string
+  readonly plan: PlanId
+  readonly region: RegionId
+  readonly planLabel: string
+  readonly regionLabel: string
   readonly baseUrl: string
   readonly consoleUrl: string
 }
@@ -34,16 +44,41 @@ const CONSOLE_CN = 'https://bailian.console.aliyuncs.com/?apiKey=1#/api-key'
 const CONSOLE_INTL = 'https://bailian.console.alibabacloud.com/?apiKey=1#/api-key'
 
 export const ENDPOINT_PRESETS: readonly EndpointPreset[] = [
-  { label: 'Coding Plan（北京）', baseUrl: 'https://coding.dashscope.aliyuncs.com/v1', consoleUrl: CONSOLE_CN },
-  { label: 'Coding Plan（国际）', baseUrl: 'https://coding-intl.dashscope.aliyuncs.com/v1', consoleUrl: CONSOLE_INTL },
-  { label: 'Token Plan（北京）', baseUrl: 'https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1', consoleUrl: CONSOLE_CN },
-  { label: 'Token Plan（新加坡）', baseUrl: 'https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1', consoleUrl: CONSOLE_INTL },
-  { label: 'DashScope 兼容模式（国内）', baseUrl: QWEN_BASE_URL_CN, consoleUrl: CONSOLE_CN },
-  { label: 'DashScope 兼容模式（国际）', baseUrl: QWEN_BASE_URL_INTL, consoleUrl: CONSOLE_INTL },
+  {
+    plan: 'coding-plan', region: 'cn', planLabel: 'Coding Plan', regionLabel: '北京',
+    baseUrl: 'https://coding.dashscope.aliyuncs.com/v1', consoleUrl: CONSOLE_CN,
+  },
+  {
+    plan: 'coding-plan', region: 'intl', planLabel: 'Coding Plan', regionLabel: '新加坡',
+    baseUrl: 'https://coding-intl.dashscope.aliyuncs.com/v1', consoleUrl: CONSOLE_INTL,
+  },
+  {
+    plan: 'token-plan', region: 'cn', planLabel: 'Token Plan', regionLabel: '北京',
+    baseUrl: 'https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1', consoleUrl: CONSOLE_CN,
+  },
+  {
+    plan: 'token-plan', region: 'intl', planLabel: 'Token Plan', regionLabel: '新加坡',
+    baseUrl: 'https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1', consoleUrl: CONSOLE_INTL,
+  },
+  {
+    plan: 'dashscope', region: 'cn', planLabel: 'DashScope 兼容模式', regionLabel: '国内',
+    baseUrl: QWEN_BASE_URL_CN, consoleUrl: CONSOLE_CN,
+  },
+  {
+    plan: 'dashscope', region: 'intl', planLabel: 'DashScope 兼容模式', regionLabel: '国际',
+    baseUrl: QWEN_BASE_URL_INTL, consoleUrl: CONSOLE_INTL,
+  },
 ]
 
-/** The preset labels, in schema order. */
-export const ENDPOINT_LABELS: readonly string[] = ENDPOINT_PRESETS.map(preset => preset.label)
+/** Look up the preset for a (plan, region) pair; undefined when unknown. */
+export function findPreset(plan: string, region: string): EndpointPreset | undefined {
+  return ENDPOINT_PRESETS.find(preset => preset.plan === plan && preset.region === region)
+}
+
+/** The display label of a preset: 「套餐 · 区域」. */
+export function presetLabel(preset: EndpointPreset): string {
+  return `${preset.planLabel} · ${preset.regionLabel}`
+}
 
 const REQUEST_TIMEOUT_MS = 30_000
 
