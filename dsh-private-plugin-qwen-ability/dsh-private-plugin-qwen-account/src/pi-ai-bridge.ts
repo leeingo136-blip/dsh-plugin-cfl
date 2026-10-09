@@ -81,6 +81,11 @@ export function resolveOpenAiProfile(input: {
     // DashScope models are hybrid reasoning models; reasoning levels are
     // resolved server-side (no level map is declared).
     reasoning: true,
+    // DashScope compatible-mode rejects the OpenAI `developer` instruction
+    // role ("developer is not one of ['system', 'assistant', ...]"); pi-ai's
+    // URL-based compat detection does not know DashScope hosts and would
+    // otherwise send system instructions as `developer` for reasoning models.
+    compat: { supportsDeveloperRole: false },
     input: ['text', 'image'],
     cost: NO_COST,
     contextWindow: model.contextWindow ?? DEFAULT_CONTEXT_WINDOW,
