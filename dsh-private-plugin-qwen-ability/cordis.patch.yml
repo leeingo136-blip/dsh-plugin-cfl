@@ -24,7 +24,7 @@
       # Flip to `disabled: true` to ship the preset installed but not enabled.
       disabled: false
       config:
-        id: qwen-code
+        id: qwen-folding-fan
         name: Qwen的折扇
         description: Qwen Code 工作方式。标准能力 + Qwen Code 的会话内能力（移植系统提示词 / loop 定时器与四工具 / 移植技能树）
         order: -9

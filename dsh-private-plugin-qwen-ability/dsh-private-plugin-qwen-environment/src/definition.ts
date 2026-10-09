@@ -64,7 +64,7 @@ const COMPONENT = {
 } as const
 
 /** The preset this component contributes. */
-export const PRESET_ID = 'qwen-code'
+export const PRESET_ID = 'qwen-folding-fan'
 /** Display name of the contributed preset (any characters; not an identifier). */
 export const PRESET_NAME = 'Qwen的折扇'
 /** Sort weight: negative claims a fixed place ahead of the shipped presets. */
