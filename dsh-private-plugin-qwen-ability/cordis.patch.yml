@@ -25,7 +25,7 @@
       disabled: false
       config:
         id: qwen-code
-        name: Qwen Code
+        name: Qwen的折扇
         description: Qwen Code 工作方式。标准能力 + Qwen Code 的会话内能力（移植系统提示词 / loop 定时器与四工具 / 移植技能树）
         order: -9
         plugins:

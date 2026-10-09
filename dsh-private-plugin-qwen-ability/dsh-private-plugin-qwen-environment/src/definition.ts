@@ -66,7 +66,7 @@ const COMPONENT = {
 /** The preset this component contributes. */
 export const PRESET_ID = 'qwen-code'
 /** Display name of the contributed preset (any characters; not an identifier). */
-export const PRESET_NAME = 'Qwen Code'
+export const PRESET_NAME = 'Qwen的折扇'
 /** Sort weight: negative claims a fixed place ahead of the shipped presets. */
 export const PRESET_ORDER = -9
 /** Description as declared in the patch row. */
