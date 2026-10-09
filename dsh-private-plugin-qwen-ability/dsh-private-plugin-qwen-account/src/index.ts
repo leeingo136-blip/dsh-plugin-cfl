@@ -444,8 +444,8 @@ export default class QwenAccountExternal extends Service {
         balance: {},
         details: {
           rows: [
-            { label: '端点预设', value: this.endpointLabel },
-            { label: '推理端点', value: endpoint },
+            { label: '端点预设', value: this.endpointPreset.planLabel },
+            { label: '推理端点', value: `${this.endpointPreset.regionLabel} · ${endpoint}` },
           ],
         },
       }

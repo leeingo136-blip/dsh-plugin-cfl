@@ -40,35 +40,40 @@ export interface EndpointPreset {
   readonly consoleUrl: string
 }
 
-// Aliyun's China console lives under *.console.aliyun.com (console.aliyuncs.com
-// does not resolve); the international one is *.console.alibabacloud.com.
-const CONSOLE_CN = 'https://bailian.console.aliyun.com/?apiKey=1#/api-key'
-const CONSOLE_INTL = 'https://bailian.console.alibabacloud.com/?apiKey=1#/api-key'
+// Console pages per (plan, region), mirroring official qwen-code: each tier
+// lands on its own console surface (coding-plan management, token-plan docs,
+// model-api console) rather than a generic api-key page.
+const CODING_PLAN_CN_CONSOLE = 'https://bailian.console.aliyun.com/?tab=model#/efm/coding_plan'
+const CODING_PLAN_INTL_CONSOLE = 'https://modelstudio.console.alibabacloud.com/?tab=dashboard#/efm/coding_plan'
+const TOKEN_PLAN_CN_CONSOLE = 'https://bailian.console.aliyun.com/cn-beijing?tab=doc#/doc/?type=model&url=3028856'
+const TOKEN_PLAN_INTL_CONSOLE = 'https://modelstudio.console.alibabacloud.com/ap-southeast-1?tab=doc#/doc/?type=model'
+const DASHSCOPE_CN_CONSOLE = 'https://bailian.console.aliyun.com/cn-beijing?tab=api#/api'
+const DASHSCOPE_INTL_CONSOLE = 'https://modelstudio.console.alibabacloud.com/ap-southeast-1?tab=api#/api/?type=model&url=2712195'
 
 export const ENDPOINT_PRESETS: readonly EndpointPreset[] = [
   {
     plan: 'coding-plan', region: 'cn', planLabel: 'Coding Plan', regionLabel: '北京',
-    baseUrl: 'https://coding.dashscope.aliyuncs.com/v1', consoleUrl: CONSOLE_CN,
+    baseUrl: 'https://coding.dashscope.aliyuncs.com/v1', consoleUrl: CODING_PLAN_CN_CONSOLE,
   },
   {
     plan: 'coding-plan', region: 'intl', planLabel: 'Coding Plan', regionLabel: '新加坡',
-    baseUrl: 'https://coding-intl.dashscope.aliyuncs.com/v1', consoleUrl: CONSOLE_INTL,
+    baseUrl: 'https://coding-intl.dashscope.aliyuncs.com/v1', consoleUrl: CODING_PLAN_INTL_CONSOLE,
   },
   {
     plan: 'token-plan', region: 'cn', planLabel: 'Token Plan', regionLabel: '北京',
-    baseUrl: 'https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1', consoleUrl: CONSOLE_CN,
+    baseUrl: 'https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1', consoleUrl: TOKEN_PLAN_CN_CONSOLE,
   },
   {
     plan: 'token-plan', region: 'intl', planLabel: 'Token Plan', regionLabel: '新加坡',
-    baseUrl: 'https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1', consoleUrl: CONSOLE_INTL,
+    baseUrl: 'https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1', consoleUrl: TOKEN_PLAN_INTL_CONSOLE,
   },
   {
     plan: 'dashscope', region: 'cn', planLabel: 'DashScope 兼容模式', regionLabel: '国内',
-    baseUrl: QWEN_BASE_URL_CN, consoleUrl: CONSOLE_CN,
+    baseUrl: QWEN_BASE_URL_CN, consoleUrl: DASHSCOPE_CN_CONSOLE,
   },
   {
     plan: 'dashscope', region: 'intl', planLabel: 'DashScope 兼容模式', regionLabel: '国际',
-    baseUrl: QWEN_BASE_URL_INTL, consoleUrl: CONSOLE_INTL,
+    baseUrl: QWEN_BASE_URL_INTL, consoleUrl: DASHSCOPE_INTL_CONSOLE,
   },
 ]
 
