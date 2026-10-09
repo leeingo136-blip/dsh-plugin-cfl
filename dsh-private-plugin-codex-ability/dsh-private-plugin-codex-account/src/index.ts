@@ -29,6 +29,7 @@
  */
 
 import { createServer } from 'node:http'
+import { readFileSync } from 'node:fs'
 import type { Server, IncomingMessage, ServerResponse } from 'node:http'
 import { Context, Service } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/cordis-plugin-loader'
@@ -140,7 +141,18 @@ export const Config = zschema.object({
 }) as unknown as SchemaNode
 
 /** The brand line both card states draw. */
-const BRAND = Object.freeze({ name: 'Codex 账号' })
+/** The official OpenAI mark (the 2025 symbol SVG — the identity OpenAI
+ *  applies to Codex across its product surfaces), bundled as a data URI. */
+const LOGO_DATA_URI: string | undefined = (() => {
+  try {
+    const svg = readFileSync(new URL('../assets/codex-logo.svg', import.meta.url), 'utf8')
+    return `data:image/svg+xml;base64,${Buffer.from(svg, 'utf8').toString('base64')}`
+  } catch {
+    return undefined
+  }
+})()
+
+const BRAND = Object.freeze({ logoUrl: LOGO_DATA_URI, name: 'Codex 账号' })
 
 /** The credential record keys. */
 const OAUTH_GRANT = credentialKey(ID, 'grant-oauth')
@@ -981,11 +993,12 @@ export default class CodexAccountExternal extends Service {
           signedIn: true,
           brand: BRAND,
           identity: {
-            // The plan rides on the account name; the mode/endpoint couple
-            // lives in details below.
+            // The plan rides on the account name; the subscription type sits
+            // on the second line, the endpoint stays in details.
             name: plan !== undefined
               ? `${oauth.email ?? 'ChatGPT 账号'}（${plan}）`
-              : oauth.email !== undefined ? `${oauth.email}（ChatGPT 订阅）` : 'ChatGPT 账号（ChatGPT 订阅）',
+              : oauth.email !== undefined ? `${oauth.email}` : 'ChatGPT 账号',
+            contact: 'ChatGPT 订阅',
             infoLabel: '控制台',
             infoUrl: 'https://chatgpt.com/#settings/Account',
           },
@@ -995,8 +1008,9 @@ export default class CodexAccountExternal extends Service {
           },
           details: {
             rows: [
-              // Mode and endpoint are one coupled fact — a single line.
-              { label: '订阅类型', value: `ChatGPT 订阅 · ${this.baseUrlValue}` },
+              // The endpoint only — the subscription type moved onto the
+              // identity card's second line.
+              { label: '推理端点', value: this.baseUrlValue },
             ],
           },
         }
@@ -1011,6 +1025,7 @@ export default class CodexAccountExternal extends Service {
         brand: BRAND,
         identity: {
           name: 'OpenAI Platform（API Key）',
+          contact: 'Platform API Key',
           infoLabel: '控制台',
           infoUrl: CONSOLE_URL,
         },
@@ -1019,7 +1034,7 @@ export default class CodexAccountExternal extends Service {
           more: [{ label: '更多', links: [{ label: 'OpenAI Platform', href: CONSOLE_URL, primary: true }] }],
         },
         details: {
-          rows: [{ label: '订阅类型', value: `Platform API Key · ${this.baseUrlValue}` }],
+          rows: [{ label: '推理端点', value: this.baseUrlValue }],
         },
       }
     } else {
