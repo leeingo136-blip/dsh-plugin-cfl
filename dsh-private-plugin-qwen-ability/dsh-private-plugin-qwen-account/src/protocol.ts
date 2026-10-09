@@ -40,7 +40,9 @@ export interface EndpointPreset {
   readonly consoleUrl: string
 }
 
-const CONSOLE_CN = 'https://bailian.console.aliyuncs.com/?apiKey=1#/api-key'
+// Aliyun's China console lives under *.console.aliyun.com (console.aliyuncs.com
+// does not resolve); the international one is *.console.alibabacloud.com.
+const CONSOLE_CN = 'https://bailian.console.aliyun.com/?apiKey=1#/api-key'
 const CONSOLE_INTL = 'https://bailian.console.alibabacloud.com/?apiKey=1#/api-key'
 
 export const ENDPOINT_PRESETS: readonly EndpointPreset[] = [
