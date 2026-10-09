@@ -46,11 +46,16 @@ import type { AccountHubCardState } from '@dsh-private/api-account-hub'
 import { openNativePath } from '@deepseek-ai/dsh-native-command'
 import zschema from '@deepseek-ai/schemastery'
 import { CARD } from './card.ts'
+import { detectExitRegion, localTimezone, regionLabel, timezoneMatchesRegion } from './regions.ts'
+import type { ExitRegion } from './regions.ts'
 import { emptyCredentialStore, resolveOpenAiResponsesProfile, staticAuthContext } from './pi-ai-bridge.ts'
 import {
   API_KEY_BASE_URL, CALLBACK_PATH, CALLBACK_PORT, CHATGPT_BASE_URL, CONSOLE_URL,
-  ORIGINATOR, buildAuthorizeUrl, exchangeCode, generatePkce, parseIdTokenClaims, readModels, refreshTokens,
+  ORIGINATOR, buildAuthorizeUrl, codexUserAgent, exchangeCode, generatePkce, mergeWithBundledModels,
+  parseIdTokenClaims, readChatGptModels, readModels, readWhamUsage, refreshTokens,
 } from './protocol.ts'
+import type { RemoteModelInfo, WhamUsage } from './protocol.ts'
+import { BUNDLED_CHATGPT_MODELS } from './protocol.ts'
 
 /** Stable identity: hub account id and entry id fallback. */
 export const name = 'codex-account-external'
@@ -59,6 +64,9 @@ const ID = name
 const REQUEST_TIMEOUT_MS = 30_000
 /** The OAuth callback catch window (codex-rs polls its login server 15 min). */
 const LOGIN_TIMEOUT_MS = 15 * 60_000
+/** The rejection a superseded login flow carries: its own catch swallows
+ *  exactly this message so the replacement flow keeps the card's view. */
+const LOGIN_SUPERSEDED = '登录流程已被新的一次登录取代。'
 /** Refresh the access token when it expires within this horizon. */
 const REFRESH_SKEW_MS = 5 * 60_000
 
@@ -66,14 +74,6 @@ const REFRESH_SKEW_MS = 5 * 60_000
 const ROUTE = 'Codex-account'
 /** The credential reference name the profile renders. */
 const DEFAULT_CREDENTIAL_REF_NAME = 'CODEX_CREDENTIAL'
-
-/** The subscription route's dependable defaults; the ChatGPT backend has no
- *  portable catalog endpoint, so this table is the signed-in catalog. */
-const CHATGPT_MODELS: readonly ModelRow[] = [
-  { id: 'gpt-5.2-codex', name: 'GPT-5.2 Codex', contextWindow: 272_000, maxTokens: 128_000 },
-  { id: 'gpt-5.1-codex-max', name: 'GPT-5.1 Codex Max', contextWindow: 272_000, maxTokens: 128_000 },
-  { id: 'gpt-5.1-codex-mini', name: 'GPT-5.1 Codex Mini', contextWindow: 272_000, maxTokens: 128_000 },
-]
 
 /** One adopted catalog row, mirroring the official model-list editor. */
 export interface ModelRow {
@@ -112,6 +112,10 @@ export interface Config {
   apiKey?: VolatileBox<string>
   customBaseUrl?: VolatileBox<string>
   models?: VolatileBox<ModelRow[]>
+  /** The persisted 可用国家与地区 choice (ISO-style region code). Committed
+   *  by the card's autoSave select; the geo gate compares it against the
+   *  probed exit at sign-in and at every startup. */
+  region?: VolatileBox<string>
 }
 
 /** The schema class instance type, nameable without dragging cosmokit into
@@ -127,6 +131,9 @@ export const Config = zschema.object({
   apiKey: zschema.string().volatile(),
   customBaseUrl: zschema.string().volatile(),
   models: zschema.array(modelRow).volatile(),
+  // A free string (region codes are too many for a union); the geo gate
+  // validates the choice against the detected exit at sign-in and startup.
+  region: zschema.string().volatile(),
 }) as unknown as SchemaNode
 
 /** The brand line both card states draw. */
@@ -171,10 +178,24 @@ export default class CodexAccountExternal extends Service {
   private readonly config: Config
   private readonly requestLifetime = new AbortController()
 
+  /** The login flow currently holding the 1455 listener, if any. A new
+   *  login supersedes it (cancel-and-replace) instead of colliding on the
+   *  fixed OAuth callback port. */
+  private oauthLoginFlow: { cancel(): void } | undefined
+
   /** The credential facts, re-read by ingest. */
   private oauth: StoredOAuth | null = null
   private apiKeyStored: StoredApiKey | null = null
   private view: AccountHubCardState = { text: '未登录', level: 'warn', signedIn: false, brand: BRAND }
+
+  /** Exit-region probe outcome, shown on the card's status line: 'pending'
+   *  while probing, 'ok' with the detected facts, 'failed' when every probe
+   *  timed out or errored. Beyond display it drives the geo gate: sign-in
+   *  and every startup compare the persisted region choice against it. */
+  private exitState: 'pending' | 'ok' | 'failed' = 'pending'
+  private exit: ExitRegion | undefined
+  /** Why the startup geo gate auto-signed-out, shown on the signed-out card. */
+  private geoNotice: string | undefined
 
   /** Lazy refresh dedup: one in-flight refresh per token generation. */
   private refreshInFlight: Promise<string> | null = null
@@ -199,6 +220,77 @@ export default class CodexAccountExternal extends Service {
     this.registerProvider(ctx)
     this.registerHub(ctx)
     void this.ingest()
+    // The exit probe rides the plugin load, not a readiness gate: a slow or
+    // dead probe service must not delay the plugin's readiness.
+    void this.detectExit()
+  }
+
+  /** Probe the exit region once per load and republish, so the card's status
+   *  line shows what the outside world sees as this machine's exit (IP +
+   *  country/region) — or that the probe failed. Doubles as the startup geo
+   *  enforcement: while a login fact exists, the persisted region choice must
+   *  still match the freshly probed exit. A mismatch (or a missing choice)
+   *  reverts to the signed-out state — both credential records are cleared,
+   *  so nothing can connect afterwards until a matching region is chosen and
+   *  a fresh sign-in happens. */
+  private async detectExit(): Promise<void> {
+    const detected = await detectExitRegion()
+    this.exit = detected
+    this.exitState = detected === undefined ? 'failed' : 'ok'
+    if (detected !== undefined && this.signedIn) {
+      const persisted = this.config.region?.get()?.trim() ?? ''
+      if (persisted !== detected.code) {
+        this.geoNotice = persisted === ''
+          ? `已自动退出：请先选择「可用国家与地区」（当前出口 ${detected.label}）。`
+          : `已自动退出：出口 ${detected.label} 与所选地区「${regionLabel(persisted)}」不一致。`
+        await this.signOut()
+        return
+      }
+      // The same enforcement on the clock half: a login whose chosen region
+      // stopped matching the machine's timezone is just as inconsistent as
+      // one whose exit moved — revert to signed-out with the reason shown.
+      const local = localTimezone()
+      if (timezoneMatchesRegion(local, persisted) === false) {
+        this.geoNotice = `已自动退出：本机时区（${local}）与所选地区「${regionLabel(persisted)}」不一致。`
+        await this.signOut()
+        return
+      }
+    }
+    this.publish()
+  }
+
+  /**
+   * The clock gate: the machine's timezone must belong to the chosen region.
+   * Independent of the exit probe — a proxy user's clock stays on home time
+   * even when the exit answers elsewhere, and a genuine resident passes by
+   * virtue of their OS-configured zone. Unjudgeable combinations (region
+   * without zone data, or a platform that cannot name its zone) fail open.
+   */
+  private timezoneGate(region: string): string | undefined {
+    if (region === '') return undefined
+    const local = localTimezone()
+    const verdict = timezoneMatchesRegion(local, region)
+    if (verdict !== false) return undefined
+    return `本机时区（${local}）与所选地区「${regionLabel(region)}」不一致，无法登录：请将系统时区改为所选地区，或改选本机实际所在地区。`
+  }
+
+  /** The geo gate for both sign-in gestures. `values` carries the dialog
+   *  submit's merged card values (the dropdown's live choice rides
+   *  `values.region`); the OAuth button has none, so the persisted choice
+   *  speaks. Two refusals: the machine's timezone must belong to the chosen
+   *  region, and the detected exit must be that same region. A failed exit
+   *  probe leaves the exit half of the gate open — there is nothing to
+   *  compare against. */
+  private gateCheck(values?: Record<string, unknown>): string | undefined {
+    const chosen = typeof values?.region === 'string' ? values.region : ''
+    const region = chosen !== '' ? chosen : (this.config.region?.get()?.trim() ?? '')
+    const clock = this.timezoneGate(region)
+    if (clock !== undefined) return clock
+    if (this.exitState !== 'ok' || this.exit === undefined) return undefined
+    if (region === this.exit.code) return undefined
+    return region === ''
+      ? `请先在「可用国家与地区」中选择「${this.exit.label}」，再登录。`
+      : `所选地区「${regionLabel(region)}」与当前出口地区「${this.exit.label}」不一致，无法登录。`
   }
 
   // ---- configuration reads --------------------------------------------------
@@ -236,6 +328,110 @@ export default class CodexAccountExternal extends Service {
     return this.config.models?.get() ?? []
   }
 
+  /** The remote-catalog state: rows in the backend's priority order, and the
+   *  one in-flight refresh guard. */
+  private chatgptCatalog: readonly ModelRow[] = []
+  private catalogRefresh: Promise<void> | undefined
+
+  /** The subscription usage snapshot (the CLI `/status` data). */
+  private usage: WhamUsage | undefined
+  private usageRefresh: Promise<void> | undefined
+
+  /** Refresh the usage snapshot once; a failure keeps the previous rows. */
+  private refreshUsage(): Promise<void> {
+    this.usageRefresh ??= this.fetchUsage()
+      .catch((error: unknown) => {
+        console.info('[codex-account] usage refresh failed', {
+          error: error instanceof Error ? error.message : String(error),
+        })
+      })
+      .finally(() => { this.usageRefresh = undefined })
+    return this.usageRefresh
+  }
+
+  private async fetchUsage(): Promise<void> {
+    const oauth = this.oauth ?? await this.readOAuth()
+    if (!this.isChatGptMode || oauth === null) return
+    const signal = AbortSignal.any([this.requestLifetime.signal, AbortSignal.timeout(REQUEST_TIMEOUT_MS)])
+    const usage = await readWhamUsage({ token: oauth.accessToken, accountId: oauth.accountId, signal })
+    this.usage = usage
+    this.publish()
+  }
+
+  /** The usage rows for the balance block, rendered from the latest wham
+   *  snapshot: both enforced windows plus the purchased credits when the
+   *  account carries any. */
+  private usageRows(): readonly { label: string; value: string }[] {
+    const usage = this.usage
+    if (usage === undefined) return []
+    const windowLabel = (seconds: number | undefined): string => {
+      if (seconds === 604_800) return '每周'
+      if (seconds === 86_400) return '每日'
+      if (seconds === 18_000) return '5 小时'
+      if (seconds !== undefined && seconds > 0) return `${Math.round(seconds / 3600)} 小时`
+      return '主窗口'
+    }
+    const resetLabel = (at: number | undefined): string =>
+      at === undefined ? '' : new Date(at * 1000).toLocaleString('zh-CN', {
+        month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
+      })
+    const rows: { label: string; value: string }[] = []
+    for (const window of [usage.primary, usage.secondary]) {
+      if (window?.used_percent === undefined) continue
+      const reset = resetLabel(window.reset_at)
+      rows.push({
+        label: `${windowLabel(window.limit_window_seconds)}用量`,
+        value: `已用 ${Math.round(window.used_percent)}%${reset === '' ? '' : ` · ${reset} 重置`}`,
+      })
+    }
+    if (usage.creditsBalance !== undefined) {
+      rows.push({ label: '已购余额', value: `$${usage.creditsBalance.toFixed(2)}` })
+    }
+    return rows
+  }
+
+  /** Refresh the remote catalog once (the CLI's startup behavior). A failure
+   *  keeps whatever catalog is in place — the bundled table still serves. */
+  private refreshChatGptCatalog(): Promise<void> {
+    this.catalogRefresh ??= this.fetchChatGptCatalog()
+      .catch((error: unknown) => {
+        console.info('[codex-account] remote catalog refresh failed', {
+          error: error instanceof Error ? error.message : String(error),
+        })
+      })
+      .finally(() => { this.catalogRefresh = undefined })
+    return this.catalogRefresh
+  }
+
+  private async fetchChatGptCatalog(): Promise<void> {
+    const oauth = this.oauth ?? await this.readOAuth()
+    if (!this.isChatGptMode || oauth === null) return
+    const signal = AbortSignal.any([this.requestLifetime.signal, AbortSignal.timeout(REQUEST_TIMEOUT_MS)])
+    const rows = await readChatGptModels({
+      token: oauth.accessToken,
+      accountId: oauth.accountId,
+      signal,
+    })
+    this.applyRemoteCatalog(rows)
+  }
+
+  /** Install a fetched catalog: map `ModelInfo` rows to the profile's shape,
+   *  and when the id set actually moved, rebuild the route profile. */
+  private applyRemoteCatalog(rows: readonly RemoteModelInfo[]): void {
+    const mapped: ModelRow[] = rows.map(info => ({
+      id: info.slug as string,
+      ...(info.display_name === undefined ? {} : { name: info.display_name }),
+      ...(info.context_window === undefined ? {} : { contextWindow: info.context_window }),
+    }))
+    if (mapped.length === 0) return
+    const unchanged = mapped.length === this.chatgptCatalog.length
+      && mapped.every((row, index) => row.id === this.chatgptCatalog[index]?.id)
+    if (unchanged) return
+    this.chatgptCatalog = mapped
+    this.routeProfileKey = ''
+    this.publish()
+  }
+
   /** The credential reference name the profile renders. */
   get credentialRefName(): string {
     return DEFAULT_CREDENTIAL_REF_NAME
@@ -269,8 +465,16 @@ export default class CodexAccountExternal extends Service {
 
   /** Re-read both stored records and republish (credential-side changes). */
   private async refreshStored(): Promise<void> {
+    // A fresh login fact (either gesture) retires a startup auto-sign-out's
+    // reason — the user is signed in again.
+    if (this.signedIn) this.geoNotice = undefined
     this.oauth = await this.readOAuth()
     this.apiKeyStored = await this.readApiKeyGrant()
+    // A login arriving through a credential event still seeds the marker
+    // before the republish, so the card never blinks out of existence.
+    if (this.signedIn) await this.ensureAdoptionMarker()
+    void this.refreshChatGptCatalog()
+    void this.refreshUsage()
     this.routeProfileKey = ''
     this.publish()
   }
@@ -292,6 +496,14 @@ export default class CodexAccountExternal extends Service {
       this.apiKeyStored = null
     }
     if (this.oauth === null) this.oauth = await this.readOAuth()
+    // Startup/config-change sync: a signed-in account restored from storage
+    // gets its marker here too (migration for accounts logged in before
+    // adoption gating existed).
+    if (this.signedIn) await this.ensureAdoptionMarker()
+    // The startup sync (the CLI fetches `/models` and `/status` on launch
+    // too); both no-op while signed out.
+    void this.refreshChatGptCatalog()
+    void this.refreshUsage()
     this.routeProfileKey = ''
     this.publish()
   }
@@ -335,6 +547,10 @@ export default class CodexAccountExternal extends Service {
         }
         await this.ctx.credentials.modifyRecord(OAUTH_GRANT, () => Promise.resolve({ kind: 'grant' as const, payload: next }))
         this.oauth = next
+        // The refresh's fresh id_token carries the current plan claim; pull
+        // the usage snapshot too so a plan change on the official site lands
+        // here without a restart.
+        void this.refreshUsage()
         this.routeProfileKey = ''
         this.publish()
         return next.accessToken
@@ -351,14 +567,60 @@ export default class CodexAccountExternal extends Service {
     const accountId = this.oauth?.accountId ?? ''
     return {
       originator: ORIGINATOR,
-      'User-Agent': 'codex_cli_rs/codex-ability (DeepSeek Harness)',
+      'User-Agent': codexUserAgent(),
+      // The CLI stamps this on every Responses call (`responses=experimental`
+      // marks the beta surface the subscription backend expects).
+      'OpenAI-Beta': 'responses=experimental',
       ...(accountId !== '' ? { 'chatgpt-account-id': accountId } : {}),
     }
   }
 
+  /** Whether the settings user layer carries an explicit `models` write —
+   *  an adoption, or a deliberate clearing. schemastery materializes the
+   *  mounted volatile array as an empty box even when the user never wrote
+   *  the field, so the config box alone cannot distinguish "never adopted"
+   *  from "emptied"; the user layer can (a field's presence there marks a
+   *  genuine user write). */
+  private modelsAdopted(): boolean {
+    try {
+      const user = this.ctx.settings.describe().find(row => row.ns === this.settingsNs)?.user
+      return typeof user === 'object' && user !== null && 'models' in user
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * Seed the user layer with an explicit `models: []` once per sign-in, so
+   * the models card is visible while the route — under adoption gating —
+   * still advertises nothing. Without the marker an untouched catalog would
+   * hide the card on both visibility signals (no live group, no user write)
+   * and the user could never reach 「获取可用模型」. Idempotent: an existing
+   * write (adopted rows or a deliberate clearing) is never overwritten.
+   */
+  private async ensureAdoptionMarker(): Promise<void> {
+    if (!this.signedIn || this.modelsAdopted()) return
+    try {
+      await this.ctx.settings.mutate(this.settingsNs, [{ op: 'set', path: ['models'], value: [] }])
+    } catch (error: unknown) {
+      console.info('[codex-account] adoption marker write failed', {
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
+
   private routeProfiles(): ReadonlyMap<string, ResolvedPiAiProviderProfile> {
-    const models = this.adoptedModelsValue
+    // Adoption gating: the route advertises exactly the catalog saved in
+    // 设置-模型 — including `models: []`, advertised as empty so the
+    // selectors hide the group — and **nothing** while the catalog was never
+    // written. The login flow seeds the user layer with `models: []` (see
+    // `ensureAdoptionMarker`), so the models card is visible from sign-in on
+    // and the home selector stays empty until the user adopts rows via
+    // 「获取可用模型」. The earlier fallback (broadcast the default catalog
+    // while untouched) put models on the selector the user never enabled.
+    const adopted = this.config.models?.get()
     const signedIn = this.signedIn
+    const models = signedIn && this.modelsAdopted() ? adopted ?? [] : []
     const baseUrl = this.baseUrlValue
     const headers = this.routeHeaders()
     const key = JSON.stringify([signedIn, baseUrl, this.credentialRefName, models, headers])
@@ -375,7 +637,7 @@ export default class CodexAccountExternal extends Service {
         apiKeyEnv: this.credentialRefName,
         headers,
         models: signedIn
-          ? (models.length > 0 ? models : this.isChatGptMode ? CHATGPT_MODELS : DEFAULT_APIKEY_MODELS).map(row => ({
+          ? models.map(row => ({
             id: row.id,
             ...(row.name === undefined ? {} : { name: row.name }),
             ...(row.contextWindow === undefined ? {} : { contextWindow: row.contextWindow }),
@@ -415,16 +677,44 @@ export default class CodexAccountExternal extends Service {
     }))
     ctx.llm.registerModelDiscovery(this.settingsNs, async (request): Promise<readonly LlmDiscoveredModel[]> => {
       const key = await this.resolveKey()
+      const signal = AbortSignal.any([this.requestLifetime.signal, AbortSignal.timeout(REQUEST_TIMEOUT_MS)])
       if (this.isChatGptMode) {
-        throw new LlmError('ChatGPT 订阅模式使用内置 Codex 模型表，无需拉取目录。', 'CODEX_STATIC_MODELS')
+        // The official discovery: the subscription backend's `/models` (the
+        // same refresh the CLI runs at startup), layered over the bundled
+        // catalog exactly like the CLI does — the answer merges both, and a
+        // failed refresh falls back to the bundled table alone. Enabling a
+        // model stays the user's pick on the models page; the answer also
+        // becomes the route's default catalog.
+        const oauth = this.oauth ?? await this.readOAuth()
+        if (oauth === null) {
+          throw new LlmError('ChatGPT 订阅模式尚未登录：请先在账号卡片完成登录。', 'MISSING_CREDENTIAL')
+        }
+        let rows: readonly RemoteModelInfo[] = BUNDLED_CHATGPT_MODELS
+        try {
+          const remote = await readChatGptModels({ token: oauth.accessToken, accountId: oauth.accountId, signal })
+          rows = mergeWithBundledModels(remote)
+        } catch (error: unknown) {
+          console.info('[codex-account] remote models refresh failed; serving bundled catalog', {
+            error: error instanceof Error ? error.message : String(error),
+          })
+        }
+        this.applyRemoteCatalog(rows)
+        return rows.map(info => ({ id: info.slug as string, name: info.display_name ?? info.slug as string }))
       }
       const baseUrl = typeof request.baseURL === 'string' && request.baseURL.trim() !== ''
         ? request.baseURL.trim()
         : this.baseUrlValue
-      const signal = AbortSignal.any([this.requestLifetime.signal, AbortSignal.timeout(REQUEST_TIMEOUT_MS)])
       const ids = await readModels({ baseUrl: baseUrl.replace(/\/+$/, ''), token: key, signal })
       if (ids.length === 0) throw new LlmError('该账号下没有可用模型。', 'CODEX_NO_MODELS')
-      return ids.map(id => ({ id, name: id }))
+      // The bundled slugs the key's catalog does not list ride along, so the
+      // picker offers the plugin's internal set too.
+      const known = new Set(ids)
+      return [
+        ...ids.map(id => ({ id, name: id })),
+        ...BUNDLED_CHATGPT_MODELS
+          .filter(info => !known.has(info.slug as string))
+          .map(info => ({ id: info.slug as string, name: info.display_name ?? info.slug as string })),
+      ]
     })
   }
 
@@ -451,6 +741,10 @@ export default class CodexAccountExternal extends Service {
   private async invoke(method: string, args?: JsonValue): Promise<JsonValue> {
     switch (method) {
       case 'sign-in': {
+        // The geo gate: the OAuth button carries no dialog values, so the
+        // persisted region choice is what gets compared.
+        const gate = this.gateCheck()
+        if (gate !== undefined) return { message: gate, error: true }
         this.scheduleOauthLogin()
         return { message: '已打开 OpenAI 授权页：在浏览器完成登录后本页面会自动接住回调（本地端口 1455）。' }
       }
@@ -462,6 +756,11 @@ export default class CodexAccountExternal extends Service {
         if (pasted === '') {
           return { message: '请先粘贴 OpenAI Platform API Key。', error: true }
         }
+        // The geo gate: the dialog submit merges the card's live values, so
+        // the dropdown's current choice rides `values.region` even when
+        // unsaved; a dropdown left untouched falls back to the persisted one.
+        const gate = this.gateCheck(values)
+        if (gate !== undefined) return { message: gate, error: true }
         await this.signInWithKey(pasted)
         return { message: '登录成功：API Key 已保存并同步到凭据管理，认证方式已切换为 API Key。', close: true }
       }
@@ -483,6 +782,9 @@ export default class CodexAccountExternal extends Service {
    */
   private scheduleOauthLogin(): void {
     void this.runOauthLogin().catch((error: unknown) => {
+      // A superseded flow's failure is not a failure: the replacement flow
+      // owns the card from here on, so its view must not be clobbered.
+      if (error instanceof Error && error.message === LOGIN_SUPERSEDED) return
       const message = error instanceof Error ? error.message : String(error)
       this.view = { text: `登录失败：${message}`, level: 'error', signedIn: false, brand: BRAND }
       this.ctx.emit(ACCOUNT_HUB_CHANGED, ID)
@@ -490,11 +792,26 @@ export default class CodexAccountExternal extends Service {
   }
 
   private async runOauthLogin(): Promise<void> {
+    // Exactly one listener may own 1455: supersede any flow still waiting (a
+    // lost browser tab, an aborted card, a user who clicked 登录 twice)
+    // instead of letting this attempt die on EADDRINUSE against our own
+    // stale server. The superseded flow's rejection is swallowed by its own
+    // catch via the sentinel.
+    this.oauthLoginFlow?.cancel()
+    this.oauthLoginFlow = undefined
+
     const { verifier, challenge } = generatePkce()
     const state = generatePkce().verifier
     const redirectUri = `http://127.0.0.1:${CALLBACK_PORT}${CALLBACK_PATH}`
 
     const callback = this.serveCallback(state)
+    this.oauthLoginFlow = callback
+    // The callback server must not outlive the plugin's lifetime: an abort
+    // (dispose/reload) closes the listener and rejects the awaiter, so the
+    // port is freed even though nothing else settles the promise.
+    const onAbort = (): void => { callback.cancel() }
+    if (this.requestLifetime.signal.aborted) onAbort()
+    else this.requestLifetime.signal.addEventListener('abort', onAbort, { once: true })
     try {
       await openNativePath(buildAuthorizeUrl({ challenge, state, redirectUri }), this.requestLifetime.signal)
     } catch (error) {
@@ -528,23 +845,49 @@ export default class CodexAccountExternal extends Service {
       }
       await this.ctx.credentials.modifyRecord(OAUTH_GRANT, () => Promise.resolve({ kind: 'grant' as const, payload: stored }))
       this.oauth = stored
+      // Seed the marker before the republish: under adoption gating the card
+      // rides the user layer, and the selector stays empty until adoption.
+      await this.ensureAdoptionMarker()
+      void this.refreshChatGptCatalog()
+      void this.refreshUsage()
       this.routeProfileKey = ''
       this.publish()
     } finally {
+      this.requestLifetime.signal.removeEventListener('abort', onAbort)
+      if (this.oauthLoginFlow === callback) this.oauthLoginFlow = undefined
       callback.close()
     }
   }
 
   /**
-   * Serve the one callback catch on `127.0.0.1:1455`.
+   * Serve the one callback catch on `127.0.0.1:1455`. Every exit path —
+   * callback served, timeout, superseded by a new flow, lifetime abort,
+   * listen error — funnels through one settle-once teardown that stops the
+   * listener and drops its connections, so the port is never left bound by
+   * a flow that died mid-wait.
    * @param expectedState - the anti-CSRF state this flow sent.
-   * @returns the awaited authorization code and a closer for the server.
+   * @returns the awaited authorization code, a closer, and a canceller that
+   *   rejects the awaiter (used when a newer flow takes the port).
    */
-  private serveCallback(expectedState: string): { promise: Promise<string>; close(): void } {
+  private serveCallback(expectedState: string): { promise: Promise<string>; close(): void; cancel(): void } {
     let server: Server | null = null
+    let timer: NodeJS.Timeout | undefined
+    let settle: ((error?: Error, code?: string) => void) | undefined
     const promise = new Promise<string>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        reject(new Error('授权回调等待超时（15 分钟），请重试。'))
+      settle = (error, code) => {
+        if (settle === undefined) return
+        settle = undefined
+        if (timer !== undefined) { clearTimeout(timer); timer = undefined }
+        // Keep-alive sockets hold a closing server alive past close(); drop
+        // them first so the port is released the moment this runs.
+        server?.closeAllConnections?.()
+        server?.close()
+        server = null
+        if (error !== undefined) reject(error)
+        else resolve(code ?? '')
+      }
+      timer = setTimeout(() => {
+        settle?.(new Error('授权回调等待超时（15 分钟），请重试。'))
       }, LOGIN_TIMEOUT_MS)
       timer.unref?.()
       server = createServer((request: IncomingMessage, response: ServerResponse) => {
@@ -556,39 +899,56 @@ export default class CodexAccountExternal extends Service {
         const error = url.searchParams.get('error')
         const code = url.searchParams.get('code')
         const state = url.searchParams.get('state')
-        const finish = (status: number, body: string, settle: () => void): void => {
-          response.writeHead(status, { 'Content-Type': 'text/html; charset=utf-8' })
-          response.end(body)
-          clearTimeout(timer)
-          server?.close()
-          server = null
-          settle()
-        }
         if (error !== null) {
-          finish(200, `<meta charset="utf-8"><title>Codex 登录</title><p>授权被拒绝：${error}，请回到应用重试。</p>`,
-            () => reject(new Error(`授权被拒绝：${error}`)))
+          response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+          response.end(`<meta charset="utf-8"><title>Codex 登录</title><p>授权被拒绝：${error}，请回到应用重试。</p>`)
+          settle?.(new Error(`授权被拒绝：${error}`))
           return
         }
         if (code === null || state !== expectedState) {
-          finish(400, '<meta charset="utf-8"><title>Codex 登录</title><p>回调参数无效。</p>',
-            () => reject(new Error('授权回调参数无效（state 不匹配或缺少 code）。')))
+          response.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' })
+          response.end('<meta charset="utf-8"><title>Codex 登录</title><p>回调参数无效。</p>')
+          settle?.(new Error('授权回调参数无效（state 不匹配或缺少 code）。'))
           return
         }
-        finish(200, '<meta charset="utf-8"><title>Codex 登录</title><p>授权成功，请回到 DeepSeek Harness 查看账号状态。</p>',
-          () => resolve(code))
+        response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+        response.end('<meta charset="utf-8"><title>Codex 登录</title><p>授权成功，请回到 DeepSeek Harness 查看账号状态。</p>')
+        settle?.(undefined, code)
       })
       server.once('error', (error: NodeJS.ErrnoException) => {
-        clearTimeout(timer)
-        reject(new Error(error.code === 'EADDRINUSE'
+        settle?.(new Error(error.code === 'EADDRINUSE'
           ? `本地回调端口 ${CALLBACK_PORT} 被占用（可能有另一个登录流程在跑），请稍后重试。`
           : `本地回调服务器启动失败：${error.message}`))
       })
       server.listen(CALLBACK_PORT, '127.0.0.1')
     })
-    return { promise, close: () => { server?.close(); server = null } }
+    // The rejection can fire while `runOauthLogin` is still awaiting the
+    // browser-open (EADDRINUSE lands on the very first listen tick), so the
+    // host's fatal `unhandledRejection` handler would see it before the real
+    // `await callback.promise` attaches. Pre-attach a no-op catch to mark the
+    // promise handled — the awaited copy still throws into the normal path.
+    promise.catch(() => {})
+    return {
+      promise,
+      close: () => { settle?.() },
+      cancel: () => { settle?.(new Error(LOGIN_SUPERSEDED)) },
+    }
   }
 
   // ---- published state --------------------------------------------------------
+
+  /** The exit-region suffix for the status line: a startup auto-sign-out's
+   *  reason comes first; otherwise the detected facts ride every state and
+   *  the probing/failed hints only matter while signed out (on a signed-in
+   *  card they'd be noise). */
+  private exitSuffix(signedOut: boolean): string {
+    if (signedOut && this.geoNotice !== undefined) return ` · ${this.geoNotice}`
+    if (this.exitState === 'ok' && this.exit !== undefined) {
+      return ` · 出口 ${this.exit.label}（${this.exit.ip}）`
+    }
+    if (!signedOut) return ''
+    return this.exitState === 'pending' ? ' · 正在检测出口地区…' : ' · 出口检测失败'
+  }
 
   /** Recompute the hub-visible state: the signed-in fact or the signed-out
    *  brand row. */
@@ -597,48 +957,48 @@ export default class CodexAccountExternal extends Service {
       const oauth = this.oauth
       if (oauth !== null) {
         this.view = {
-          text: '已登录 · ChatGPT 订阅',
+          text: `已登录 · ChatGPT 订阅${this.exitSuffix(false)}`,
           level: 'ok',
           signedIn: true,
           brand: BRAND,
           identity: {
-            name: oauth.email !== undefined ? oauth.email : 'ChatGPT 账号',
+            name: oauth.email !== undefined ? `${oauth.email}（ChatGPT 订阅）` : 'ChatGPT 账号（ChatGPT 订阅）',
             infoLabel: '控制台',
             infoUrl: 'https://chatgpt.com/#settings/Account',
           },
           balance: {
             rows: [
-              { label: '认证方式', value: 'ChatGPT 订阅（OAuth）' },
-              ...(oauth.plan !== undefined ? [{ label: '套餐', value: oauth.plan }] : []),
+              ...(oauth.plan !== undefined || this.usage?.planType !== undefined
+                ? [{ label: '套餐', value: oauth.plan ?? this.usage?.planType ?? '' }] : []),
               { label: '推理端点', value: this.baseUrlValue },
+              ...this.usageRows(),
             ],
             more: [{ label: '更多', links: [{ label: 'OpenAI Platform', href: CONSOLE_URL, primary: true }] }],
           },
         }
       } else {
-        this.view = { text: '未登录', level: 'warn', signedIn: false, brand: BRAND }
+        this.view = { text: `未登录${this.exitSuffix(true)}`, level: 'warn', signedIn: false, brand: BRAND }
       }
     } else if (this.signedIn) {
       this.view = {
-        text: '已登录 · Platform API Key',
+        text: `已登录 · Platform API Key${this.exitSuffix(false)}`,
         level: 'ok',
         signedIn: true,
         brand: BRAND,
         identity: {
-          name: 'OpenAI Platform',
+          name: 'OpenAI Platform（API Key）',
           infoLabel: '控制台',
           infoUrl: CONSOLE_URL,
         },
         balance: {
           rows: [
-            { label: '认证方式', value: 'API Key（OpenAI Platform）' },
             { label: '推理端点', value: this.baseUrlValue },
           ],
           more: [{ label: '更多', links: [{ label: 'OpenAI Platform', href: CONSOLE_URL, primary: true }] }],
         },
       }
     } else {
-      this.view = { text: '未登录', level: 'warn', signedIn: false, brand: BRAND }
+      this.view = { text: `未登录${this.exitSuffix(true)}`, level: 'warn', signedIn: false, brand: BRAND }
     }
     this.ctx.emit(ACCOUNT_HUB_CHANGED, ID)
   }
@@ -662,6 +1022,10 @@ export default class CodexAccountExternal extends Service {
     await this.ctx.settings.mutate(this.settingsNs, [
       { op: 'unset', path: ['apiKey'] },
       { op: 'unset', path: ['customBaseUrl'] },
+      // The adopted catalog is session-scoped: clearing it lets the models
+      // page drop the group entirely (the live catalog is empty once the
+      // route is signed out, and no managed value remains to keep it up).
+      { op: 'unset', path: ['models'] },
     ])
     await this.ctx.credentials.deleteRecord(OAUTH_GRANT)
     await this.ctx.credentials.deleteRecord(APIKEY_GRANT)
@@ -671,9 +1035,3 @@ export default class CodexAccountExternal extends Service {
     this.publish()
   }
 }
-
-/** The Platform route's fallback defaults, used before any discovery run. */
-const DEFAULT_APIKEY_MODELS: readonly ModelRow[] = [
-  { id: 'gpt-5.2', name: 'GPT-5.2', contextWindow: 272_000, maxTokens: 128_000 },
-  { id: 'gpt-5.2-codex', name: 'GPT-5.2 Codex', contextWindow: 272_000, maxTokens: 128_000 },
-]

@@ -18,6 +18,8 @@
  */
 
 import { createHash, randomBytes } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { arch as osArch, platform as osPlatform, release as osRelease } from 'node:os'
 
 /** The public Codex CLI OAuth client id (`codex-rs/login/src/auth/manager.rs`). */
 export const CLIENT_ID = 'app_EMoamEEZ73f0CkXaXp7hrann'
@@ -32,6 +34,70 @@ export const CALLBACK_PORT = 1455
 export const CALLBACK_PATH = '/auth/callback'
 /** Requested scopes (`build_authorize_url`). */
 export const SCOPE = 'openid profile email offline_access api.connectors.read api.connectors.invoke'
+
+/** The Codex CLI version this plugin's fingerprint mirrors (rust-v0.161.0). */
+export const CODEX_VERSION = '0.161.0'
+
+// ---- client fingerprint --------------------------------------------------------
+// The backend attributes requests by their header fingerprint, so every
+// outbound call carries the same shape the CLI itself sends:
+// `codex_cli_rs/<version> (<os> <os-version>; <arch>) <terminal>` — the
+// format of `get_codex_user_agent` in `codex-rs/core/src/default_client.rs`.
+
+/** Darwin kernel major → macOS marketing version (24 → 15, 25 → 26, …). */
+function darwinMarketingRelease(): string {
+  const parts = osRelease().split('.')
+  const major = Number.parseInt(parts[0] ?? '', 10)
+  if (!Number.isFinite(major)) return osRelease()
+  const mapped = major <= 24 ? major - 9 : major + 1
+  return [String(mapped), ...parts.slice(1)].join('.')
+}
+
+/** The distro label `os_info` would produce on Linux (`/etc/os-release`). */
+function linuxDistro(): string {
+  try {
+    const text = readFileSync('/etc/os-release', 'utf8')
+    const field = (key: string): string | null => {
+      const match = text.match(new RegExp(`^${key}=(?:"([^"]*)"|(.*)$)`, 'm'))
+      return (match?.[1] ?? match?.[2])?.trim() ?? null
+    }
+    return [field('NAME'), field('VERSION_ID')].filter(Boolean).join(' ') || 'Linux'
+  } catch {
+    return 'Linux'
+  }
+}
+
+/** The OS label in the CLI's UA (`Mac OS 15.6.0` / `Ubuntu 24.04` / …). */
+function osLabel(): string {
+  if (osPlatform() === 'darwin') return `Mac OS ${darwinMarketingRelease()}`
+  if (osPlatform() === 'linux') return linuxDistro()
+  if (osPlatform() === 'win32') return `Windows ${osRelease()}`
+  return osPlatform()
+}
+
+/** The architecture label (`arm64` / `x86_64`, as `std::env::consts::ARCH`). */
+function archLabel(): string {
+  return osArch() === 'x64' ? 'x86_64' : osArch()
+}
+
+/** The terminal segment (`TERM_PROGRAM`, or `unknown` when unset — what the
+ *  CLI reports for GUI parents). */
+function terminalLabel(): string {
+  const program = process.env.TERM_PROGRAM
+  return program !== undefined && program !== '' ? program : 'unknown'
+}
+
+let userAgentCache: string | undefined
+
+/**
+ * The User-Agent the Codex CLI itself sends — same format, same platform
+ * facts. Computed once per process; the platform facts cannot change.
+ * @returns the UA string.
+ */
+export function codexUserAgent(): string {
+  userAgentCache ??= `codex_cli_rs/${CODEX_VERSION} (${osLabel()}; ${archLabel()}) ${terminalLabel()}`
+  return userAgentCache
+}
 /** The originator header value Codex sends on every backend request. */
 export const ORIGINATOR = 'codex_cli_rs'
 /** ChatGPT-subscription inference base (`config/mod.rs` default). */
@@ -117,7 +183,11 @@ export async function exchangeCode(input: {
   })
   const response = await fetch(TOKEN_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Accept: 'application/json',
+      'User-Agent': codexUserAgent(),
+    },
     body: body.toString(),
     signal: AbortSignal.any([input.signal ?? AbortSignal.abort(), AbortSignal.timeout(REQUEST_TIMEOUT_MS)]),
   })
@@ -134,7 +204,11 @@ export async function refreshTokens(input: {
 }): Promise<TokenResponse> {
   const response = await fetch(TOKEN_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'User-Agent': codexUserAgent(),
+    },
     body: JSON.stringify({
       grant_type: 'refresh_token',
       client_id: CLIENT_ID,
@@ -213,7 +287,11 @@ export async function readModels(options: {
 }): Promise<readonly string[]> {
   const root = options.baseUrl.replace(/\/+$/, '')
   const response = await fetch(`${root}/models`, {
-    headers: { Authorization: `Bearer ${options.token}`, Accept: 'application/json' },
+    headers: {
+      Authorization: `Bearer ${options.token}`,
+      Accept: 'application/json',
+      'User-Agent': codexUserAgent(),
+    },
     signal: AbortSignal.any([options.signal ?? AbortSignal.abort(), AbortSignal.timeout(REQUEST_TIMEOUT_MS)]),
   })
   if (!response.ok) {
@@ -223,4 +301,144 @@ export async function readModels(options: {
   return (data.data ?? [])
     .map(model => model.id)
     .filter((id): id is string => typeof id === 'string' && id !== '')
+}
+
+/** A row of the subscription backend's `/models` payload (`ModelsResponse`
+ *  wrapping `ModelInfo`): only the fields the catalog mapping consumes. */
+export interface RemoteModelInfo {
+  readonly slug?: string
+  readonly display_name?: string
+  readonly description?: string
+  readonly context_window?: number
+  readonly input_modalities?: readonly string[]
+  readonly visibility?: string
+  readonly priority?: number
+}
+
+/**
+ * The official model discovery the CLI performs at startup: `GET
+ * {CHATGPT_BASE_URL}/models` with the ChatGPT access token — the same
+ * request `codex debug models` refreshes (the CLI then layers this over its
+ * bundled `models.json`). Rows come back in the backend's own priority
+ * order; `hide`-visibility rows (Daybreak, Auto Review, …) are dropped the
+ * way the CLI's picker does.
+ */
+export async function readChatGptModels(input: {
+  readonly token: string
+  readonly accountId?: string
+  readonly signal?: AbortSignal
+}): Promise<readonly RemoteModelInfo[]> {
+  const response = await fetch(`${CHATGPT_BASE_URL}/models?client_version=${CODEX_VERSION}`, {
+    headers: {
+      Authorization: `Bearer ${input.token}`,
+      Accept: 'application/json',
+      // The CLI's `chatgpt_get_request` sends this even on GET.
+      'Content-Type': 'application/json',
+      'User-Agent': codexUserAgent(),
+      originator: ORIGINATOR,
+      ...(input.accountId !== undefined && input.accountId !== ''
+        ? { 'chatgpt-account-id': input.accountId } : {}),
+    },
+    signal: AbortSignal.any([input.signal ?? AbortSignal.abort(), AbortSignal.timeout(REQUEST_TIMEOUT_MS)]),
+  })
+  if (!response.ok) {
+    // The body carries the backend's `detail` (e.g. a 400 for a missing
+    // `client_version`) — surface it instead of a bare status line.
+    const body = await response.text().catch(() => '')
+    throw new Error(`模型目录请求失败：${response.status} ${response.statusText}${body !== '' ? ` — ${body.slice(0, 300)}` : ''}`)
+  }
+  const data = JSON.parse(await response.text()) as { models?: readonly RemoteModelInfo[] }
+  return (data.models ?? []).filter(info =>
+    typeof info.slug === 'string' && info.slug !== '' && info.visibility !== 'hide')
+}
+
+/**
+ * The plugin's bundled catalog, mirroring the `models.json` the official CLI
+ * ships in its binary (the offline layer the CLI falls back to when the
+ * backend `/models` refresh fails). Only picker-visible rows (`list`
+ * visibility), in the bundled priority order; `hide` rows (Daybreak, Auto
+ * Review) are excluded the same way as the remote filter above.
+ */
+export const BUNDLED_CHATGPT_MODELS: readonly RemoteModelInfo[] = Object.freeze([
+  { slug: 'gpt-6.1-sol', display_name: 'GPT-6.1-Sol', context_window: 272000, visibility: 'list', priority: 1 },
+  { slug: 'gpt-6-astra', display_name: 'GPT-6-Astra', context_window: 272000, visibility: 'list', priority: 2 },
+  { slug: 'gpt-6-sol', display_name: 'GPT-6-Sol', context_window: 272000, visibility: 'list', priority: 3 },
+  { slug: 'gpt-6-luna', display_name: 'GPT-6-Luna', context_window: 272000, visibility: 'list', priority: 4 },
+  { slug: 'gpt-5.6-sol', display_name: 'GPT-5.6-Sol', context_window: 272000, visibility: 'list', priority: 5 },
+  { slug: 'gpt-5.6-terra', display_name: 'GPT-5.6-Terra', context_window: 272000, visibility: 'list', priority: 8 },
+  { slug: 'gpt-5.6-luna', display_name: 'GPT-5.6-Luna', context_window: 272000, visibility: 'list', priority: 9 },
+  { slug: 'gpt-5.5', display_name: 'GPT-5.5', context_window: 272000, visibility: 'list', priority: 13 },
+])
+
+/** Merge the remote catalog over the bundled one: remote rows keep the
+ *  backend's priority order; bundled rows the backend does not list are
+ *  appended (dedup by slug) so the picker always offers the plugin's
+ *  internal set too — the CLI's layering semantics. */
+export function mergeWithBundledModels(
+  remote: readonly RemoteModelInfo[],
+  bundled: readonly RemoteModelInfo[] = BUNDLED_CHATGPT_MODELS,
+): readonly RemoteModelInfo[] {
+  const seen = new Set(remote.map(info => info.slug))
+  const extras = bundled.filter(info => !seen.has(info.slug))
+  return extras.length === 0 ? remote : [...remote, ...extras]
+}
+
+/** The usage endpoint the CLI's `/status` and `/usage` read. */
+export const USAGE_URL = 'https://chatgpt.com/backend-api/wham/usage'
+
+/** One usage window of the wham payload. */
+export interface UsageWindow {
+  readonly used_percent?: number
+  readonly reset_at?: number
+  readonly limit_window_seconds?: number
+}
+
+/** The slice of the wham/usage payload this account displays: the plan, the
+ *  two enforced rate-limit windows, and the optional purchased credits. */
+export interface WhamUsage {
+  readonly planType?: string
+  readonly primary?: UsageWindow
+  readonly secondary?: UsageWindow
+  readonly creditsBalance?: number
+  readonly creditsUnlimited?: boolean
+}
+
+/**
+ * Read the subscription usage snapshot — `GET {USAGE_URL}` with the ChatGPT
+ * access token (the same call behind `codex` `/status`). The subscription
+ * model has no prepaid "balance" page; what it enforces are the two rolling
+ * windows (≈5 h primary, ≈7 d secondary) plus optional purchased credits.
+ */
+export async function readWhamUsage(input: {
+  readonly token: string
+  readonly accountId?: string
+  readonly signal?: AbortSignal
+}): Promise<WhamUsage> {
+  const response = await fetch(USAGE_URL, {
+    headers: {
+      Authorization: `Bearer ${input.token}`,
+      Accept: 'application/json',
+      'User-Agent': codexUserAgent(),
+      originator: ORIGINATOR,
+      ...(input.accountId !== undefined && input.accountId !== ''
+        ? { 'chatgpt-account-id': input.accountId } : {}),
+    },
+    signal: AbortSignal.any([input.signal ?? AbortSignal.abort(), AbortSignal.timeout(REQUEST_TIMEOUT_MS)]),
+  })
+  if (!response.ok) {
+    throw new Error(`用量请求失败：${response.status} ${response.statusText}`)
+  }
+  const data = JSON.parse(await response.text()) as {
+    plan_type?: string
+    rate_limit?: { primary_window?: UsageWindow; secondary_window?: UsageWindow }
+    credits?: { has_credits?: boolean; unlimited?: boolean; balance?: number }
+  }
+  const credits = data.credits
+  return {
+    ...(typeof data.plan_type === 'string' && data.plan_type !== '' ? { planType: data.plan_type } : {}),
+    ...(data.rate_limit?.primary_window === undefined ? {} : { primary: data.rate_limit.primary_window }),
+    ...(data.rate_limit?.secondary_window === undefined ? {} : { secondary: data.rate_limit.secondary_window }),
+    ...(credits?.has_credits === true && credits.unlimited !== true && typeof credits.balance === 'number'
+      ? { creditsBalance: credits.balance, creditsUnlimited: false } : {}),
+  }
 }
