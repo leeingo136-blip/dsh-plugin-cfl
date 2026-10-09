@@ -993,25 +993,18 @@ export default class CodexAccountExternal extends Service {
           signedIn: true,
           brand: BRAND,
           identity: {
-            // The plan rides on the account name; the subscription type sits
-            // on the second line, the endpoint stays in details.
+            // The plan rides on the account name; the second line couples the
+            // subscription type with the endpoint (one line).
             name: plan !== undefined
               ? `${oauth.email ?? 'ChatGPT 账号'}（${plan}）`
               : oauth.email !== undefined ? `${oauth.email}` : 'ChatGPT 账号',
-            contact: 'ChatGPT 订阅',
+            contact: `ChatGPT 订阅 · ${this.baseUrlValue}`,
             infoLabel: '控制台',
             infoUrl: 'https://chatgpt.com/#settings/Account',
           },
           balance: {
             rows: [...this.usageRows()],
             more: [{ label: '更多', links: [{ label: 'OpenAI Platform', href: CONSOLE_URL, primary: true }] }],
-          },
-          details: {
-            rows: [
-              // The endpoint only — the subscription type moved onto the
-              // identity card's second line.
-              { label: '推理端点', value: this.baseUrlValue },
-            ],
           },
         }
       } else {
@@ -1025,16 +1018,13 @@ export default class CodexAccountExternal extends Service {
         brand: BRAND,
         identity: {
           name: 'OpenAI Platform（API Key）',
-          contact: 'Platform API Key',
+          contact: `Platform API Key · ${this.baseUrlValue}`,
           infoLabel: '控制台',
           infoUrl: CONSOLE_URL,
         },
         balance: {
           rows: [],
           more: [{ label: '更多', links: [{ label: 'OpenAI Platform', href: CONSOLE_URL, primary: true }] }],
-        },
-        details: {
-          rows: [{ label: '推理端点', value: this.baseUrlValue }],
         },
       }
     } else {
