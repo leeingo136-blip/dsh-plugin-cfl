@@ -62,6 +62,9 @@ export const name = 'codex-account-external'
 const ID = name
 
 const REQUEST_TIMEOUT_MS = 30_000
+/** The exit-probe retry cadence while every probe service stays unreachable
+ *  (boot with the proxy not yet up, rate-limited shared exits, …). */
+const EXIT_RETRY_MS = 15_000
 /** The OAuth callback catch window (codex-rs polls its login server 15 min). */
 const LOGIN_TIMEOUT_MS = 15 * 60_000
 /** The rejection a superseded login flow carries: its own catch swallows
@@ -194,6 +197,8 @@ export default class CodexAccountExternal extends Service {
    *  and every startup compare the persisted region choice against it. */
   private exitState: 'pending' | 'ok' | 'failed' = 'pending'
   private exit: ExitRegion | undefined
+  /** Pending self-healing re-probe, cleared once a probe answers. */
+  private exitRetry: ReturnType<typeof setTimeout> | undefined
   /** Why the startup geo gate auto-signed-out, shown on the signed-out card. */
   private geoNotice: string | undefined
 
@@ -216,6 +221,9 @@ export default class CodexAccountExternal extends Service {
     })
 
     ctx.effect(() => () => { this.requestLifetime.abort() }, 'codex-account-external: request lifetime')
+    ctx.effect(() => () => {
+      if (this.exitRetry !== undefined) clearTimeout(this.exitRetry)
+    }, 'codex-account-external: exit retry timer')
 
     this.registerProvider(ctx)
     this.registerHub(ctx)
@@ -234,10 +242,20 @@ export default class CodexAccountExternal extends Service {
    *  so nothing can connect afterwards until a matching region is chosen and
    *  a fresh sign-in happens. */
   private async detectExit(): Promise<void> {
+    if (this.exitRetry !== undefined) { clearTimeout(this.exitRetry); this.exitRetry = undefined }
     const detected = await detectExitRegion()
     this.exit = detected
     this.exitState = detected === undefined ? 'failed' : 'ok'
-    if (detected !== undefined && this.signedIn) {
+    if (detected === undefined) {
+      // Self-healing: the load-time probe can land before the network/proxy
+      // is up, and shared exits exhaust the free echo services. Re-probe
+      // until one answers, so the status line and the geo gate recover
+      // without an app restart.
+      this.exitRetry = setTimeout(() => { void this.detectExit() }, EXIT_RETRY_MS)
+      this.publish()
+      return
+    }
+    if (this.signedIn) {
       const persisted = this.config.region?.get()?.trim() ?? ''
       if (persisted !== detected.code) {
         this.geoNotice = persisted === ''
@@ -947,7 +965,7 @@ export default class CodexAccountExternal extends Service {
       return ` · 出口 ${this.exit.label}（${this.exit.ip}）`
     }
     if (!signedOut) return ''
-    return this.exitState === 'pending' ? ' · 正在检测出口地区…' : ' · 出口检测失败'
+    return this.exitState === 'pending' ? ' · 正在检测出口地区…' : ' · 出口检测失败（自动重试中）'
   }
 
   /** Recompute the hub-visible state: the signed-in fact or the signed-out
