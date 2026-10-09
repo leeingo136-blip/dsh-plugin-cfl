@@ -59,6 +59,45 @@ function harnessApiKeyAuth(name: string): ApiKeyAuth {
   }
 }
 
+/** The Stainless telemetry headers the OpenAI Node SDK stamps on every
+ *  request (`x-stainless-lang`, `x-stainless-runtime: node`, package
+ *  version, …). The real Codex CLI is a Rust reqwest client and sends none
+ *  of them — on this route they would contradict the `codex_cli_rs`
+ *  User-Agent, so the wire wrapper below strips the whole family. */
+const SDK_TELEMETRY_HEADER = /^x-stainless-/i
+
+/**
+ * Wrap one fetch so no `x-stainless-*` header reaches the wire. The SDK
+ * calls the injected fetch as `(url, init)` with the merged headers on the
+ * init, so rebuilding the init's `Headers` is enough.
+ * @param inner - the caller-supplied fetch to chain, if any.
+ * @returns the wrapper to hand the adapter.
+ */
+function telemetryFreeFetch(inner?: typeof fetch): typeof fetch {
+  return (async (input: RequestInfo | URL, init?: RequestInit) => {
+    if (init !== undefined && init.headers !== undefined) {
+      const headers = new Headers(init.headers)
+      for (const name of [...headers.keys()]) {
+        if (SDK_TELEMETRY_HEADER.test(name)) headers.delete(name)
+      }
+      init = { ...init, headers }
+    }
+    return await (inner ?? fetch)(input, init)
+  }) as typeof fetch
+}
+
+/** The stream options the provider closures receive, narrowed to the one
+ *  field the wrapper needs (pi-ai forwards `fetch` into the OpenAI client). */
+interface WireOptions {
+  fetch?: typeof fetch
+}
+
+/** Stamp the telemetry-stripping wire onto one stream call's options. */
+function withCleanWire<T extends WireOptions | undefined>(options: T): T {
+  if (options === undefined) return options
+  return { ...options, fetch: telemetryFreeFetch(options.fetch) } as T
+}
+
 /**
  * Build the resolved profile for the one Responses route the account serves.
  * Every default matches the harness resolver's.
@@ -96,8 +135,8 @@ export function resolveOpenAiResponsesProfile(input: {
     baseUrl: input.baseURL,
     auth: { apiKey: harnessApiKeyAuth(input.displayName) },
     getModels: () => models,
-    stream: (model, context, options) => api.stream(model, context, options),
-    streamSimple: (model, context, options) => api.streamSimple(model, context, options),
+    stream: (model, context, options) => api.stream(model, context, withCleanWire(options)),
+    streamSimple: (model, context, options) => api.streamSimple(model, context, withCleanWire(options)),
   }
   return {
     provider: input.provider,

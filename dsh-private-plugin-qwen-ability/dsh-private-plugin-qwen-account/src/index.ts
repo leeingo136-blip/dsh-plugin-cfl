@@ -303,9 +303,26 @@ export default class QwenAccountExternal extends Service {
 
   // ---- route registration -----------------------------------------------------
 
+  /** Whether the settings user layer carries an explicit `models` write —
+   *  an adoption, or a deliberate clearing. schemastery materializes the
+   *  mounted volatile array as an empty box even when the user never wrote
+   *  the field, so the config box alone cannot distinguish "never adopted"
+   *  from "emptied"; the user layer can (a field's presence there marks a
+   *  genuine user write). */
+  private modelsAdopted(): boolean {
+    try {
+      const user = this.ctx.settings.describe().find(row => row.ns === this.settingsNs)?.user
+      return typeof user === 'object' && user !== null && 'models' in user
+    } catch {
+      return false
+    }
+  }
+
   private routeProfiles(): ReadonlyMap<string, ResolvedPiAiProviderProfile> {
-    const models = this.adoptedModelsValue
+    // An explicitly written catalog (`models: []` included) is respected as
+    // saved; only an untouched catalog falls back to the defaults.
     const signedIn = this.signedIn
+    const models = signedIn ? (this.modelsAdopted() ? this.config.models?.get() ?? [] : DEFAULT_ROUTE_MODELS) : []
     const baseUrl = this.baseUrlValue
     const key = JSON.stringify([signedIn, baseUrl, this.credentialRefName, models])
     const cached = this.routeProfileValue
@@ -320,7 +337,7 @@ export default class QwenAccountExternal extends Service {
         baseURL: baseUrl,
         apiKeyEnv: this.credentialRefName,
         models: signedIn
-          ? (models.length > 0 ? models : DEFAULT_ROUTE_MODELS).map(row => ({
+          ? models.map(row => ({
             id: row.id,
             ...(row.name === undefined ? {} : { name: row.name }),
             ...(row.contextWindow === undefined ? {} : { contextWindow: row.contextWindow }),
@@ -484,6 +501,9 @@ export default class QwenAccountExternal extends Service {
     await this.ctx.settings.mutate(this.settingsNs, [
       { op: 'unset', path: ['apiKey'] },
       { op: 'unset', path: ['customBaseUrl'] },
+      // Session-scoped adoption: without this the models page would keep the
+      // group alive after sign-out via the managed-value visibility rule.
+      { op: 'unset', path: ['models'] },
     ])
     await this.ctx.credentials.deleteRecord(GRANT)
     this.stored = null

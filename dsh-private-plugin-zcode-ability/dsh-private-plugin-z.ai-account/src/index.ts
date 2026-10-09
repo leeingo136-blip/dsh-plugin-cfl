@@ -306,14 +306,31 @@ export default class ZaiAccountExternal extends Service {
    *  as a「加载失败」warning bar; an owned profile with no models lists zero
    *  models, so both the selector and the models page simply hide the row
    *  (each derives visibility from a non-empty catalog group). */
+  /** Whether the settings user layer carries an explicit `models` write —
+   *  an adoption, or a deliberate clearing. schemastery materializes the
+   *  mounted volatile array as an empty box even when the user never wrote
+   *  the field, so the config box alone cannot distinguish "never adopted"
+   *  from "emptied"; the user layer can (a field's presence there marks a
+   *  genuine user write). */
+  private modelsAdopted(): boolean {
+    try {
+      const user = this.ctx.settings.describe().find(row => row.ns === this.settingsNs)?.user
+      return typeof user === 'object' && user !== null && 'models' in user
+    } catch {
+      return false
+    }
+  }
+
   private routeProfiles(): ReadonlyMap<string, ResolvedPiAiProviderProfile> {
-    const models = this.adoptedModelsValue
+    // An explicitly written catalog (`models: []` included) is respected as
+    // saved; only an untouched catalog falls back to the defaults.
+    const models = this.signedIn ? (this.modelsAdopted() ? this.config.models?.get() ?? [] : DEFAULT_ROUTE_MODELS) : []
     const key = JSON.stringify([this.signedIn, this.providerCache, this.credentialRefName, models])
     const cached = this.routeProfileValue
     if (this.routeProfileKey !== key || cached === undefined) {
       const next = new Map<string, ResolvedPiAiProviderProfile>()
       if (this.signedIn) {
-        const adopted = models.length > 0 ? models : DEFAULT_ROUTE_MODELS
+        const adopted = models
         const profile = resolveAnthropicProfile({
           provider: ROUTE,
           displayName: 'Z.ai 账号',
@@ -809,6 +826,9 @@ export default class ZaiAccountExternal extends Service {
   /** Drop the local login. A remote revocation is not attempted: this flow
    *  has no token revocation endpoint it can trust. */
   private async signOut(): Promise<void> {
+    // Session-scoped adoption: drop the managed `models` value so the models
+    // page's visibility rule no longer pins the group after sign-out.
+    await this.ctx.settings.mutate(this.settingsNs, [{ op: 'unset', path: ['models'] }])
     this.removing ??= this.forgetCredential().finally(() => { this.removing = undefined })
     await this.removing
   }

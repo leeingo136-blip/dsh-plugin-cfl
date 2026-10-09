@@ -144,13 +144,26 @@ export function presetPlugins(): readonly PresetPluginEntry[] {
       { id: 'tool-subagent', name: '@deepseek-ai/dsh-tool-subagent', config: {
         provider: 'spawn', toolName: 'subagent', modelSelectionSettings: true, backgroundMode: 'continuable',
       } },
+      { id: 'tool-subagent-fork', name: '@deepseek-ai/dsh-tool-subagent', config: {
+        provider: 'fork', toolName: 'subagent_fork', backgroundMode: 'continuable',
+      } },
+      { id: 'tool-subagent-codex', name: '@deepseek-ai/dsh-tool-subagent', disabled: true, config: {
+        provider: 'codex', toolName: 'subagent_codex', backgroundMode: 'one-shot', maxDepth: 'provider-managed',
+      } },
+      { id: 'tool-subagent-claude-code', name: '@deepseek-ai/dsh-tool-subagent', disabled: true, config: {
+        provider: 'claude-code', toolName: 'subagent_claude_code', backgroundMode: 'one-shot', maxDepth: 'provider-managed',
+      } },
       { id: 'workflow-ptc', name: '@deepseek-ai/dsh-workflow-ptc', config: { provider: 'spawn' } },
       { id: 'tool-workflow', name: '@deepseek-ai/dsh-tool-workflow' },
+      { id: 'tool-ralph', name: '@deepseek-ai/dsh-tool-ralph', disabled: true, config: {
+        subagentProvider: 'spawn', maxRounds: 64,
+      } },
     ] },
     { id: 'tool-ask-user', name: '@deepseek-ai/dsh-tool-ask-user' },
     { id: 'tool-todo', name: '@deepseek-ai/dsh-tool-todo', config: { allowParallelInProgress: true } },
     { id: 'tool-web', name: '@deepseek-ai/dsh-tool-web', config: { fetch: true, searchTimeoutMs: 60000 } },
     { id: 'present', name: '@deepseek-ai/dsh-tool-present' },
+    { id: 'tool-plugin-manager', name: '@deepseek-ai/dsh-plugin-manager/tools', disabled: true },
   ]
 }
 
