@@ -660,9 +660,9 @@ window.__ModuleLoader__.load({
 									})]
 								}),
 								(detailRows.length > 0 || balanceRows.length > 0 || moreRows.length > 0) && (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }),
-								detailRows.map((raw, index) => {
-									const d = asRecord(raw);
-									return (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [(0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), (0, react_jsx_runtime.jsxs)("div", {
+							detailRows.map((raw, index) => {
+								const d = asRecord(raw);
+								return (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [index > 0 && (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), (0, react_jsx_runtime.jsxs)("div", {
 										className: HubAccountCard_module_css_default.bRow,
 										children: [(0, react_jsx_runtime.jsx)("span", { children: asString(d.label) }), (0, react_jsx_runtime.jsx)("span", { children: asString(d.value) })]
 									})] }, `detail-${index}`);
@@ -684,7 +684,7 @@ window.__ModuleLoader__.load({
 									const m = asRecord(raw);
 									const links = Array.isArray(m.links) ? m.links : [];
 									if (links.length === 0) return null;
-									return (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [(0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), (0, react_jsx_runtime.jsxs)("div", {
+									return (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [(index > 0 || detailRows.length > 0 || balanceRows.length > 0) && (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), (0, react_jsx_runtime.jsxs)("div", {
 										className: HubAccountCard_module_css_default.bRow,
 										children: [(0, react_jsx_runtime.jsx)("span", {
 											className: HubAccountCard_module_css_default.secondary,

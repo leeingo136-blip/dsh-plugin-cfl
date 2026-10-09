@@ -581,7 +581,10 @@ export function HubAccountCard(props: HubAccountCardProps): ReactNode {
             const d = asRecord(raw)
             return (
               <Fragment key={`detail-${index}`}>
-                <div className={css.divider} />
+                {/* The divider above the first detail row is the one line 579
+                  * already drew (details follow identity directly); each row
+                  * here only separates itself from its predecessor. */}
+                {index > 0 && <div className={css.divider} />}
                 <div className={css.bRow}>
                   <span>{asString(d.label)}</span>
                   <span>{asString(d.value)}</span>
@@ -611,7 +614,9 @@ export function HubAccountCard(props: HubAccountCardProps): ReactNode {
             if (links.length === 0) return null
             return (
               <Fragment key={`more-${index}`}>
-                <div className={css.divider} />
+                {/* Same rule as detail rows: the card-leading divider covers
+                  * the first row overall, later rows draw their own. */}
+                {(index > 0 || detailRows.length > 0 || balanceRows.length > 0) && <div className={css.divider} />}
                 <div className={css.bRow}>
                   <span className={css.secondary}>{asString(m.label)}</span>
                   <div className={css.links}>
