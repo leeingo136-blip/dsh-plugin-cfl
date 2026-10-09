@@ -956,24 +956,30 @@ export default class CodexAccountExternal extends Service {
     if (this.isChatGptMode) {
       const oauth = this.oauth
       if (oauth !== null) {
+        const plan = oauth.plan ?? this.usage?.planType
         this.view = {
           text: `已登录 · ChatGPT 订阅${this.exitSuffix(false)}`,
           level: 'ok',
           signedIn: true,
           brand: BRAND,
           identity: {
-            name: oauth.email !== undefined ? `${oauth.email}（ChatGPT 订阅）` : 'ChatGPT 账号（ChatGPT 订阅）',
+            // The plan rides on the account name; the mode/endpoint couple
+            // lives in details below.
+            name: plan !== undefined
+              ? `${oauth.email ?? 'ChatGPT 账号'}（${plan}）`
+              : oauth.email !== undefined ? `${oauth.email}（ChatGPT 订阅）` : 'ChatGPT 账号（ChatGPT 订阅）',
             infoLabel: '控制台',
             infoUrl: 'https://chatgpt.com/#settings/Account',
           },
           balance: {
-            rows: [
-              ...(oauth.plan !== undefined || this.usage?.planType !== undefined
-                ? [{ label: '套餐', value: oauth.plan ?? this.usage?.planType ?? '' }] : []),
-              { label: '推理端点', value: this.baseUrlValue },
-              ...this.usageRows(),
-            ],
+            rows: [...this.usageRows()],
             more: [{ label: '更多', links: [{ label: 'OpenAI Platform', href: CONSOLE_URL, primary: true }] }],
+          },
+          details: {
+            rows: [
+              // Mode and endpoint are one coupled fact — a single line.
+              { label: '订阅类型', value: `ChatGPT 订阅 · ${this.baseUrlValue}` },
+            ],
           },
         }
       } else {
@@ -991,10 +997,11 @@ export default class CodexAccountExternal extends Service {
           infoUrl: CONSOLE_URL,
         },
         balance: {
-          rows: [
-            { label: '推理端点', value: this.baseUrlValue },
-          ],
+          rows: [],
           more: [{ label: '更多', links: [{ label: 'OpenAI Platform', href: CONSOLE_URL, primary: true }] }],
+        },
+        details: {
+          rows: [{ label: '订阅类型', value: `Platform API Key · ${this.baseUrlValue}` }],
         },
       }
     } else {
