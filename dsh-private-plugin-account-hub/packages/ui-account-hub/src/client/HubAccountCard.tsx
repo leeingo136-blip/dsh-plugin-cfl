@@ -106,6 +106,10 @@ export function HubAccountCard(props: HubAccountCardProps): ReactNode {
   const [initial, setInitial] = useState<Record<string, JsonValue>>({})
   const [values, setValues] = useState<Record<string, JsonValue>>({})
   const [options, setOptions] = useState<Record<string, AccountHubSelectOption[]>>({})
+  // Search text per searchable select field, keyed by field key.
+  const [filters, setFilters] = useState<Record<string, string>>({})
+  // The currently opened filterable dropdown, by field key (one at a time).
+  const [openKey, setOpenKey] = useState<string | null>(null)
   const [notice, setNotice] = useState<Notice | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   // The open dialog field, its live input values, and its own notice line.
@@ -177,6 +181,24 @@ export function HubAccountCard(props: HubAccountCardProps): ReactNode {
 
   const setValue = (key: string, value: JsonValue): void => {
     setValues(previous => ({ ...previous, [key]: value }))
+  }
+
+  // autoSave selects commit the picked value straight into the stored params,
+  // so the card reopens with the saved choice pre-selected — no save press.
+  const autoSaveValue = (field: AccountHubFieldDescriptor, value: JsonValue): void => {
+    const op: SettingsPathOpView = value === undefined || value === ''
+      ? { op: 'unset', path: [field.key] }
+      : { op: 'set', path: [field.key], value }
+    void (async () => {
+      try {
+        await commitParams([op])
+        if (!alive.current) return
+        setInitial(previous => ({ ...previous, [field.key]: value }))
+        setValues(previous => ({ ...previous, [field.key]: value }))
+      } catch (error: unknown) {
+        if (alive.current) setNotice({ tone: 'error', text: `${t('saveFailed')}: ${messageOf(error)}` })
+      }
+    })()
   }
 
   const save = (): void => {
@@ -346,15 +368,80 @@ export function HubAccountCard(props: HubAccountCardProps): ReactNode {
           const current = bound !== undefined
             ? asString(bound.access.getPath([bound.path]))
             : asString(values[field.key])
+          const pick = (value: string): void => {
+            if (bound !== undefined) bound.access.setPath([bound.path], value)
+            else if (field.autoSave === true) autoSaveValue(field, value)
+            else setValue(field.key, value)
+            setFilters(previous => ({ ...previous, [field.key]: '' }))
+            setOpenKey(null)
+          }
+          // Filterable dropdown: the trigger opens a panel whose top input
+          // narrows the choices by label or value (case-insensitive). The
+          // current choice always stays in the list, so a saved value never
+          // reads as "nothing chosen" while its label is filtered away.
+          if (field.searchable === true) {
+            const query = asString(filters[field.key]).trim().toLowerCase()
+            const filtered = query === '' ? choices : choices.filter(choice =>
+              choice.label.toLowerCase().includes(query) || choice.value.toLowerCase().includes(query))
+            const visible = current === '' || query === ''
+              || filtered.some(choice => choice.value === current)
+              ? filtered
+              : [choices.find(choice => choice.value === current), ...filtered]
+                .filter((choice): choice is AccountHubSelectOption => choice !== undefined)
+            const open = openKey === field.key
+            const currentChoice = choices.find(choice => choice.value === current)
+            return (
+              <div className={css.combo}>
+                <button
+                  type="button"
+                  id={domId}
+                  className={css.comboTrigger}
+                  onClick={() => { setOpenKey(open ? null : field.key) }}
+                >
+                  <span className={currentChoice === undefined && current === '' ? css.comboPlaceholder : css.comboValue}>
+                    {currentChoice?.label ?? (current === '' ? t('selectPlaceholder') : current)}
+                  </span>
+                  <span className={css.comboCaret}>▾</span>
+                </button>
+                {open && (
+                  <Fragment>
+                    <div className={css.comboBackdrop} onClick={() => { setOpenKey(null) }} />
+                    <div className={css.comboPanel}>
+                      <Input
+                        type="text"
+                        value={asString(filters[field.key])}
+                        placeholder={t('selectSearchPlaceholder')}
+                        autoComplete="off"
+                        onChange={(event) => { setFilters(previous => ({ ...previous, [field.key]: event.target.value })) }}
+                      />
+                      <div className={css.comboList}>
+                        {visible.length === 0
+                          ? <div className={css.comboEmpty}>{t('selectNoMatch')}</div>
+                          : visible.map(choice => (
+                            <button
+                              key={choice.value}
+                              type="button"
+                              className={choice.value === current
+                                ? `${css.comboOption} ${css.comboOptionActive}`
+                                : css.comboOption}
+                              onClick={() => { pick(choice.value) }}
+                            >
+                              {choice.label}
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  </Fragment>
+                )}
+              </div>
+            )
+          }
           return (
             <select
               id={domId}
               className={css.select}
               value={current}
-              onChange={(event) => {
-                if (bound !== undefined) bound.access.setPath([bound.path], event.target.value)
-                else setValue(field.key, event.target.value)
-              }}
+              onChange={(event) => { pick(event.target.value) }}
             >
               {current === '' && <option value="">{t('selectPlaceholder')}</option>}
               {choices.map(choice => (
@@ -489,23 +576,7 @@ export function HubAccountCard(props: HubAccountCardProps): ReactNode {
               )}
             </div>
           </div>
-          {(balanceRows.length > 0 || moreRows.length > 0) && <div className={css.divider} />}
-          {balanceRows.map((raw, index) => {
-            const r = asRecord(raw)
-            return (
-              <Fragment key={`balance-${index}`}>
-                {index > 0 && <div className={css.divider} />}
-                <div className={css.bRow}>
-                  <span>{asString(r.label)}</span>
-                  {asString(r.value) !== ''
-                    ? <span className={css.amount}>{asString(r.value)}</span>
-                    : r.loading === true
-                      ? <span className={css.unavailable}>{t('loading')}</span>
-                      : rowLink(r.unavailable as JsonValue ?? null)}
-                </div>
-              </Fragment>
-            )
-          })}
+          {(detailRows.length > 0 || balanceRows.length > 0 || moreRows.length > 0) && <div className={css.divider} />}
           {detailRows.map((raw, index) => {
             const d = asRecord(raw)
             return (
@@ -514,6 +585,22 @@ export function HubAccountCard(props: HubAccountCardProps): ReactNode {
                 <div className={css.bRow}>
                   <span>{asString(d.label)}</span>
                   <span>{asString(d.value)}</span>
+                </div>
+              </Fragment>
+            )
+          })}
+          {balanceRows.map((raw, index) => {
+            const r = asRecord(raw)
+            return (
+              <Fragment key={`balance-${index}`}>
+                {(index > 0 || detailRows.length > 0) && <div className={css.divider} />}
+                <div className={css.bRow}>
+                  <span>{asString(r.label)}</span>
+                  {asString(r.value) !== ''
+                    ? <span className={css.amount}>{asString(r.value)}</span>
+                    : r.loading === true
+                      ? <span className={css.unavailable}>{t('loading')}</span>
+                      : rowLink(r.unavailable as JsonValue ?? null)}
                 </div>
               </Fragment>
             )
@@ -645,8 +732,10 @@ export function HubAccountCard(props: HubAccountCardProps): ReactNode {
       {notice !== null && (
         <p className={notice.tone === 'error' ? css.error : css.notice}>{notice.text}</p>
       )}
-      {/* A card of actions only (sign-in/out) has nothing to save. */}
-      {visibleFields.some(field => isValueField(field) && !isDraftBound(field)) && (
+      {/* A card of actions only (sign-in/out) has nothing to save; a card
+       * whose value fields all auto-save on selection doesn't either. */}
+      {visibleFields.some(field => isValueField(field) && !isDraftBound(field)
+        && field.autoSave !== true) && (
         <div className={css.actions}>
           <Button
             variant="primary"

@@ -22,6 +22,8 @@ window.__ModuleLoader__.load({
 			optionsFailed: "Loading options failed",
 			busy: "Working…",
 			selectPlaceholder: "Select…",
+			selectSearchPlaceholder: "Search…",
+			selectNoMatch: "No matches",
 			signedIn: "Signed in",
 			accountInfo: "Account info",
 			loading: "Loading…",
@@ -40,6 +42,8 @@ window.__ModuleLoader__.load({
 			optionsFailed: "选项加载失败",
 			busy: "处理中…",
 			selectPlaceholder: "请选择…",
+			selectSearchPlaceholder: "搜索…",
+			selectNoMatch: "无匹配项",
 			signedIn: "已登录",
 			accountInfo: "账号信息",
 			loading: "加载中…",
@@ -47,7 +51,7 @@ window.__ModuleLoader__.load({
 		};
 		//#endregion
 		//#region \0dsh-css:/Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/deep-seek-harness-private-plugin/dsh-private-plugin-account-hub/packages/ui-account-hub/src/client/HubAccountCard.module.css.mjs
-		const css = ".F3R7oa_card{border:.5px solid var(--dsw-alias-settings-card-stroke,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-xl,12px);background:var(--dsw-alias-surface-default,transparent);flex-direction:column;gap:12px;margin:8px 0;padding:14px 16px;display:flex}.F3R7oa_plain{flex-direction:column;gap:12px;display:flex}.F3R7oa_head{align-items:baseline;gap:10px;display:flex}.F3R7oa_name{color:var(--dsw-alias-text-primary);font-size:14px;font-weight:600}.F3R7oa_status{color:var(--dsw-alias-text-secondary);font-size:12px}.F3R7oa_statusOk{color:var(--dsw-alias-text-success,var(--dsw-ref-green-600,#1a7f37))}.F3R7oa_statusWarn{color:var(--dsw-alias-text-warning,var(--dsw-ref-yellow-600,#9a6700))}.F3R7oa_statusError{color:var(--dsw-alias-text-danger,var(--dsw-ref-red-600,#cf222e))}.F3R7oa_field{flex-direction:column;gap:4px;display:flex}.F3R7oa_label{color:var(--dsw-alias-text-secondary);font-size:12px;font-weight:500}.F3R7oa_hint{color:var(--dsw-alias-text-tertiary,var(--dsw-alias-text-secondary));margin:0;font-size:11px}.F3R7oa_select{border:1px solid var(--dsw-alias-border-default,var(--dsw-ref-neutral-200,#e2e2e2));background:var(--dsw-alias-surface-default,transparent);height:30px;color:var(--dsw-alias-text-primary);border-radius:8px;padding:0 8px;font-size:13px}.F3R7oa_notice{color:var(--dsw-alias-text-secondary);margin:0;font-size:12px}.F3R7oa_error{color:var(--dsw-alias-text-danger,var(--dsw-ref-red-600,#cf222e));margin:0;font-size:12px}.F3R7oa_actions{justify-content:flex-end;gap:8px;display:flex}.F3R7oa_rich{color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary));flex-direction:column;gap:16px;padding:8px 0;font-size:13px;line-height:22px;display:flex}.F3R7oa_officialCard{border:.5px solid var(--dsw-alias-settings-card-stroke,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-xl,12px);background:var(--dsw-alias-settings-card-fill,var(--dsw-alias-surface-default,transparent));flex-direction:column;gap:4px;padding:12px 16px;display:flex}.F3R7oa_brandCard{border:.5px solid var(--dsw-alias-settings-card-stroke,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-xl,12px);background:var(--dsw-alias-surface-default,transparent);align-items:center;gap:10px;margin:8px 0;padding:12px 16px;display:flex}.F3R7oa_brandMark{flex:none;width:24px;height:24px}.F3R7oa_brandName{min-width:0;color:var(--dsw-alias-text-primary);white-space:nowrap;flex:1;font-size:14px;font-weight:600}.F3R7oa_brandActions{flex:none;align-items:center;gap:8px;display:flex}.F3R7oa_brandStatus{max-width:42%;color:var(--dsw-alias-text-secondary);text-overflow:ellipsis;white-space:nowrap;flex:none;font-size:12px;line-height:20px;overflow:hidden}.F3R7oa_brandStatusError{color:var(--dsw-alias-text-danger,var(--dsw-ref-red-600,#cf222e))}.F3R7oa_identityRow{justify-content:space-between;align-items:center;gap:16px;min-height:44px;display:flex}.F3R7oa_rowEnd{flex:none;align-items:center;gap:20px;display:flex}.F3R7oa_identity{align-items:center;gap:10px;min-width:0;min-height:44px;display:flex}.F3R7oa_avatar{corner-shape:round;width:32px;height:32px;color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary));background:var(--dsw-alias-bg-skeleton,var(--dsw-ref-neutral-100,#f2f2f2));border-radius:50%;flex:none;justify-content:center;align-items:center;display:flex;overflow:hidden}.F3R7oa_avatarImage{object-fit:cover;width:100%;height:100%}.F3R7oa_avatarBrand{width:22px;height:22px}.F3R7oa_identityCopy{flex-direction:column;min-width:0;display:flex}.F3R7oa_nameLine{font-size:14px;font-weight:500}.F3R7oa_statusLine{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary));text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.F3R7oa_accountInfo{color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary));white-space:nowrap;flex:none;align-items:center;gap:2px;font-size:13px;line-height:22px;text-decoration:none;display:inline-flex}.F3R7oa_accountInfo:hover{text-underline-offset:3px;text-decoration:underline}.F3R7oa_bRow{box-sizing:border-box;justify-content:space-between;align-items:center;gap:16px;min-height:40px;padding:6px 0;display:flex}.F3R7oa_divider{border-top:.5px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-default,#e2e2e2))}.F3R7oa_amount{flex-wrap:wrap;justify-content:flex-end;font-size:18px;font-weight:510;line-height:28px;display:flex}.F3R7oa_secondary,.F3R7oa_unavailable{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary))}.F3R7oa_links{flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:10px;display:flex}.F3R7oa_linkButton{box-sizing:border-box;border:.5px solid var(--dsw-alias-border-l3,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-md,8px);min-width:58px;height:36px;color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary));white-space:nowrap;background:0 0;flex:none;justify-content:center;align-items:center;padding:0 14px;font-size:14px;line-height:22px;text-decoration:none;display:inline-flex}.F3R7oa_linkButton:hover{background:var(--dsw-alias-interactive-bg-hover,#8080801a)}.F3R7oa_primaryLink{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-text-primary));border-color:#0000;font-weight:500}.F3R7oa_primaryLink:hover{background:var(--dsw-alias-button-primary-hover,var(--dsw-alias-text-primary))}.F3R7oa_unavailableLink{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary));text-underline-offset:3px;text-decoration:underline}.F3R7oa_unavailableLink:hover{color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary))}";
+		const css = ".F3R7oa_card{border:.5px solid var(--dsw-alias-settings-card-stroke,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-xl,12px);background:var(--dsw-alias-surface-default,transparent);flex-direction:column;gap:12px;margin:8px 0;padding:14px 16px;display:flex}.F3R7oa_plain{flex-direction:column;gap:12px;display:flex}.F3R7oa_head{align-items:baseline;gap:10px;display:flex}.F3R7oa_name{color:var(--dsw-alias-text-primary);font-size:14px;font-weight:600}.F3R7oa_status{color:var(--dsw-alias-text-secondary);font-size:12px}.F3R7oa_statusOk{color:var(--dsw-alias-text-success,var(--dsw-ref-green-600,#1a7f37))}.F3R7oa_statusWarn{color:var(--dsw-alias-text-warning,var(--dsw-ref-yellow-600,#9a6700))}.F3R7oa_statusError{color:var(--dsw-alias-text-danger,var(--dsw-ref-red-600,#cf222e))}.F3R7oa_field{flex-direction:column;gap:4px;display:flex}.F3R7oa_label{color:var(--dsw-alias-text-secondary);font-size:12px;font-weight:500}.F3R7oa_hint{color:var(--dsw-alias-text-tertiary,var(--dsw-alias-text-secondary));margin:0;font-size:11px}.F3R7oa_select{border:1px solid var(--dsw-alias-border-default,var(--dsw-ref-neutral-200,#e2e2e2));background:var(--dsw-alias-surface-default,transparent);height:30px;color:var(--dsw-alias-text-primary);border-radius:8px;padding:0 8px;font-size:13px}.F3R7oa_notice{color:var(--dsw-alias-text-secondary);margin:0;font-size:12px}.F3R7oa_error{color:var(--dsw-alias-text-danger,var(--dsw-ref-red-600,#cf222e));margin:0;font-size:12px}.F3R7oa_actions{justify-content:flex-end;gap:8px;display:flex}.F3R7oa_rich{color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary));flex-direction:column;gap:16px;padding:8px 0;font-size:13px;line-height:22px;display:flex}.F3R7oa_officialCard{border:.5px solid var(--dsw-alias-settings-card-stroke,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-xl,12px);background:var(--dsw-alias-settings-card-fill,var(--dsw-alias-surface-default,transparent));flex-direction:column;gap:4px;padding:12px 16px;display:flex}.F3R7oa_brandCard{border:.5px solid var(--dsw-alias-settings-card-stroke,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-xl,12px);background:var(--dsw-alias-surface-default,transparent);align-items:center;gap:10px;margin:8px 0;padding:12px 16px;display:flex}.F3R7oa_brandMark{flex:none;width:24px;height:24px}.F3R7oa_brandName{min-width:0;color:var(--dsw-alias-text-primary);white-space:nowrap;flex:1;font-size:14px;font-weight:600}.F3R7oa_brandActions{flex:none;align-items:center;gap:8px;display:flex}.F3R7oa_brandStatus{max-width:42%;color:var(--dsw-alias-text-secondary);text-overflow:ellipsis;white-space:nowrap;flex:none;font-size:12px;line-height:20px;overflow:hidden}.F3R7oa_brandStatusError{color:var(--dsw-alias-text-danger,var(--dsw-ref-red-600,#cf222e))}.F3R7oa_identityRow{justify-content:space-between;align-items:center;gap:16px;min-height:44px;display:flex}.F3R7oa_rowEnd{flex:none;align-items:center;gap:20px;display:flex}.F3R7oa_identity{align-items:center;gap:10px;min-width:0;min-height:44px;display:flex}.F3R7oa_avatar{corner-shape:round;width:32px;height:32px;color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary));background:var(--dsw-alias-bg-skeleton,var(--dsw-ref-neutral-100,#f2f2f2));border-radius:50%;flex:none;justify-content:center;align-items:center;display:flex;overflow:hidden}.F3R7oa_avatarImage{object-fit:cover;width:100%;height:100%}.F3R7oa_avatarBrand{width:22px;height:22px}.F3R7oa_identityCopy{flex-direction:column;min-width:0;display:flex}.F3R7oa_nameLine{font-size:14px;font-weight:500}.F3R7oa_statusLine{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary));text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.F3R7oa_accountInfo{color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary));white-space:nowrap;flex:none;align-items:center;gap:2px;font-size:13px;line-height:22px;text-decoration:none;display:inline-flex}.F3R7oa_accountInfo:hover{text-underline-offset:3px;text-decoration:underline}.F3R7oa_bRow{box-sizing:border-box;justify-content:space-between;align-items:center;gap:16px;min-height:40px;padding:6px 0;display:flex}.F3R7oa_divider{border-top:.5px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-default,#e2e2e2))}.F3R7oa_amount{flex-wrap:wrap;justify-content:flex-end;font-size:18px;font-weight:510;line-height:28px;display:flex}.F3R7oa_secondary,.F3R7oa_unavailable{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary))}.F3R7oa_links{flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:10px;display:flex}.F3R7oa_linkButton{box-sizing:border-box;border:.5px solid var(--dsw-alias-border-l3,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-md,8px);min-width:58px;height:36px;color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary));white-space:nowrap;background:0 0;flex:none;justify-content:center;align-items:center;padding:0 14px;font-size:14px;line-height:22px;text-decoration:none;display:inline-flex}.F3R7oa_linkButton:hover{background:var(--dsw-alias-interactive-bg-hover,#8080801a)}.F3R7oa_primaryLink{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-text-primary));border-color:#0000;font-weight:500}.F3R7oa_primaryLink:hover{background:var(--dsw-alias-button-primary-hover,var(--dsw-alias-text-primary))}.F3R7oa_unavailableLink{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary));text-underline-offset:3px;text-decoration:underline}.F3R7oa_unavailableLink:hover{color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary))}.F3R7oa_combo{position:relative}.F3R7oa_comboTrigger{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;height:30px;padding:0 8px;border:1px solid var(--dsw-alias-border-default,var(--dsw-ref-neutral-200,#e2e2e2));border-radius:8px;background:var(--dsw-alias-surface-default,transparent);color:var(--dsw-alias-text-primary);font-size:13px;cursor:pointer;text-align:left}.F3R7oa_comboPlaceholder{color:var(--dsw-alias-text-tertiary,var(--dsw-alias-text-secondary))}.F3R7oa_comboValue{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.F3R7oa_comboCaret{flex:none;font-size:10px;color:var(--dsw-alias-text-tertiary,var(--dsw-alias-text-secondary))}.F3R7oa_comboBackdrop{position:fixed;inset:0;z-index:90}.F3R7oa_comboPanel{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:91;display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--dsw-alias-border-default,var(--dsw-ref-neutral-200,#e2e2e2));border-radius:8px;background:var(--dsw-alias-surface-raised,var(--dsw-ref-neutral-0,#fff));box-shadow:0 8px 24px #0000001f}.F3R7oa_comboList{display:block;max-height:240px;overflow-y:auto}.F3R7oa_comboOption{display:block;width:100%;box-sizing:border-box;padding:6px 8px;border:0;border-radius:6px;background:0 0;color:var(--dsw-alias-text-primary);font-size:13px;text-align:left;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.F3R7oa_comboOption:hover{background:var(--dsw-alias-interactive-bg-hover,#8080801a)}.F3R7oa_comboOptionActive{font-weight:600;background:var(--dsw-alias-interactive-bg-hover,#8080801a)}.F3R7oa_comboEmpty{padding:6px 8px;font-size:12px;color:var(--dsw-alias-text-secondary)}";
 		const tagId = "@dsh-private/ui-account-hub/HubAccountCard.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
 			const tag = document.createElement("style");
@@ -71,6 +75,17 @@ window.__ModuleLoader__.load({
 			"brandStatus": "F3R7oa_brandStatus",
 			"brandStatusError": "F3R7oa_brandStatusError",
 			"card": "F3R7oa_card",
+			"combo": "F3R7oa_combo",
+			"comboTrigger": "F3R7oa_comboTrigger",
+			"comboPlaceholder": "F3R7oa_comboPlaceholder",
+			"comboValue": "F3R7oa_comboValue",
+			"comboCaret": "F3R7oa_comboCaret",
+			"comboBackdrop": "F3R7oa_comboBackdrop",
+			"comboPanel": "F3R7oa_comboPanel",
+			"comboList": "F3R7oa_comboList",
+			"comboOption": "F3R7oa_comboOption",
+			"comboOptionActive": "F3R7oa_comboOptionActive",
+			"comboEmpty": "F3R7oa_comboEmpty",
 			"divider": "F3R7oa_divider",
 			"error": "F3R7oa_error",
 			"field": "F3R7oa_field",
@@ -160,6 +175,8 @@ window.__ModuleLoader__.load({
 			const [initial, setInitial] = (0, react.useState)({});
 			const [values, setValues] = (0, react.useState)({});
 			const [options, setOptions] = (0, react.useState)({});
+			const [filters, setFilters] = (0, react.useState)({});
+			const [openKey, setOpenKey] = (0, react.useState)(null);
 			const [notice, setNotice] = (0, react.useState)(null);
 			const [busy, setBusy] = (0, react.useState)(null);
 			const [dialogField, setDialogField] = (0, react.useState)(null);
@@ -230,6 +247,18 @@ window.__ModuleLoader__.load({
 					...previous,
 					[key]: value
 				}));
+			};
+			const autoSaveValue = (field, value) => {
+				(async () => {
+					try {
+						await commitParams([value === void 0 || value === "" ? { op: "unset", path: [field.key] } : { op: "set", path: [field.key], value }]);
+						if (!alive.current) return;
+						setInitial((previous) => ({ ...previous, [field.key]: value }));
+						setValues((previous) => ({ ...previous, [field.key]: value }));
+					} catch (error) {
+						if (alive.current) setNotice({ tone: "error", text: t("saveFailed") + ": " + messageOf(error) });
+					}
+				})();
 			};
 			const save = () => {
 				(async () => {
@@ -405,22 +434,84 @@ window.__ModuleLoader__.load({
 								access: editor
 							} : void 0;
 							const current = bound !== void 0 ? asString(bound.access.getPath([bound.path])) : asString(values[field.key]);
-							return (0, react_jsx_runtime.jsxs)("select", {
-								id: domId,
-								className: HubAccountCard_module_css_default.select,
-								value: current,
-								onChange: (event) => {
-									if (bound !== void 0) bound.access.setPath([bound.path], event.target.value);
-									else setValue(field.key, event.target.value);
-								},
-								children: [current === "" && (0, react_jsx_runtime.jsx)("option", {
-									value: "",
-									children: t("selectPlaceholder")
-								}), choices.map((choice) => (0, react_jsx_runtime.jsx)("option", {
-									value: choice.value,
-									children: choice.label
-								}, choice.value))]
-							});
+							const pick = (value) => {
+								if (bound !== void 0) bound.access.setPath([bound.path], value);
+								else if (field.autoSave === true) autoSaveValue(field, value);
+								else setValue(field.key, value);
+								setFilters((previous) => ({ ...previous, [field.key]: "" }));
+								setOpenKey(null);
+							};
+							if (field.searchable === true) {
+								const query = asString(filters[field.key]).trim().toLowerCase();
+								const filtered = query === "" ? choices : choices.filter((choice) => choice.label.toLowerCase().includes(query) || choice.value.toLowerCase().includes(query));
+								const visible = current === "" || query === "" || filtered.some((choice) => choice.value === current) ? filtered : [choices.find((choice) => choice.value === current), ...filtered].filter((choice) => choice !== void 0);
+								const open = openKey === field.key;
+								const currentChoice = choices.find((choice) => choice.value === current);
+								return (0, react_jsx_runtime.jsxs)("div", {
+									className: HubAccountCard_module_css_default.combo,
+									children: [(0, react_jsx_runtime.jsxs)("button", {
+										type: "button",
+										id: domId,
+										className: HubAccountCard_module_css_default.comboTrigger,
+										onClick: () => {
+											setOpenKey(open ? null : field.key);
+										},
+										children: [(0, react_jsx_runtime.jsx)("span", {
+											className: currentChoice === void 0 && current === "" ? HubAccountCard_module_css_default.comboPlaceholder : HubAccountCard_module_css_default.comboValue,
+											children: currentChoice?.label ?? (current === "" ? t("selectPlaceholder") : current)
+										}), (0, react_jsx_runtime.jsx)("span", {
+											className: HubAccountCard_module_css_default.comboCaret,
+											children: "▾"
+										})]
+									}), open && (0, react_jsx_runtime.jsxs)(react.Fragment, {
+										children: [(0, react_jsx_runtime.jsx)("div", {
+											className: HubAccountCard_module_css_default.comboBackdrop,
+											onClick: () => {
+												setOpenKey(null);
+											}
+										}), (0, react_jsx_runtime.jsxs)("div", {
+											className: HubAccountCard_module_css_default.comboPanel,
+											children: [(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
+												type: "text",
+												value: asString(filters[field.key]),
+												placeholder: t("selectSearchPlaceholder"),
+												autoComplete: "off",
+												onChange: (event) => {
+													setFilters((previous) => ({ ...previous, [field.key]: event.target.value }));
+												}
+											}), (0, react_jsx_runtime.jsx)("div", {
+												className: HubAccountCard_module_css_default.comboList,
+												children: visible.length === 0 ? (0, react_jsx_runtime.jsx)("div", {
+													className: HubAccountCard_module_css_default.comboEmpty,
+													children: t("selectNoMatch")
+												}) : visible.map((choice) => (0, react_jsx_runtime.jsx)("button", {
+													type: "button",
+													className: choice.value === current ? HubAccountCard_module_css_default.comboOption + " " + HubAccountCard_module_css_default.comboOptionActive : HubAccountCard_module_css_default.comboOption,
+													onClick: () => {
+														pick(choice.value);
+													},
+													children: choice.label
+												}, choice.value))
+											})]
+										})]
+									})]
+								});
+							}
+								return (0, react_jsx_runtime.jsxs)("select", {
+									id: domId,
+									className: HubAccountCard_module_css_default.select,
+									value: current,
+									onChange: (event) => {
+										pick(event.target.value);
+									},
+									children: [current === "" && (0, react_jsx_runtime.jsx)("option", {
+										value: "",
+										children: t("selectPlaceholder")
+									}), choices.map((choice) => (0, react_jsx_runtime.jsx)("option", {
+										value: choice.value,
+										children: choice.label
+									}, choice.value))]
+								});
 						}
 						case "button": return renderButtonControl(field);
 					}
@@ -568,10 +659,17 @@ window.__ModuleLoader__.load({
 										})]
 									})]
 								}),
-								(balanceRows.length > 0 || moreRows.length > 0) && (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }),
+								(detailRows.length > 0 || balanceRows.length > 0 || moreRows.length > 0) && (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }),
+								detailRows.map((raw, index) => {
+									const d = asRecord(raw);
+									return (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [(0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), (0, react_jsx_runtime.jsxs)("div", {
+										className: HubAccountCard_module_css_default.bRow,
+										children: [(0, react_jsx_runtime.jsx)("span", { children: asString(d.label) }), (0, react_jsx_runtime.jsx)("span", { children: asString(d.value) })]
+									})] }, `detail-${index}`);
+								}),
 								balanceRows.map((raw, index) => {
 									const r = asRecord(raw);
-									return (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [index > 0 && (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), (0, react_jsx_runtime.jsxs)("div", {
+									return (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [(index > 0 || detailRows.length > 0) && (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), (0, react_jsx_runtime.jsxs)("div", {
 										className: HubAccountCard_module_css_default.bRow,
 										children: [(0, react_jsx_runtime.jsx)("span", { children: asString(r.label) }), asString(r.value) !== "" ? (0, react_jsx_runtime.jsx)("span", {
 											className: HubAccountCard_module_css_default.amount,
@@ -581,13 +679,6 @@ window.__ModuleLoader__.load({
 											children: t("loading")
 										}) : rowLink(r.unavailable ?? null)]
 									})] }, `balance-${index}`);
-								}),
-								detailRows.map((raw, index) => {
-									const d = asRecord(raw);
-									return (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [(0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), (0, react_jsx_runtime.jsxs)("div", {
-										className: HubAccountCard_module_css_default.bRow,
-										children: [(0, react_jsx_runtime.jsx)("span", { children: asString(d.label) }), (0, react_jsx_runtime.jsx)("span", { children: asString(d.value) })]
-									})] }, `detail-${index}`);
 								}),
 								moreRows.map((raw, index) => {
 									const m = asRecord(raw);
@@ -697,7 +788,7 @@ window.__ModuleLoader__.load({
 						className: notice.tone === "error" ? HubAccountCard_module_css_default.error : HubAccountCard_module_css_default.notice,
 						children: notice.text
 					}),
-					visibleFields.some((field) => isValueField(field) && !isDraftBound(field)) && (0, react_jsx_runtime.jsx)("div", {
+					visibleFields.some((field) => isValueField(field) && !isDraftBound(field) && field.autoSave !== true) && (0, react_jsx_runtime.jsx)("div", {
 						className: HubAccountCard_module_css_default.actions,
 						children: (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 							variant: "primary",
