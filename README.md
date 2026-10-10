@@ -35,6 +35,15 @@ containers do not depend on hub.
 因此安装任何账号插件前，先安装 account-hub / Install account-hub first, then the
 account plugins.
 
+> **安装 account-hub 前注意**：hub 会屏蔽 dsh 自带的 DeepSeek 账号，并屏蔽模型中的
+> 默认 DeepSeek API 模型组——请先确认默认模型组的 API 记录已保存、DeepSeek 账号已
+> 登出，再安装；如需 DeepSeek 登录功能，请安装 `dsh-plugin-deepseek-account`。详见
+> [account-hub README](./packages/dsh-plugin-account-hub/README.md)。
+>
+> **Before installing account-hub**: it hides the built-in DeepSeek account and the
+> default DeepSeek API model group. Save those API records and sign out first; for
+> DeepSeek sign-in install `dsh-plugin-deepseek-account`.
+
 ## ⚠️ 账号风险警告 / Account risk warning
 
 **适用于需要登录的账号插件：`deepseek-account`、`codex-account`（订阅 OAuth）、
