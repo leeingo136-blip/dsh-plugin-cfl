@@ -23,7 +23,7 @@
 ## 二、目录与装入方式
 
 ```
-dsh-plugin-local-llama/
+dsh-plugin-llama-local/
 ├── src/index.ts          # 服务 + adapter + 账号卡（direct 模式）
 ├── src/local-model.ts    # 推理引擎：懒加载、串行队列、流式桥接、思考块拆分
 ├── src/fetch-weights.ts  # 应用内权重下载器（启用时自动拉取，带镜像回退）

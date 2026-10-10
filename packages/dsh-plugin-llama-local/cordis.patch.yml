@@ -7,7 +7,7 @@
 # assumption leaks in.
 - insert:
     - id: local-llama-account
-      name: 'dsh-plugin-local-llama'
+      name: 'dsh-plugin-llama-local'
       # A config-less activation: every knob lives in the model module, the
       # account card exposes nothing to edit. An empty object keeps the
       # schemastery Config valid where `undefined` would fail validation.

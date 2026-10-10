@@ -1,5 +1,5 @@
 {
-  "name": "dsh-plugin-local-llama",
+  "name": "dsh-plugin-llama-local",
   "version": "0.1.0",
   "private": true,
   "description": "本地 GGUF 小模型账号插件：node-llama-cpp 在进程内运行 llama.cpp（GGUF），默认加载 xLAM-2-3b 函数调用模型，可触发 harness 技能/工具",

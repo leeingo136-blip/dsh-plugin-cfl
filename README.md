@@ -13,7 +13,7 @@ External plugins for the DeepSeek Harness, kept standalone from the harness repo
 | `dsh-plugin-account-testcode` | TestCode 测试账号插件（direct 模式） |
 | `dsh-plugin-deepseek-account` | DeepSeek 官方账号插件（credential-inject 模式） |
 | `dsh-plugin-account-hub` | 账号管理枢纽（官方宿主适配：hub API / 桌面 shim / UI 组件 ×2） |
-| `dsh-plugin-local-llama` | 本地 GGUF 推理插件：xLAM-2-3B-fc-r（函数调用）/ Qwen3-0.6B 兜底，node-llama-cpp 引擎，工具调用走别名注入 + 解析回环 |
+| `dsh-plugin-llama-local` | 本地 GGUF 推理插件：xLAM-2-3B-fc-r（函数调用）/ Qwen3-0.6B 兜底，node-llama-cpp 引擎，工具调用走别名注入 + 解析回环 |
 | `dsh-plugin-zcode-ability` | ZCode 移植容器：persona / skills / plan / workflow / environment（zCode之剑 预设）+ z.ai-account 账号 + 8 个技能 |
 | `dsh-plugin-qwen-ability` | Qwen 容器：账号 / persona / loop / environment（Qwen的折扇 预设） |
 | `dsh-plugin-codex-ability` | Codex 容器：账号 / persona / loop / environment（Codex吐息 预设） |
@@ -22,8 +22,8 @@ External plugins for the DeepSeek Harness, kept standalone from the harness repo
 
 - `node_modules/` —— 根目录 `pnpm install` 自包含重建（宿主依赖走 npm，pi-ai 0.87.1 经 patchedDependencies 修补）。
 - `dist/` —— 构建产物，各包内重建：`tsc -p tsconfig.build.json`。
-- `models/` —— 模型权重（单文件远超 Gitee 100MB 上限）。local-llama 权重用 `node scripts/fetch-model.mjs` 重新拉取。
-- `.state/` —— 运行时状态（如 local-llama 的启用标记）。
+- `models/` —— 模型权重（单文件远超 Gitee 100MB 上限）。llama-local 权重用 `node scripts/fetch-model.mjs` 重新拉取。
+- `.state/` —— 运行时状态（如 llama-local 的启用标记）。
 
 ## 构建与安装 / Build & install
 
