@@ -4,7 +4,7 @@
 # after editing src.
 - insert:
     - id: testcode-account-external
-      name: 'dsh-private-plugin-account-testcode'
+      name: 'dsh-plugin-account-testcode'
       # The schema is a plain z.object, which rejects `undefined`; the empty
       # config makes a default install a valid activation (modelGroup is
       # optional and is later written here by the hub card's Save).

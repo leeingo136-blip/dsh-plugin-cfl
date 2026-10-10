@@ -1,8 +1,0 @@
-# The external DeepSeek account plugin's own patch layer, applied by the
-# profile once this package is installed as a profile dependency (the standard
-# third-party plugin path: `dsh plugin add <spec>` or the Plugins settings
-# page). The bare name resolves through the package's `main` (dist/index.js),
-# so rebuild dist after editing src.
-- insert:
-    - id: deepseek-account-external
-      name: 'dsh-private-plugin-account-deepseek'

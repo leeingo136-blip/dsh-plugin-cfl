@@ -15,83 +15,9 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
-  packages/dsh-plugin-account-testcode:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ~4.0.4
-        version: 4.0.4(@deepseek-ai/cordis-plugin-include@1.0.9)(@deepseek-ai/cordis-plugin-loader@1.0.5)
-      '@deepseek-ai/cordis-plugin-loader':
-        specifier: ^1.0.5
-        version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.7)
-      '@deepseek-ai/dsh-credentials':
-        specifier: 0.2.0-rc.2
-        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
-      '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2
-        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
-      '@deepseek-ai/dsh-settings':
-        specifier: 0.2.0-rc.2
-        version: 0.2.0-rc.2(fbf8b4d9fba8373d950e70520f096e74)
-      '@deepseek-ai/dsh-util-values':
-        specifier: 0.2.0-rc.2
-        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
-      '@deepseek-ai/schemastery':
-        specifier: ~3.18.4
-        version: 3.18.4
-      '@dsh-private/api-account-hub':
-        specifier: workspace:*
-        version: link:../dsh-private-plugin-account-hub/packages/api-account-hub
-      zod:
-        specifier: ^4.4.3
-        version: 4.6.5
-    devDependencies:
-      '@types/node':
-        specifier: ^22
-        version: 22.20.5
+  packages/dsh-plugin-account-hub: {}
 
-  packages/dsh-private-plugin-account-deepseek:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ~4.0.4
-        version: 4.0.4(@deepseek-ai/cordis-plugin-include@1.0.9)(@deepseek-ai/cordis-plugin-loader@1.0.5)
-      '@deepseek-ai/cordis-plugin-loader':
-        specifier: ^1.0.5
-        version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.7)
-      '@deepseek-ai/dsh-authorization':
-        specifier: 0.2.0-rc.2
-        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-credentials@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
-      '@deepseek-ai/dsh-credentials':
-        specifier: 0.2.0-rc.2
-        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
-      '@deepseek-ai/dsh-launch-environment':
-        specifier: 0.2.0-rc.2
-        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
-      '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2
-        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
-      '@deepseek-ai/dsh-llm-deepseek':
-        specifier: 0.2.0-rc.2
-        version: 0.2.0-rc.2(92203fffa8eb22d3bf471936e9f2add5)
-      '@deepseek-ai/dsh-native-command':
-        specifier: 0.2.0-rc.2
-        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
-      '@deepseek-ai/dsh-util-values':
-        specifier: 0.2.0-rc.2
-        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
-      '@dsh-private/api-account-hub':
-        specifier: workspace:*
-        version: link:../dsh-private-plugin-account-hub/packages/api-account-hub
-      zod:
-        specifier: ^4.4.3
-        version: 4.6.5
-    devDependencies:
-      '@types/node':
-        specifier: ^22
-        version: 22.20.5
-
-  packages/dsh-private-plugin-account-hub: {}
-
-  packages/dsh-private-plugin-account-hub/packages/account-desktop-shim:
+  packages/dsh-plugin-account-hub/packages/account-desktop-shim:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -107,12 +33,12 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-account-hub/packages/account-hub-mount:
+  packages/dsh-plugin-account-hub/packages/account-hub-mount:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
         version: 4.0.4(@deepseek-ai/cordis-plugin-include@1.0.9)(@deepseek-ai/cordis-plugin-loader@1.0.5)
-      '@dsh-private/api-account-hub':
+      '@dsh/api-account-hub':
         specifier: workspace:*
         version: link:../api-account-hub
     devDependencies:
@@ -123,7 +49,7 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-account-hub/packages/api-account-hub:
+  packages/dsh-plugin-account-hub/packages/api-account-hub:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -145,7 +71,7 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-account-hub/packages/ui-account-hub:
+  packages/dsh-plugin-account-hub/packages/ui-account-hub:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -153,10 +79,10 @@ importers:
       '@deepseek-ai/dsh-util-values':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
-      '@dsh-private/api-account-hub':
+      '@dsh/api-account-hub':
         specifier: workspace:*
         version: link:../api-account-hub
-      '@dsh-private/ui-settings-models':
+      '@dsh/ui-settings-models':
         specifier: workspace:*
         version: link:../ui-settings-models
     devDependencies:
@@ -197,7 +123,7 @@ importers:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
 
-  packages/dsh-private-plugin-account-hub/packages/ui-settings-models:
+  packages/dsh-plugin-account-hub/packages/ui-settings-models:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -255,9 +181,43 @@ importers:
         specifier: ^4.4.3
         version: 4.6.5
 
-  packages/dsh-private-plugin-codex-ability: {}
+  packages/dsh-plugin-account-testcode:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ~4.0.4
+        version: 4.0.4(@deepseek-ai/cordis-plugin-include@1.0.9)(@deepseek-ai/cordis-plugin-loader@1.0.5)
+      '@deepseek-ai/cordis-plugin-loader':
+        specifier: ^1.0.5
+        version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.7)
+      '@deepseek-ai/dsh-credentials':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
+      '@deepseek-ai/dsh-llm':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
+      '@deepseek-ai/dsh-settings':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(fbf8b4d9fba8373d950e70520f096e74)
+      '@deepseek-ai/dsh-util-values':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
+      '@deepseek-ai/schemastery':
+        specifier: ~3.18.4
+        version: 3.18.4
+      '@dsh/api-account-hub':
+        specifier: workspace:*
+        version: link:../dsh-plugin-account-hub/packages/api-account-hub
+      zod:
+        specifier: ^4.4.3
+        version: 4.6.5
+    devDependencies:
+      '@types/node':
+        specifier: ^22
+        version: 22.20.5
 
-  packages/dsh-private-plugin-codex-ability/dsh-private-plugin-codex-account:
+  packages/dsh-plugin-codex-ability: {}
+
+  packages/dsh-plugin-codex-ability/dsh-plugin-codex-account:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -286,9 +246,9 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: ~3.18.4
         version: 3.18.4
-      '@dsh-private/api-account-hub':
+      '@dsh/api-account-hub':
         specifier: workspace:*
-        version: link:../../dsh-private-plugin-account-hub/packages/api-account-hub
+        version: link:../../dsh-plugin-account-hub/packages/api-account-hub
       '@earendil-works/pi-ai':
         specifier: 0.87.1
         version: 0.87.1(patch_hash=b9bcce474fb2ac44633dff0fa722816a5bff5451b4575d5874035ea14ba70a4f)(ws@8.22.0)(zod@4.6.5)
@@ -297,7 +257,7 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-codex-ability/dsh-private-plugin-codex-environment:
+  packages/dsh-plugin-codex-ability/dsh-plugin-codex-environment:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -316,7 +276,7 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-codex-ability/dsh-private-plugin-codex-loop:
+  packages/dsh-plugin-codex-ability/dsh-plugin-codex-loop:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -338,7 +298,7 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-codex-ability/dsh-private-plugin-codex-persona:
+  packages/dsh-plugin-codex-ability/dsh-plugin-codex-persona:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -357,7 +317,47 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-local-llama:
+  packages/dsh-plugin-deepseek-account:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ~4.0.4
+        version: 4.0.4(@deepseek-ai/cordis-plugin-include@1.0.9)(@deepseek-ai/cordis-plugin-loader@1.0.5)
+      '@deepseek-ai/cordis-plugin-loader':
+        specifier: ^1.0.5
+        version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.7)
+      '@deepseek-ai/dsh-authorization':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-credentials@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
+      '@deepseek-ai/dsh-credentials':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
+      '@deepseek-ai/dsh-launch-environment':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
+      '@deepseek-ai/dsh-llm':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
+      '@deepseek-ai/dsh-llm-deepseek':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(92203fffa8eb22d3bf471936e9f2add5)
+      '@deepseek-ai/dsh-native-command':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
+      '@deepseek-ai/dsh-util-values':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
+      '@dsh/api-account-hub':
+        specifier: workspace:*
+        version: link:../dsh-plugin-account-hub/packages/api-account-hub
+      zod:
+        specifier: ^4.4.3
+        version: 4.6.5
+    devDependencies:
+      '@types/node':
+        specifier: ^22
+        version: 22.20.5
+
+  packages/dsh-plugin-local-llama:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -374,9 +374,9 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: ~3.18.4
         version: 3.18.4
-      '@dsh-private/api-account-hub':
+      '@dsh/api-account-hub':
         specifier: workspace:*
-        version: link:../dsh-private-plugin-account-hub/packages/api-account-hub
+        version: link:../dsh-plugin-account-hub/packages/api-account-hub
       node-llama-cpp:
         specifier: ^3.22.1
         version: 3.22.1(typescript@5.9.3)
@@ -385,9 +385,9 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-qwen-ability: {}
+  packages/dsh-plugin-qwen-ability: {}
 
-  packages/dsh-private-plugin-qwen-ability/dsh-private-plugin-qwen-account:
+  packages/dsh-plugin-qwen-ability/dsh-plugin-qwen-account:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -416,9 +416,9 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: ~3.18.4
         version: 3.18.4
-      '@dsh-private/api-account-hub':
+      '@dsh/api-account-hub':
         specifier: workspace:*
-        version: link:../../dsh-private-plugin-account-hub/packages/api-account-hub
+        version: link:../../dsh-plugin-account-hub/packages/api-account-hub
       '@earendil-works/pi-ai':
         specifier: 0.87.1
         version: 0.87.1(patch_hash=b9bcce474fb2ac44633dff0fa722816a5bff5451b4575d5874035ea14ba70a4f)(ws@8.22.0)(zod@4.6.5)
@@ -430,7 +430,7 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-qwen-ability/dsh-private-plugin-qwen-environment:
+  packages/dsh-plugin-qwen-ability/dsh-plugin-qwen-environment:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -449,7 +449,7 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-qwen-ability/dsh-private-plugin-qwen-loop:
+  packages/dsh-plugin-qwen-ability/dsh-plugin-qwen-loop:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -471,7 +471,7 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-qwen-ability/dsh-private-plugin-qwen-persona:
+  packages/dsh-plugin-qwen-ability/dsh-plugin-qwen-persona:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -490,9 +490,9 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-zcode-ability: {}
+  packages/dsh-plugin-zcode-ability: {}
 
-  packages/dsh-private-plugin-zcode-ability/dsh-private-plugin-z.ai-account:
+  packages/dsh-plugin-zcode-ability/dsh-plugin-z.ai-account:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -521,9 +521,9 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: ~3.18.4
         version: 3.18.4
-      '@dsh-private/api-account-hub':
+      '@dsh/api-account-hub':
         specifier: workspace:*
-        version: link:../../dsh-private-plugin-account-hub/packages/api-account-hub
+        version: link:../../dsh-plugin-account-hub/packages/api-account-hub
       '@earendil-works/pi-ai':
         specifier: 0.87.1
         version: 0.87.1(patch_hash=b9bcce474fb2ac44633dff0fa722816a5bff5451b4575d5874035ea14ba70a4f)(ws@8.22.0)(zod@4.6.5)
@@ -535,7 +535,7 @@ importers:
         specifier: ^22
         version: 22.20.5
 
-  packages/dsh-private-plugin-zcode-ability/dsh-private-plugin-zcode-environment:
+  packages/dsh-plugin-zcode-ability/dsh-plugin-zcode-environment:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -550,7 +550,7 @@ importers:
         specifier: ~3.18.4
         version: 3.18.4
 
-  packages/dsh-private-plugin-zcode-ability/dsh-private-plugin-zcode-persona:
+  packages/dsh-plugin-zcode-ability/dsh-plugin-zcode-persona:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -565,7 +565,7 @@ importers:
         specifier: ~3.18.4
         version: 3.18.4
 
-  packages/dsh-private-plugin-zcode-ability/dsh-private-plugin-zcode-plan:
+  packages/dsh-plugin-zcode-ability/dsh-plugin-zcode-plan:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -580,7 +580,7 @@ importers:
         specifier: ~3.18.4
         version: 3.18.4
 
-  packages/dsh-private-plugin-zcode-ability/dsh-private-plugin-zcode-skills:
+  packages/dsh-plugin-zcode-ability/dsh-plugin-zcode-skills:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -598,7 +598,7 @@ importers:
         specifier: ~3.18.4
         version: 3.18.4
 
-  packages/dsh-private-plugin-zcode-ability/dsh-private-plugin-zcode-workflow:
+  packages/dsh-plugin-zcode-ability/dsh-plugin-zcode-workflow:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4

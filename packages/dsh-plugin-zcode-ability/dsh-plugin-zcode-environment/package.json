@@ -1,0 +1,22 @@
+{
+  "name": "dsh-plugin-zcode-environment",
+  "description": "The 「zCode之剑」 agent preset component: same shape as the official @deepseek-ai/dsh-agent-preset entry (config-driven registration into agentPresets), declared under this package name so the preset is a component of its own rather than a blob inside the container.",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "default": "./dist/index.js"
+    }
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@deepseek-ai/cordis-plugin-loader": "^1.0.5",
+    "@deepseek-ai/dsh-agent-preset-registry": "0.2.0-rc.2",
+    "@deepseek-ai/schemastery": "~3.18.4"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "~4.0.4"
+  }
+}

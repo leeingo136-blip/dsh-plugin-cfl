@@ -1,8 +1,8 @@
-# DeepSeek Harness 私有插件集 / Private Plugins for DeepSeek Harness
+# DSH Plugin Collection / DeepSeek Harness 外部插件集
 
-DeepSeek Harness（分支 PrivateModification）的全部私有外部插件，独立于 harness 主仓库之外，pnpm workspace 自包含。
+DeepSeek Harness 的全部外部插件，独立于 harness 主仓库之外，pnpm workspace 自包含。
 
-All private external plugins for the DeepSeek Harness (`PrivateModification` branch), kept standalone from the harness repo. Self-contained pnpm workspace.
+External plugins for the DeepSeek Harness, kept standalone from the harness repo. Self-contained pnpm workspace.
 
 ## 插件清单 / Plugins
 
@@ -11,12 +11,12 @@ All private external plugins for the DeepSeek Harness (`PrivateModification` bra
 | 目录 | 说明 |
 |---|---|
 | `dsh-plugin-account-testcode` | TestCode 测试账号插件（direct 模式） |
-| `dsh-private-plugin-account-deepseek` | DeepSeek 官方账号插件（credential-inject 模式） |
-| `dsh-private-plugin-account-hub` | 账号管理枢纽（官方宿主适配：hub API / 桌面 shim / UI 组件 ×2） |
-| `dsh-private-plugin-local-llama` | 本地 GGUF 推理插件：xLAM-2-3B-fc-r（函数调用）/ Qwen3-0.6B 兜底，node-llama-cpp 引擎，工具调用走别名注入 + 解析回环 |
-| `dsh-private-plugin-zcode-ability` | ZCode 移植容器：persona / skills / plan / workflow / environment（zCode之剑 预设）+ z.ai-account 账号 + 8 个技能 |
-| `dsh-private-plugin-qwen-ability` | Qwen 容器：账号 / persona / loop / environment（Qwen的折扇 预设） |
-| `dsh-private-plugin-codex-ability` | Codex 容器：账号 / persona / loop / environment（Codex吐息 预设） |
+| `dsh-plugin-deepseek-account` | DeepSeek 官方账号插件（credential-inject 模式） |
+| `dsh-plugin-account-hub` | 账号管理枢纽（官方宿主适配：hub API / 桌面 shim / UI 组件 ×2） |
+| `dsh-plugin-local-llama` | 本地 GGUF 推理插件：xLAM-2-3B-fc-r（函数调用）/ Qwen3-0.6B 兜底，node-llama-cpp 引擎，工具调用走别名注入 + 解析回环 |
+| `dsh-plugin-zcode-ability` | ZCode 移植容器：persona / skills / plan / workflow / environment（zCode之剑 预设）+ z.ai-account 账号 + 8 个技能 |
+| `dsh-plugin-qwen-ability` | Qwen 容器：账号 / persona / loop / environment（Qwen的折扇 预设） |
+| `dsh-plugin-codex-ability` | Codex 容器：账号 / persona / loop / environment（Codex吐息 预设） |
 
 ## 仓库不含的内容 / Not included
 

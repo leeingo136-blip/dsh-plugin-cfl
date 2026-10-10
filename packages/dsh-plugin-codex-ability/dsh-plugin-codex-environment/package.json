@@ -1,0 +1,23 @@
+{
+  "name": "@dsh/codex-environment",
+  "description": "The Codex agent preset: standard harness capabilities plus the ported Codex posture, loop scheduling tools and skill tree.",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./locale/*": "./locale/*"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis-plugin-loader": "^1.0.5",
+    "@deepseek-ai/dsh-agent-preset-registry": "0.2.0-rc.2",
+    "@deepseek-ai/schemastery": "~3.18.4"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "~4.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22"
+  }
+}

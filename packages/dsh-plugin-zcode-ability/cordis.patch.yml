@@ -1,0 +1,202 @@
+# dsh-plugin-zcode-ability's own patch layer, applied by the profile once this
+# package is installed as a profile dependency.
+#
+# A preset is a COMPLETE capability tree, not a patch on another one: choosing
+# it replaces the selected preset's tree, so this row restates the standard
+# capability set and adds the ZCode components to it. Copying the official
+# declaration is the intended way to build one (see
+# packages/bundle/web-app/presets/standard.patch.yml); only the `zcode-*`
+# entries are this package's own.
+#
+# Mounted as its own component (`dsh-plugin-zcode-environment`) instead of
+# the official `@deepseek-ai/dsh-agent-preset` row: same registration shape,
+# but the preset is addressable as a component of its own.
+#
+# Two rows: the 「zCode之剑」 agent preset (dsh-plugin-zcode-environment) and
+# the Z.ai/GLM account component (dsh-plugin-z.ai-account) — both nested
+# component packages of this container.
+#
+# The account row sits OUTSIDE the preset on purpose. An account is
+# install-level, so it must survive a preset switch; a preset row would take
+# the account with it.
+- insert:
+    - id: zai-account-external
+      name: 'dsh-plugin-z.ai-account'
+      config: {}
+- insert:
+    - id: zcode-sword-preset
+      name: 'dsh-plugin-zcode-environment'
+      # Flip to `disabled: true` to ship the preset installed but not enabled.
+      disabled: false
+      config:
+        id: zcode-sword
+        name: zCode之剑
+        description: 屠龙者终成恶龙。标准能力 + ZCode 的会话内能力（提示词 / 技能门禁 / 工具策略 / 计划 / 工作流）
+        order: -10
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              suffix: Your working directory is {{cwd}}.
+              prefix: You are a coding agent powered by the {{model}} model.
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+          # --- ZCode: working posture (a section, never a complete prompt) ---
+          - id: zcode-persona
+            name: 'dsh-plugin-zcode-persona'
+            inject: [systemPrompt]
+            config: {}
+          - id: tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+          - id: tool-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+          - id: tool-jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+          # The ported skill tree: harness ships its own skills (bundled,
+          # user, project), so only the ZCode-derived ones are added here as an
+          # extra root. The shipped `skills/` directory holds every ported
+          # skill minus the ones harness already provides (see README).
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+            config:
+              # Container-relative: the environment component resolves
+              # non-absolute entries against the container root at register
+              # time (YAML has no module anchor), so this stays device-portable.
+              customSkillDirs:
+                - skills
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          # --- ZCode: the "load a skill before you act" reminder gate ---
+          - id: zcode-skills
+            name: 'dsh-plugin-zcode-skills'
+            inject: [tools]
+            config: {}
+          - id: command-goal
+            name: '@deepseek-ai/dsh-command-goal'
+          - id: tool-goal
+            name: '@deepseek-ai/dsh-tool-goal'
+          - id: planning
+            name: cordis:group
+            group: true
+            isolate:
+              planMode: true
+            config:
+              - id: plan-mode
+                name: '@deepseek-ai/dsh-plan-mode'
+                config:
+                  section: |
+                    You are in plan mode. Stay in plan mode until exit_plan_mode succeeds or the user switches the session mode. Imperative language to implement changes means plan the implementation, not execute it. A user's conversational agreement — including an answer confirming something you asked — approves nothing and does not end plan mode; fold the confirmed decision into the plan and submit it through exit_plan_mode.
+
+                    Explore first. Use non-mutating reads, searches, static analysis, and checks to ground the plan in the actual repository. Do not edit or write files, change configuration, run formatters or code generation that rewrites tracked files, commit, or otherwise carry out the plan. Prefer existing functions and patterns over new machinery.
+
+                    The tool catalog stays the same across modes for request-cache stability. These plan-mode rules override any later tool description or guidance that suggests using mutation tools; those tools remain listed to keep the tool catalog unchanged. Do not use todo_write to track this planning phase: it tracks implementation after an approved plan, while the plan itself belongs in exit_plan_mode.
+
+                    Resolve discoverable facts by inspection. Use ask_user_question only for user-owned choices or material ambiguity that inspection cannot answer. Do not ask the user where code lives or how current behavior works when you can find out.
+
+                    Make the plan decision-complete: state the goal and success criteria; group implementation changes by subsystem; identify public API, schema, and data-flow changes; cover edge cases, failure modes, tests, acceptance criteria, and explicit assumptions. Keep it concise enough to review but detailed enough that another engineer can implement it without making design decisions.
+
+                    When ready, call exit_plan_mode with the complete plan markdown, starting with a # title. Make exit_plan_mode the only and final tool call in that assistant response: it presents the plan for approval, and implementation begins only in a later step after approval. Do not paste the final plan as a plain reply or ask "should I proceed?" through prose or ask_user_question. If review rejects it, incorporate the feedback and present again. If the review channel is unavailable or aborted, stay in plan mode and ask the user to switch modes manually; do not proceed with implementation.
+              # --- ZCode: planning discipline ---
+              - id: zcode-plan
+                name: 'dsh-plugin-zcode-plan'
+                inject: [systemPrompt]
+                config: {}
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024
+          - id: delegation
+            name: cordis:group
+            group: true
+            isolate:
+              workflowEngine: true
+            config:
+              - id: tool-subagent-control
+                name: '@deepseek-ai/dsh-tool-subagent-control'
+              - id: tool-subagent-list-agents
+                name: '@deepseek-ai/dsh-tool-subagent-control/list-agents'
+              - id: tool-subagent
+                name: '@deepseek-ai/dsh-tool-subagent'
+                config:
+                  provider: spawn
+                  toolName: subagent
+                  modelSelectionSettings: true
+                  backgroundMode: continuable
+              - id: tool-subagent-fork
+                name: '@deepseek-ai/dsh-tool-subagent'
+                config:
+                  provider: fork
+                  toolName: subagent_fork
+                  backgroundMode: continuable
+              - id: tool-subagent-codex
+                name: '@deepseek-ai/dsh-tool-subagent'
+                disabled: true
+                config:
+                  provider: codex
+                  toolName: subagent_codex
+                  backgroundMode: one-shot
+                  maxDepth: provider-managed
+              - id: tool-subagent-claude-code
+                name: '@deepseek-ai/dsh-tool-subagent'
+                disabled: true
+                config:
+                  provider: claude-code
+                  toolName: subagent_claude_code
+                  backgroundMode: one-shot
+                  maxDepth: provider-managed
+              - id: workflow-ptc
+                name: '@deepseek-ai/dsh-workflow-ptc'
+                config:
+                  provider: spawn
+              - id: tool-workflow
+                name: '@deepseek-ai/dsh-tool-workflow'
+              - id: tool-ralph
+                name: '@deepseek-ai/dsh-tool-ralph'
+                disabled: true
+                config:
+                  subagentProvider: spawn
+                  maxRounds: 64
+              # --- ZCode: workflow discipline ---
+              - id: zcode-workflow
+                name: 'dsh-plugin-zcode-workflow'
+                inject: [systemPrompt]
+                config: {}
+          - id: tool-ask-user
+            name: '@deepseek-ai/dsh-tool-ask-user'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+          - id: present
+            name: '@deepseek-ai/dsh-tool-present'
+          - id: tool-plugin-manager
+            name: '@deepseek-ai/dsh-plugin-manager/tools'
+            disabled: true

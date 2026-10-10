@@ -1,0 +1,13 @@
+{
+  "name": "dsh-plugin-zcode-ability",
+  "description": "ZCode capability container for DeepSeek Harness. Holds no logic of its own: it carries the declarative patch that mounts its six component packages (dsh-plugin-zcode-{persona,skills,plan,workflow}, dsh-plugin-zcode-environment, dsh-plugin-z.ai-account) and the ported ZCode skill tree (skills/).",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "license": "MIT"
+}
