@@ -1,0 +1,30 @@
+{
+  "name": "dsh-private-plugin-account-testcode",
+  "description": "External TestCode account plugin: dialog sign-in (123/abc), a fake 'TestCode Acc' inference provider with aav/vvi model groups, and a TestOK reply",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@deepseek-ai/cordis-plugin-loader": "^1.0.5",
+    "@dsh-private/api-account-hub": "workspace:*",
+    "@deepseek-ai/dsh-credentials": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-settings": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-util-values": "0.2.0-rc.2",
+    "@deepseek-ai/schemastery": "~3.18.4",
+    "zod": "^4.4.3"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "~4.0.4",
+    "@deepseek-ai/dsh-llm": "0.2.0-rc.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22"
+  }
+}
