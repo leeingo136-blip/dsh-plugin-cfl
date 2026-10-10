@@ -8,3 +8,10 @@ allowBuilds:
   node-llama-cpp: true
   protobufjs: true
   '@google/genai': true
+# Install node-llama-cpp's prebuilt binaries for every target platform into
+# node_modules. The runtime (getLlama) auto-detects process.platform/arch/GPU
+# and loads the matching backend, so one node_modules tree serves both macOS
+# and Windows hosts without reinstalling.
+supportedArchitectures:
+  os: [current, darwin, win32, linux]
+  cpu: [current, x64, arm64]
