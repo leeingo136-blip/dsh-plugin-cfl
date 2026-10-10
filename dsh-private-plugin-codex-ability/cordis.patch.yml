@@ -24,8 +24,8 @@
       # Flip to `disabled: true` to ship the preset installed but not enabled.
       disabled: false
       config:
-        id: codex
-        name: Codex
+        id: codex-breath
+        name: Codex吐息
         description: Codex 工作方式。标准能力 + Codex 的会话内能力（移植系统提示词 / loop 定时器与四工具 / 移植技能树）
         order: -8
         plugins:

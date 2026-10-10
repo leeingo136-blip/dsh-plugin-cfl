@@ -64,9 +64,9 @@ const COMPONENT = {
 } as const
 
 /** The preset this component contributes. */
-export const PRESET_ID = 'codex'
+export const PRESET_ID = 'codex-breath'
 /** Display name of the contributed preset (any characters; not an identifier). */
-export const PRESET_NAME = 'Codex'
+export const PRESET_NAME = 'Codex吐息'
 /** Sort weight: negative claims a fixed place ahead of the shipped presets. */
 export const PRESET_ORDER = -8
 /** Description as declared in the patch row. */
