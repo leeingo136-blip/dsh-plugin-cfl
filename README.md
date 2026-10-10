@@ -17,6 +17,7 @@ External plugins for the DeepSeek Harness, kept standalone from the harness repo
 | `dsh-plugin-zcode-ability` | ZCode 移植容器：persona / skills / plan / workflow / environment（zCode之剑 预设）+ z.ai-account 账号 + 8 个技能 | ⚠️ 仅 z.ai-account |
 | `dsh-plugin-qwen-ability` | Qwen 容器：账号 / persona / loop / environment（Qwen的折扇 预设） | ⚠️ 仅 qwen-account |
 | `dsh-plugin-codex-ability` | Codex 容器：账号 / persona / loop / environment（Codex吐息 预设） | ⚠️ 仅 codex-account |
+| `dsh-plugin-claude-ability` | Claude 容器：账号 / persona / loop / environment（Claude心流 预设） | ⚠️ 仅 claude-account |
 
 ## 依赖关系 / Dependencies
 
@@ -47,12 +48,16 @@ account plugins.
 ## ⚠️ 账号风险警告 / Account risk warning
 
 **适用于需要登录的账号插件：`deepseek-account`、`codex-account`（订阅 OAuth）、
-`z.ai-account`（OAuth）、`qwen-account`（API Key）。**
+`z.ai-account`（OAuth）、`qwen-account`（API Key）、`claude-account`（订阅 OAuth / Console Key）。**
 
 这些插件为官方客户端行为的**开源代码移植**：登录与请求流程已考虑指纹伪造（客户端
 平台标识、User-Agent、设备标识等请求头），但**未经过长期压力测试**，无法保证不被
 官方风控识别——**存在账号被限制或封禁的风险，请酌情使用**。建议不要绑定重要账号，
 因使用本插件产生的账号后果由使用者自行承担。
+
+其中 **`claude-account` 的订阅 OAuth 通道风险更高**：Anthropic 未官方开放第三方
+客户端接入，该通道属灰色地带且风控严格；其 **Console API Key 模式完全合法**，
+推荐优先使用。
 
 **Applies to the login-capable account plugins: `deepseek-account`,
 `codex-account` (subscription OAuth), `z.ai-account` (OAuth) and

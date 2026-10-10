@@ -1,0 +1,30 @@
+{
+  "name": "@dsh/claude-account",
+  "description": "Claude 账号组件：Anthropic 订阅 OAuth（授权码+PKCE，免回调粘贴）与 Console API Key 双路登录，凭证镜像进凭据存储统一管理，服务 pi-ai anthropic-messages 路由。",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./locale/*": "./locale/*"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis-plugin-loader": "^1.0.5",
+    "@deepseek-ai/dsh-credentials": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-llm-pi-ai": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-native-command": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-settings": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-util-values": "0.2.0-rc.2",
+    "@deepseek-ai/schemastery": "~3.18.4",
+    "@dsh/api-account-hub": "workspace:*",
+    "@earendil-works/pi-ai": "0.87.1"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "~4.0.4",
+    "@deepseek-ai/dsh-llm": "0.2.0-rc.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22"
+  }
+}

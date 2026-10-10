@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Claude组件",
+    "description": "Claude 会话内能力：Anthropic 订阅 OAuth / Console API Key 双路账号、loop 定时器及其四工具、自写姿态提示词与 Claude 预设。"
+  }
+}

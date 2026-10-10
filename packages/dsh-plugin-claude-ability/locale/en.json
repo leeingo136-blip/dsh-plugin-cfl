@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Claude Extensions",
+    "description": "Claude session capabilities: the Anthropic-subscription OAuth / Console API-key account, the loop scheduler with its four tools, the self-authored posture prompt and the Claude preset."
+  }
+}
