@@ -35,6 +35,27 @@ containers do not depend on hub.
 因此安装任何账号插件前，先安装 account-hub / Install account-hub first, then the
 account plugins.
 
+## ⚠️ 账号风险警告 / Account risk warning
+
+**适用于需要登录的账号插件：`deepseek-account`、`codex-account`（订阅 OAuth）、
+`z.ai-account`（OAuth）、`qwen-account`（API Key）。**
+
+这些插件为官方客户端行为的**开源代码移植**：登录与请求流程已考虑指纹伪造（客户端
+平台标识、User-Agent、设备标识等请求头），但**未经过长期压力测试**，无法保证不被
+官方风控识别——**存在账号被限制或封禁的风险，请酌情使用**。建议不要绑定重要账号，
+因使用本插件产生的账号后果由使用者自行承担。
+
+**Applies to the login-capable account plugins: `deepseek-account`,
+`codex-account` (subscription OAuth), `z.ai-account` (OAuth) and
+`qwen-account` (API key).**
+
+These plugins are **open-source ports of official client behaviour**. Fingerprint
+spoofing (client platform, User-Agent, device headers) is taken into account, but
+they have **not been stress-tested over the long term** — the vendor's risk
+control may still detect them. **There is a real risk of account restriction or
+ban; use at your own discretion**, preferably not with accounts you cannot afford
+to lose. Any consequences to your account are your own responsibility.
+
 ## 仓库不含的内容 / Not included
 
 - `node_modules/` —— 根目录 `pnpm install` 自包含重建（宿主依赖走 npm，pi-ai 0.87.1 经 patchedDependencies 修补；llama-local 的全平台预编译二进制由 `supportedArchitectures` 约定，macOS 与 Windows 共用同一份）。

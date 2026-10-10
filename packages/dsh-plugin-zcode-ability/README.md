@@ -3,6 +3,11 @@
 把 ZCode 的会话内能力搬进 DeepSeek Harness 的私有插件。一个能力一个组件，外加
 「zCode之剑」预设把这些组件与移植来的技能装配成一棵能力树。
 
+> ⚠️ **封号风险提示（仅 z.ai-account）**：该组件为官方客户端行为的开源代码移植，
+> 登录与请求流程已考虑指纹伪造，但未经过长期压力测试，存在账号被限制或封禁的风险，
+> 请酌情使用，不要绑定重要账号。persona / skills / plan / workflow / environment
+> 不涉及账号，无此风险。
+
 **边界**：只写插件，不改动 harness 任何源码。harness 提供的全部是已发布接口
 （`accountHub.register`、`ctx.llm.*`、`ctx.systemPrompt.*`、`ctx.tools.*`、`ctx.credentials`、
 agent preset 声明）。`deepseek-harness/` 只用于查看接口与构建依赖链接。
