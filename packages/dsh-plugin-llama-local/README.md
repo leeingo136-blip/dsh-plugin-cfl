@@ -2,6 +2,12 @@
 
 在 Harness 内直接运行一个本地小模型，由 llama.cpp 在本进程内解码。不联网、不需要账号、不改动 Harness 源码。
 
+> **依赖 account-hub**：本插件的账号卡片（启用/下载/状态显示）注册在 dsh-plugin-account-hub
+> 的「设置-账号」界面里，必须与 account-hub 一起安装，单独安装本插件没有任何 UI 入口。
+>
+> **Requires account-hub**: the plugin's account card lives in dsh-plugin-account-hub's
+> Settings-Account page and cannot be used without it.
+
 默认加载 **xLAM-2-3B-fc-r**（Qwen2.5 底座，专为函数调用训练），可在 Harness 内触发技能/工具循环；若 `models/` 里没有 xLAM 权重，则自动回退到 **Qwen3-0.6B**（纯对话，不调用工具）。权重文件由 `scripts/fetch-model.mjs` 下载，不在仓库内。
 
 ## 一、为什么是 GGUF 而不是 ONNX
@@ -29,23 +35,21 @@ dsh-plugin-llama-local/
 ├── src/fetch-weights.ts  # 应用内权重下载器（启用时自动拉取，带镜像回退）
 ├── scripts/fetch-model.mjs  # 离线权重下载器（--list / --variant / --force）
 ├── models/               # 权重，不进仓库（xLAM 约 1.93 GB / Qwen3 约 484 MB）
-├── node_modules/         # 运行时依赖，随包分发
-├── setup-links.sh        # 建立 @deepseek-ai/* 链接场（编译期必需）
-├── install-plugin.sh     # 接入桌面 dev home
-└── uninstall-plugin.sh   # 精确反向卸载
+├── node_modules/         # 运行时依赖，随包分发（含全平台预编译二进制）
+└── install-plugin.sh     # 接入桌面 dev home
 ```
 
-安装：
+安装（npm 化流程，不再有软链场）：
 
 ```bash
-sh setup-links.sh          # 编译期：@deepseek-ai/* 链接
-npm install                # 拉取 node-llama-cpp（按平台取原生二进制）
-node scripts/fetch-model.mjs
-npx tsc -p tsconfig.build.json
-sh install-plugin.sh       # 写入 dev home 三处
+# 仓库根：拉齐全部依赖（宿主依赖走 npm，llama 原生二进制按 supportedArchitectures 全平台安装）
+pnpm install
+npx tsc -p tsconfig.build.json       # 本包目录内构建
+node scripts/fetch-model.mjs         # 预取权重（可选，应用内下载亦可）
 ```
 
-卸载：`sh uninstall-plugin.sh`（插件目录默认保留，加 `--purge` 删除）。
+随后在官方 App profile（`~/.dsh/profiles/desktop`）的 `package.json` 中加入本包与
+dsh-plugin-account-hub 的 `link:` 依赖键和 bundle 行，`pnpm install` 同步。
 
 ## 三、权重
 
@@ -88,6 +92,8 @@ node scripts/fetch-model.mjs --force        # 强制重新下载
 
 ## 六、已知限制
 
-- 原生二进制绑定平台：macOS 与 Windows 需各自安装一次（跨平台不能复用同一份 `node_modules`）；
+- 原生二进制绑定平台：仓库以 `supportedArchitectures` 约定一次安装全平台预编译包
+  （macOS Metal / Windows CPU·Vulkan·CUDA / Linux），运行时按平台与 GPU 自动选择后端，
+  macOS 与 Windows 可共用同一份 `node_modules`；
 - 纯 CPU 解码，长回复需要等待；
 - 会话里若选过本模型，卸载后需手动把该会话切到其它模型（模型选择以字符串记录在会话里）。

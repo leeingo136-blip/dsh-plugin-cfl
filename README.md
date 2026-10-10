@@ -8,25 +8,46 @@ External plugins for the DeepSeek Harness, kept standalone from the harness repo
 
 全部位于 `packages/` 下 / All under `packages/`:
 
-| 目录 | 说明 |
-|---|---|
-| `dsh-plugin-account-testcode` | TestCode 测试账号插件（direct 模式） |
-| `dsh-plugin-deepseek-account` | DeepSeek 官方账号插件（credential-inject 模式） |
-| `dsh-plugin-account-hub` | 账号管理枢纽（官方宿主适配：hub API / 桌面 shim / UI 组件 ×2） |
-| `dsh-plugin-llama-local` | 本地 GGUF 推理插件：xLAM-2-3B-fc-r（函数调用）/ Qwen3-0.6B 兜底，node-llama-cpp 引擎，工具调用走别名注入 + 解析回环 |
-| `dsh-plugin-zcode-ability` | ZCode 移植容器：persona / skills / plan / workflow / environment（zCode之剑 预设）+ z.ai-account 账号 + 8 个技能 |
-| `dsh-plugin-qwen-ability` | Qwen 容器：账号 / persona / loop / environment（Qwen的折扇 预设） |
-| `dsh-plugin-codex-ability` | Codex 容器：账号 / persona / loop / environment（Codex吐息 预设） |
+| 目录 | 说明 | 依赖 account-hub |
+|---|---|---|
+| `dsh-plugin-account-hub` | 账号管理枢纽（官方宿主适配：hub API / 桌面 shim / UI 组件 ×2） | ——（本体） |
+| `dsh-plugin-deepseek-account` | DeepSeek 官方账号插件（credential-inject 模式） | ✅ 必须 |
+| `dsh-plugin-account-testcode` | TestCode 测试账号插件（direct 模式） | ✅ 必须 |
+| `dsh-plugin-llama-local` | 本地 GGUF 推理插件：xLAM-2-3B-fc-r（函数调用）/ Qwen3-0.6B 兜底，node-llama-cpp 引擎，工具调用走别名注入 + 解析回环 | ✅ 必须 |
+| `dsh-plugin-zcode-ability` | ZCode 移植容器：persona / skills / plan / workflow / environment（zCode之剑 预设）+ z.ai-account 账号 + 8 个技能 | ⚠️ 仅 z.ai-account |
+| `dsh-plugin-qwen-ability` | Qwen 容器：账号 / persona / loop / environment（Qwen的折扇 预设） | ⚠️ 仅 qwen-account |
+| `dsh-plugin-codex-ability` | Codex 容器：账号 / persona / loop / environment（Codex吐息 预设） | ⚠️ 仅 codex-account |
+
+## 依赖关系 / Dependencies
+
+**account-hub 是所有账号插件的宿主。** deepseek-account、qwen-account、codex-account、
+z.ai-account、account-testcode、llama-local 的账号卡片全部通过 hub API 注册进
+account-hub 的「设置-账号」界面——不装 hub，这些插件没有 UI 入口，账号无法登录与
+管理。容器内的 persona / loop / environment / skills 等纯提示词与预设组件不依赖 hub。
+
+**account-hub is required by every account plugin.** The account cards of
+deepseek-account, qwen-account, codex-account, z.ai-account, account-testcode and
+llama-local all register through the hub API into account-hub's Settings-Account
+page. Without hub installed they have no UI surface and accounts cannot be signed
+in or managed. Persona / loop / environment / skills components inside the
+containers do not depend on hub.
+
+因此安装任何账号插件前，先安装 account-hub / Install account-hub first, then the
+account plugins.
 
 ## 仓库不含的内容 / Not included
 
-- `node_modules/` —— 根目录 `pnpm install` 自包含重建（宿主依赖走 npm，pi-ai 0.87.1 经 patchedDependencies 修补）。
+- `node_modules/` —— 根目录 `pnpm install` 自包含重建（宿主依赖走 npm，pi-ai 0.87.1 经 patchedDependencies 修补；llama-local 的全平台预编译二进制由 `supportedArchitectures` 约定，macOS 与 Windows 共用同一份）。
 - `dist/` —— 构建产物，各包内重建：`tsc -p tsconfig.build.json`。
-- `models/` —— 模型权重（单文件远超 Gitee 100MB 上限）。llama-local 权重用 `node scripts/fetch-model.mjs` 重新拉取。
+- `models/` —— 模型权重（单文件远超 Git 托管上限）。llama-local 权重用 `node scripts/fetch-model.mjs` 重新拉取。
 - `.state/` —— 运行时状态（如 llama-local 的启用标记）。
 
 ## 构建与安装 / Build & install
 
 1. 安装：仓库根 `pnpm install`（pnpm 11.x）。
 2. 构建：各包 `tsc -p tsconfig.build.json`。
-3. 装机：官方 App profile（`~/.dsh/profiles/desktop`）以 `link:` 指向各容器包，`pnpm install` 同步。
+3. 装机：官方 App profile（`~/.dsh/profiles/desktop`）以 `link:` 指向各容器包，`pnpm install` 同步；依赖键与 bundle 清单中，账号插件须与 account-hub 同时出现。
+
+## 许可 / License
+
+[MIT](./LICENSE)

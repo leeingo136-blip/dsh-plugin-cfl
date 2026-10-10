@@ -28,6 +28,10 @@ dsh-plugin-zcode-ability/                      # 容器：只有装载层，没�
     └── src/{index,adapter,card,protocol}.ts + assets/zai-logo.svg
 ```
 
+> **依赖 account-hub**：`z.ai-account` 的账号卡片注册在 dsh-plugin-account-hub 的
+> 「设置-账号」界面，须与 account-hub 同时安装；其余五个组件（persona / skills /
+> plan / workflow / environment）不依赖 hub，可独立使用。
+
 六个**嵌套组件包**各有自己的包名，装载行直接写包名——组件因此是可单独寻址、
 单独回退的实体。**没有任何两个包之间有 import 关系**（唯一的共享件是
 `zcode-skills` 自己的 `context.ts`，一个 15 行的类型增强；预设不引用任何组件包，
