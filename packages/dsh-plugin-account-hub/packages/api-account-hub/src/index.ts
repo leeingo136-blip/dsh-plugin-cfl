@@ -117,6 +117,7 @@ export class AccountHub extends Service {
  * hub is the single browser-facing seam of every account plugin: listing and
  * watching goes through here, operations forward by account id, and provider
  * parameters land in the namespace the plugin declared at registration.
+ * @typert service accountHubController
  */
 export class AccountHubController extends TypertRemoteService {
   constructor(ctx: Context) {

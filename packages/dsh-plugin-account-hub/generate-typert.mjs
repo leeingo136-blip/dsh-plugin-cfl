@@ -14,7 +14,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const HARNESS = fileURLToPath(new URL('../../../DeepSeekHarnessPrivate/deepseek-harness/', import.meta.url))
+const HARNESS = fileURLToPath(new URL('../../../../DeepSeekHarnessPrivate/deepseek-harness/', import.meta.url))
 const { WorkspaceTypertGenerator } = await import(
   new URL(HARNESS + 'packages/typert/generator/lib/types/index.js', import.meta.url).href
 )

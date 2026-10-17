@@ -4,10 +4,10 @@ window.__ModuleLoader__.load({
 		var module = { exports: {} };
 		var exports = module.exports;
 		Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
-		let react_jsx_runtime = require("react/jsx-runtime");
 		let react = require("react");
 		let _deepseek_ai_dsh_client_ui_primitives = require("@deepseek-ai/dsh-client-ui-primitives");
-		//#region lib/types/client/locales.js
+		let react_jsx_runtime = require("react/jsx-runtime");
+		//#region src/client/locales.ts
 		/** Copy dictionaries for the settings account column. */
 		/** English strings (the key-set source of truth for this pair). */
 		const en = {
@@ -58,8 +58,8 @@ window.__ModuleLoader__.load({
 			groupAsr: "语音识别"
 		};
 		//#endregion
-		//#region \0dsh-css:/Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/deep-seek-harness-plugin/dsh-plugin-account-hub/packages/ui-account-hub/src/client/HubAccountCard.module.css.mjs
-		const css = ".F3R7oa_card{border:.5px solid var(--dsw-alias-settings-card-stroke,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-xl,12px);background:var(--dsw-alias-surface-default,transparent);flex-direction:column;gap:12px;margin:8px 0;padding:14px 16px;display:flex}.F3R7oa_plain{flex-direction:column;gap:12px;display:flex}.F3R7oa_head{align-items:baseline;gap:10px;display:flex}.F3R7oa_name{color:var(--dsw-alias-text-primary);font-size:14px;font-weight:600}.F3R7oa_status{color:var(--dsw-alias-text-secondary);font-size:12px}.F3R7oa_statusOk{color:var(--dsw-alias-text-success,var(--dsw-ref-green-600,#1a7f37))}.F3R7oa_statusWarn{color:var(--dsw-alias-text-warning,var(--dsw-ref-yellow-600,#9a6700))}.F3R7oa_statusError{color:var(--dsw-alias-text-danger,var(--dsw-ref-red-600,#cf222e))}.F3R7oa_field{flex-direction:column;gap:4px;display:flex}.F3R7oa_label{color:var(--dsw-alias-text-secondary);font-size:12px;font-weight:500}.F3R7oa_hint{color:var(--dsw-alias-text-tertiary,var(--dsw-alias-text-secondary));margin:0;font-size:11px}.F3R7oa_select{border:1px solid var(--dsw-alias-border-default,var(--dsw-ref-neutral-200,#e2e2e2));background:var(--dsw-alias-surface-default,transparent);height:30px;color:var(--dsw-alias-text-primary);border-radius:8px;padding:0 8px;font-size:13px}.F3R7oa_notice{color:var(--dsw-alias-text-secondary);margin:0;font-size:12px}.F3R7oa_error{color:var(--dsw-alias-text-danger,var(--dsw-ref-red-600,#cf222e));margin:0;font-size:12px}.F3R7oa_actions{justify-content:flex-end;gap:8px;display:flex}.F3R7oa_rich{color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary));flex-direction:column;gap:16px;padding:8px 0;font-size:13px;line-height:22px;display:flex}.F3R7oa_officialCard{border:.5px solid var(--dsw-alias-settings-card-stroke,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-xl,12px);background:var(--dsw-alias-settings-card-fill,var(--dsw-alias-surface-default,transparent));flex-direction:column;gap:4px;padding:12px 16px;display:flex}.F3R7oa_brandCard{border:.5px solid var(--dsw-alias-settings-card-stroke,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-xl,12px);background:var(--dsw-alias-surface-default,transparent);align-items:center;gap:10px;margin:8px 0;padding:12px 16px;display:flex}.F3R7oa_brandMark{flex:none;width:24px;height:24px}.F3R7oa_brandName{min-width:0;color:var(--dsw-alias-text-primary);white-space:nowrap;flex:1;font-size:14px;font-weight:600}.F3R7oa_brandActions{flex:none;align-items:center;gap:8px;display:flex}.F3R7oa_brandStatus{max-width:42%;color:var(--dsw-alias-text-secondary);text-overflow:ellipsis;white-space:nowrap;flex:none;font-size:12px;line-height:20px;overflow:hidden}.F3R7oa_brandStatusError{color:var(--dsw-alias-text-danger,var(--dsw-ref-red-600,#cf222e))}.F3R7oa_identityRow{justify-content:space-between;align-items:center;gap:16px;min-height:44px;display:flex}.F3R7oa_rowEnd{flex:none;align-items:center;gap:20px;display:flex}.F3R7oa_identity{align-items:center;gap:10px;min-width:0;min-height:44px;display:flex}.F3R7oa_avatar{corner-shape:round;width:32px;height:32px;color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary));background:var(--dsw-alias-bg-skeleton,var(--dsw-ref-neutral-100,#f2f2f2));border-radius:50%;flex:none;justify-content:center;align-items:center;display:flex;overflow:hidden}.F3R7oa_avatarImage{object-fit:cover;width:100%;height:100%}.F3R7oa_avatarBrand{width:22px;height:22px}.F3R7oa_identityCopy{flex-direction:column;min-width:0;display:flex}.F3R7oa_nameLine{font-size:14px;font-weight:500}.F3R7oa_statusLine{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary));text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.F3R7oa_accountInfo{color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary));white-space:nowrap;flex:none;align-items:center;gap:2px;font-size:13px;line-height:22px;text-decoration:none;display:inline-flex}.F3R7oa_accountInfo:hover{text-underline-offset:3px;text-decoration:underline}.F3R7oa_bRow{box-sizing:border-box;justify-content:space-between;align-items:center;gap:16px;min-height:40px;padding:6px 0;display:flex}.F3R7oa_divider{border-top:.5px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-default,#e2e2e2))}.F3R7oa_amount{flex-wrap:wrap;justify-content:flex-end;font-size:18px;font-weight:510;line-height:28px;display:flex}.F3R7oa_secondary,.F3R7oa_unavailable{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary))}.F3R7oa_links{flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:10px;display:flex}.F3R7oa_linkButton{box-sizing:border-box;border:.5px solid var(--dsw-alias-border-l3,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-md,8px);min-width:58px;height:36px;color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary));white-space:nowrap;background:0 0;flex:none;justify-content:center;align-items:center;padding:0 14px;font-size:14px;line-height:22px;text-decoration:none;display:inline-flex}.F3R7oa_linkButton:hover{background:var(--dsw-alias-interactive-bg-hover,#8080801a)}.F3R7oa_primaryLink{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-text-primary));border-color:#0000;font-weight:500}.F3R7oa_primaryLink:hover{background:var(--dsw-alias-button-primary-hover,var(--dsw-alias-text-primary))}.F3R7oa_unavailableLink{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary));text-underline-offset:3px;text-decoration:underline}.F3R7oa_unavailableLink:hover{color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary))}.F3R7oa_combo{position:relative}.F3R7oa_comboTrigger{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;height:30px;padding:0 8px;border:1px solid var(--dsw-alias-border-default,var(--dsw-ref-neutral-200,#e2e2e2));border-radius:8px;background:var(--dsw-alias-surface-default,transparent);color:var(--dsw-alias-text-primary);font-size:13px;cursor:pointer;text-align:left}.F3R7oa_comboPlaceholder{color:var(--dsw-alias-text-tertiary,var(--dsw-alias-text-secondary))}.F3R7oa_comboValue{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.F3R7oa_comboCaret{flex:none;font-size:10px;color:var(--dsw-alias-text-tertiary,var(--dsw-alias-text-secondary))}.F3R7oa_comboBackdrop{position:fixed;inset:0;z-index:90}.F3R7oa_comboPanel{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:91;display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--dsw-alias-border-default,var(--dsw-ref-neutral-200,#e2e2e2));border-radius:8px;background:var(--dsw-alias-surface-raised,var(--dsw-ref-neutral-0,#fff));box-shadow:0 8px 24px #0000001f}.F3R7oa_comboList{display:block;max-height:240px;overflow-y:auto}.F3R7oa_comboOption{display:block;width:100%;box-sizing:border-box;padding:6px 8px;border:0;border-radius:6px;background:0 0;color:var(--dsw-alias-text-primary);font-size:13px;text-align:left;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.F3R7oa_comboOption:hover{background:var(--dsw-alias-interactive-bg-hover,#8080801a)}.F3R7oa_comboOptionActive{font-weight:600;background:var(--dsw-alias-interactive-bg-hover,#8080801a)}.F3R7oa_comboEmpty{padding:6px 8px;font-size:12px;color:var(--dsw-alias-text-secondary)}";
+		//#region \0dsh-css:/Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/deep-seek-harness-plugin/packages/dsh-plugin-account-hub/packages/ui-account-hub/src/client/HubAccountCard.module.css.mjs
+		const css = ".dEbo8a_card{border:.5px solid var(--dsw-alias-settings-card-stroke,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-xl,12px);background:var(--dsw-alias-surface-default,transparent);flex-direction:column;gap:12px;margin:8px 0;padding:14px 16px;display:flex}.dEbo8a_plain{flex-direction:column;gap:12px;display:flex}.dEbo8a_head{align-items:baseline;gap:10px;display:flex}.dEbo8a_name{color:var(--dsw-alias-text-primary);font-size:14px;font-weight:600}.dEbo8a_status{color:var(--dsw-alias-text-secondary);font-size:12px}.dEbo8a_statusOk{color:var(--dsw-alias-text-success,var(--dsw-ref-green-600,#1a7f37))}.dEbo8a_statusWarn{color:var(--dsw-alias-text-warning,var(--dsw-ref-yellow-600,#9a6700))}.dEbo8a_statusError{color:var(--dsw-alias-text-danger,var(--dsw-ref-red-600,#cf222e))}.dEbo8a_field{flex-direction:column;gap:4px;display:flex}.dEbo8a_label{color:var(--dsw-alias-text-secondary);font-size:12px;font-weight:500}.dEbo8a_hint{color:var(--dsw-alias-text-tertiary,var(--dsw-alias-text-secondary));margin:0;font-size:11px}.dEbo8a_select{border:1px solid var(--dsw-alias-border-default,var(--dsw-ref-neutral-200,#e2e2e2));background:var(--dsw-alias-surface-default,transparent);height:30px;color:var(--dsw-alias-text-primary);border-radius:8px;padding:0 8px;font-size:13px}.dEbo8a_combo{position:relative}.dEbo8a_comboTrigger{border:1px solid var(--dsw-alias-border-default,var(--dsw-ref-neutral-200,#e2e2e2));background:var(--dsw-alias-surface-default,transparent);width:100%;height:30px;color:var(--dsw-alias-text-primary);cursor:pointer;text-align:left;border-radius:8px;justify-content:space-between;align-items:center;gap:6px;padding:0 8px;font-size:13px;display:flex}.dEbo8a_comboPlaceholder{color:var(--dsw-alias-text-tertiary,var(--dsw-alias-text-secondary))}.dEbo8a_comboValue{text-overflow:ellipsis;white-space:nowrap;flex:1;overflow:hidden}.dEbo8a_comboCaret{color:var(--dsw-alias-text-tertiary,var(--dsw-alias-text-secondary));flex:none;font-size:10px}.dEbo8a_comboBackdrop{z-index:90;position:fixed;inset:0}.dEbo8a_comboPanel{z-index:91;border:1px solid var(--dsw-alias-border-default,var(--dsw-ref-neutral-200,#e2e2e2));background:var(--dsw-alias-surface-raised,var(--dsw-ref-neutral-0,#fff));border-radius:8px;flex-direction:column;gap:6px;padding:8px;display:flex;position:absolute;top:calc(100% + 4px);left:0;right:0;box-shadow:0 8px 24px #0000001f}.dEbo8a_comboList{max-height:240px;display:block;overflow-y:auto}.dEbo8a_comboOption{box-sizing:border-box;width:100%;color:var(--dsw-alias-text-primary);text-align:left;cursor:pointer;text-overflow:ellipsis;white-space:nowrap;background:0 0;border:0;border-radius:6px;padding:6px 8px;font-size:13px;display:block;overflow:hidden}.dEbo8a_comboOption:hover{background:var(--dsw-alias-interactive-bg-hover,#8080801a)}.dEbo8a_comboOptionActive{background:var(--dsw-alias-interactive-bg-hover,#8080801a);font-weight:600}.dEbo8a_comboEmpty{color:var(--dsw-alias-text-secondary);padding:6px 8px;font-size:12px}.dEbo8a_notice{color:var(--dsw-alias-text-secondary);margin:0;font-size:12px}.dEbo8a_error{color:var(--dsw-alias-text-danger,var(--dsw-ref-red-600,#cf222e));margin:0;font-size:12px}.dEbo8a_actions{justify-content:flex-end;gap:8px;display:flex}.dEbo8a_rich{color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary));flex-direction:column;gap:16px;padding:8px 0;font-size:13px;line-height:22px;display:flex}.dEbo8a_officialCard{border:.5px solid var(--dsw-alias-settings-card-stroke,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-xl,12px);background:var(--dsw-alias-settings-card-fill,var(--dsw-alias-surface-default,transparent));flex-direction:column;gap:4px;padding:12px 16px;display:flex}.dEbo8a_brandCard{border:.5px solid var(--dsw-alias-settings-card-stroke,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-xl,12px);background:var(--dsw-alias-surface-default,transparent);align-items:center;gap:10px;margin:8px 0;padding:12px 16px;display:flex}.dEbo8a_brandMark{flex:none;width:24px;height:24px}.dEbo8a_brandName{min-width:0;color:var(--dsw-alias-text-primary);white-space:nowrap;flex:1;font-size:14px;font-weight:600}.dEbo8a_brandActions{flex:none;align-items:center;gap:8px;display:flex}.dEbo8a_brandStatus{max-width:42%;color:var(--dsw-alias-text-secondary);text-overflow:ellipsis;white-space:nowrap;flex:none;font-size:12px;line-height:20px;overflow:hidden}.dEbo8a_brandStatusError{color:var(--dsw-alias-text-danger,var(--dsw-ref-red-600,#cf222e))}.dEbo8a_identityRow{justify-content:space-between;align-items:center;gap:16px;min-height:44px;display:flex}.dEbo8a_rowEnd{flex:none;align-items:center;gap:20px;display:flex}.dEbo8a_identity{align-items:center;gap:10px;min-width:0;min-height:44px;display:flex}.dEbo8a_avatar{corner-shape:round;width:32px;height:32px;color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary));background:var(--dsw-alias-bg-skeleton,var(--dsw-ref-neutral-100,#f2f2f2));border-radius:50%;flex:none;justify-content:center;align-items:center;display:flex;overflow:hidden}.dEbo8a_avatarImage{object-fit:cover;width:100%;height:100%}.dEbo8a_avatarBrand{width:22px;height:22px}.dEbo8a_identityCopy{flex-direction:column;min-width:0;display:flex}.dEbo8a_nameLine{font-size:14px;font-weight:500}.dEbo8a_statusLine{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary));text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.dEbo8a_accountInfo{color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary));white-space:nowrap;flex:none;align-items:center;gap:2px;font-size:13px;line-height:22px;text-decoration:none;display:inline-flex}.dEbo8a_accountInfo:hover{text-underline-offset:3px;text-decoration:underline}.dEbo8a_bRow{box-sizing:border-box;justify-content:space-between;align-items:center;gap:16px;min-height:40px;padding:6px 0;display:flex}.dEbo8a_divider{border-top:.5px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-default,#e2e2e2))}.dEbo8a_amount{flex-wrap:wrap;justify-content:flex-end;font-size:18px;font-weight:510;line-height:28px;display:flex}.dEbo8a_secondary,.dEbo8a_unavailable{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary))}.dEbo8a_links{flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:10px;display:flex}.dEbo8a_linkButton{box-sizing:border-box;border:.5px solid var(--dsw-alias-border-l3,var(--dsw-alias-border-default,#e2e2e2));border-radius:var(--dsw-radius-md,8px);min-width:58px;height:36px;color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary));white-space:nowrap;background:0 0;flex:none;justify-content:center;align-items:center;padding:0 14px;font-size:14px;line-height:22px;text-decoration:none;display:inline-flex}.dEbo8a_linkButton:hover{background:var(--dsw-alias-interactive-bg-hover,#8080801a)}.dEbo8a_primaryLink{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-text-primary));border-color:#0000;font-weight:500}.dEbo8a_primaryLink:hover{background:var(--dsw-alias-button-primary-hover,var(--dsw-alias-text-primary))}.dEbo8a_unavailableLink{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-text-tertiary));text-underline-offset:3px;text-decoration:underline}.dEbo8a_unavailableLink:hover{color:var(--dsw-alias-label-primary,var(--dsw-alias-text-primary))}";
 		const tagId = "@dsh/ui-account-hub/HubAccountCard.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
 			const tag = document.createElement("style");
@@ -69,62 +69,62 @@ window.__ModuleLoader__.load({
 			document.head.appendChild(tag);
 		}
 		var HubAccountCard_module_css_default = {
-			"accountInfo": "F3R7oa_accountInfo",
-			"actions": "F3R7oa_actions",
-			"amount": "F3R7oa_amount",
-			"avatar": "F3R7oa_avatar",
-			"avatarBrand": "F3R7oa_avatarBrand",
-			"avatarImage": "F3R7oa_avatarImage",
-			"bRow": "F3R7oa_bRow",
-			"brandActions": "F3R7oa_brandActions",
-			"brandCard": "F3R7oa_brandCard",
-			"brandMark": "F3R7oa_brandMark",
-			"brandName": "F3R7oa_brandName",
-			"brandStatus": "F3R7oa_brandStatus",
-			"brandStatusError": "F3R7oa_brandStatusError",
-			"card": "F3R7oa_card",
-			"combo": "F3R7oa_combo",
-			"comboTrigger": "F3R7oa_comboTrigger",
-			"comboPlaceholder": "F3R7oa_comboPlaceholder",
-			"comboValue": "F3R7oa_comboValue",
-			"comboCaret": "F3R7oa_comboCaret",
-			"comboBackdrop": "F3R7oa_comboBackdrop",
-			"comboPanel": "F3R7oa_comboPanel",
-			"comboList": "F3R7oa_comboList",
-			"comboOption": "F3R7oa_comboOption",
-			"comboOptionActive": "F3R7oa_comboOptionActive",
-			"comboEmpty": "F3R7oa_comboEmpty",
-			"divider": "F3R7oa_divider",
-			"error": "F3R7oa_error",
-			"field": "F3R7oa_field",
-			"head": "F3R7oa_head",
-			"hint": "F3R7oa_hint",
-			"identity": "F3R7oa_identity",
-			"identityCopy": "F3R7oa_identityCopy",
-			"identityRow": "F3R7oa_identityRow",
-			"label": "F3R7oa_label",
-			"linkButton": "F3R7oa_linkButton",
-			"links": "F3R7oa_links",
-			"name": "F3R7oa_name",
-			"nameLine": "F3R7oa_nameLine",
-			"notice": "F3R7oa_notice",
-			"officialCard": "F3R7oa_officialCard",
-			"plain": "F3R7oa_plain",
-			"primaryLink": "F3R7oa_primaryLink",
-			"rich": "F3R7oa_rich",
-			"rowEnd": "F3R7oa_rowEnd",
-			"secondary": "F3R7oa_secondary",
-			"select": "F3R7oa_select",
-			"status": "F3R7oa_status",
-			"statusError": "F3R7oa_statusError",
-			"statusLine": "F3R7oa_statusLine",
-			"statusOk": "F3R7oa_statusOk",
-			"statusWarn": "F3R7oa_statusWarn",
-			"unavailable": "F3R7oa_unavailable",
-			"unavailableLink": "F3R7oa_unavailableLink"
+			"accountInfo": "dEbo8a_accountInfo",
+			"actions": "dEbo8a_actions",
+			"amount": "dEbo8a_amount",
+			"avatar": "dEbo8a_avatar",
+			"avatarBrand": "dEbo8a_avatarBrand",
+			"avatarImage": "dEbo8a_avatarImage",
+			"bRow": "dEbo8a_bRow",
+			"brandActions": "dEbo8a_brandActions",
+			"brandCard": "dEbo8a_brandCard",
+			"brandMark": "dEbo8a_brandMark",
+			"brandName": "dEbo8a_brandName",
+			"brandStatus": "dEbo8a_brandStatus",
+			"brandStatusError": "dEbo8a_brandStatusError",
+			"card": "dEbo8a_card",
+			"combo": "dEbo8a_combo",
+			"comboBackdrop": "dEbo8a_comboBackdrop",
+			"comboCaret": "dEbo8a_comboCaret",
+			"comboEmpty": "dEbo8a_comboEmpty",
+			"comboList": "dEbo8a_comboList",
+			"comboOption": "dEbo8a_comboOption",
+			"comboOptionActive": "dEbo8a_comboOptionActive",
+			"comboPanel": "dEbo8a_comboPanel",
+			"comboPlaceholder": "dEbo8a_comboPlaceholder",
+			"comboTrigger": "dEbo8a_comboTrigger",
+			"comboValue": "dEbo8a_comboValue",
+			"divider": "dEbo8a_divider",
+			"error": "dEbo8a_error",
+			"field": "dEbo8a_field",
+			"head": "dEbo8a_head",
+			"hint": "dEbo8a_hint",
+			"identity": "dEbo8a_identity",
+			"identityCopy": "dEbo8a_identityCopy",
+			"identityRow": "dEbo8a_identityRow",
+			"label": "dEbo8a_label",
+			"linkButton": "dEbo8a_linkButton",
+			"links": "dEbo8a_links",
+			"name": "dEbo8a_name",
+			"nameLine": "dEbo8a_nameLine",
+			"notice": "dEbo8a_notice",
+			"officialCard": "dEbo8a_officialCard",
+			"plain": "dEbo8a_plain",
+			"primaryLink": "dEbo8a_primaryLink",
+			"rich": "dEbo8a_rich",
+			"rowEnd": "dEbo8a_rowEnd",
+			"secondary": "dEbo8a_secondary",
+			"select": "dEbo8a_select",
+			"status": "dEbo8a_status",
+			"statusError": "dEbo8a_statusError",
+			"statusLine": "dEbo8a_statusLine",
+			"statusOk": "dEbo8a_statusOk",
+			"statusWarn": "dEbo8a_statusWarn",
+			"unavailable": "dEbo8a_unavailable",
+			"unavailableLink": "dEbo8a_unavailableLink"
 		};
 		//#endregion
-		//#region lib/types/client/HubAccountCard.js
+		//#region src/client/HubAccountCard.tsx
 		/**
 		* The hub-rendered account card: a declarative form drawn entirely from the
 		* plugin's card descriptor. The plugin ships no browser code — its descriptor,
@@ -257,14 +257,31 @@ window.__ModuleLoader__.load({
 				}));
 			};
 			const autoSaveValue = (field, value) => {
+				const op = value === void 0 || value === "" ? {
+					op: "unset",
+					path: [field.key]
+				} : {
+					op: "set",
+					path: [field.key],
+					value
+				};
 				(async () => {
 					try {
-						await commitParams([value === void 0 || value === "" ? { op: "unset", path: [field.key] } : { op: "set", path: [field.key], value }]);
+						await commitParams([op]);
 						if (!alive.current) return;
-						setInitial((previous) => ({ ...previous, [field.key]: value }));
-						setValues((previous) => ({ ...previous, [field.key]: value }));
+						setInitial((previous) => ({
+							...previous,
+							[field.key]: value
+						}));
+						setValues((previous) => ({
+							...previous,
+							[field.key]: value
+						}));
 					} catch (error) {
-						if (alive.current) setNotice({ tone: "error", text: t("saveFailed") + ": " + messageOf(error) });
+						if (alive.current) setNotice({
+							tone: "error",
+							text: `${t("saveFailed")}: ${messageOf(error)}`
+						});
 					}
 				})();
 			};
@@ -390,7 +407,7 @@ window.__ModuleLoader__.load({
 				setDialogValues({});
 				setDialogNotice(null);
 			};
-			const renderButtonControl = (field) => (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+			const renderButtonControl = (field) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 				variant: field.tone === "primary" ? "primary" : "outline",
 				size: "sm",
 				disabled: busy !== null,
@@ -401,7 +418,7 @@ window.__ModuleLoader__.load({
 				children: busy === field.key ? field.busyLabel ?? t("busy") : field.label
 			}, field.key);
 			const renderField = (field) => {
-				if (field.kind === "note") return (0, react_jsx_runtime.jsx)("p", {
+				if (field.kind === "note") return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 					className: HubAccountCard_module_css_default.hint,
 					children: field.label
 				}, field.key);
@@ -409,7 +426,7 @@ window.__ModuleLoader__.load({
 				const domId = `account-hub-${row.id}-${field.key}`;
 				const control = () => {
 					switch (field.kind) {
-						case "text": return (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
+						case "text": return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
 							id: domId,
 							type: "text",
 							value: asString(values[field.key]),
@@ -418,7 +435,7 @@ window.__ModuleLoader__.load({
 								setValue(field.key, event.target.value);
 							}
 						});
-						case "password": return (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
+						case "password": return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
 							id: domId,
 							type: "password",
 							value: asString(values[field.key]),
@@ -428,7 +445,7 @@ window.__ModuleLoader__.load({
 								setValue(field.key, event.target.value);
 							}
 						});
-						case "checkbox": return (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Checkbox, {
+						case "checkbox": return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Checkbox, {
 							checked: asBoolean(values[field.key]),
 							label: field.label,
 							onChange: (next) => {
@@ -446,7 +463,10 @@ window.__ModuleLoader__.load({
 								if (bound !== void 0) bound.access.setPath([bound.path], value);
 								else if (field.autoSave === true) autoSaveValue(field, value);
 								else setValue(field.key, value);
-								setFilters((previous) => ({ ...previous, [field.key]: "" }));
+								setFilters((previous) => ({
+									...previous,
+									[field.key]: ""
+								}));
 								setOpenKey(null);
 							};
 							if (field.searchable === true) {
@@ -455,116 +475,117 @@ window.__ModuleLoader__.load({
 								const visible = current === "" || query === "" || filtered.some((choice) => choice.value === current) ? filtered : [choices.find((choice) => choice.value === current), ...filtered].filter((choice) => choice !== void 0);
 								const open = openKey === field.key;
 								const currentChoice = choices.find((choice) => choice.value === current);
-								return (0, react_jsx_runtime.jsxs)("div", {
+								return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 									className: HubAccountCard_module_css_default.combo,
-									children: [(0, react_jsx_runtime.jsxs)("button", {
+									children: [/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("button", {
 										type: "button",
 										id: domId,
 										className: HubAccountCard_module_css_default.comboTrigger,
 										onClick: () => {
 											setOpenKey(open ? null : field.key);
 										},
-										children: [(0, react_jsx_runtime.jsx)("span", {
+										children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 											className: currentChoice === void 0 && current === "" ? HubAccountCard_module_css_default.comboPlaceholder : HubAccountCard_module_css_default.comboValue,
 											children: currentChoice?.label ?? (current === "" ? t("selectPlaceholder") : current)
-										}), (0, react_jsx_runtime.jsx)("span", {
+										}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 											className: HubAccountCard_module_css_default.comboCaret,
 											children: "▾"
 										})]
-									}), open && (0, react_jsx_runtime.jsxs)(react.Fragment, {
-										children: [(0, react_jsx_runtime.jsx)("div", {
-											className: HubAccountCard_module_css_default.comboBackdrop,
-											onClick: () => {
-												setOpenKey(null);
+									}), open && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+										className: HubAccountCard_module_css_default.comboBackdrop,
+										onClick: () => {
+											setOpenKey(null);
+										}
+									}), /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+										className: HubAccountCard_module_css_default.comboPanel,
+										children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
+											type: "text",
+											value: asString(filters[field.key]),
+											placeholder: t("selectSearchPlaceholder"),
+											autoComplete: "off",
+											onChange: (event) => {
+												setFilters((previous) => ({
+													...previous,
+													[field.key]: event.target.value
+												}));
 											}
-										}), (0, react_jsx_runtime.jsxs)("div", {
-											className: HubAccountCard_module_css_default.comboPanel,
-											children: [(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
-												type: "text",
-												value: asString(filters[field.key]),
-												placeholder: t("selectSearchPlaceholder"),
-												autoComplete: "off",
-												onChange: (event) => {
-													setFilters((previous) => ({ ...previous, [field.key]: event.target.value }));
-												}
-											}), (0, react_jsx_runtime.jsx)("div", {
-												className: HubAccountCard_module_css_default.comboList,
-												children: visible.length === 0 ? (0, react_jsx_runtime.jsx)("div", {
-													className: HubAccountCard_module_css_default.comboEmpty,
-													children: t("selectNoMatch")
-												}) : visible.map((choice) => (0, react_jsx_runtime.jsx)("button", {
-													type: "button",
-													className: choice.value === current ? HubAccountCard_module_css_default.comboOption + " " + HubAccountCard_module_css_default.comboOptionActive : HubAccountCard_module_css_default.comboOption,
-													onClick: () => {
-														pick(choice.value);
-													},
-													children: choice.label
-												}, choice.value))
-											})]
+										}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+											className: HubAccountCard_module_css_default.comboList,
+											children: visible.length === 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+												className: HubAccountCard_module_css_default.comboEmpty,
+												children: t("selectNoMatch")
+											}) : visible.map((choice) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+												type: "button",
+												className: choice.value === current ? `${HubAccountCard_module_css_default.comboOption} ${HubAccountCard_module_css_default.comboOptionActive}` : HubAccountCard_module_css_default.comboOption,
+												onClick: () => {
+													pick(choice.value);
+												},
+												children: choice.label
+											}, choice.value))
 										})]
-									})]
+									})] })]
 								});
 							}
-								return (0, react_jsx_runtime.jsxs)("select", {
-									id: domId,
-									className: HubAccountCard_module_css_default.select,
-									value: current,
-									onChange: (event) => {
-										pick(event.target.value);
-									},
-									children: [current === "" && (0, react_jsx_runtime.jsx)("option", {
-										value: "",
-										children: t("selectPlaceholder")
-									}), choices.map((choice) => (0, react_jsx_runtime.jsx)("option", {
-										value: choice.value,
-										children: choice.label
-									}, choice.value))]
-								});
+							return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("select", {
+								id: domId,
+								className: HubAccountCard_module_css_default.select,
+								value: current,
+								onChange: (event) => {
+									pick(event.target.value);
+								},
+								children: [current === "" && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("option", {
+									value: "",
+									children: t("selectPlaceholder")
+								}), choices.map((choice) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("option", {
+									value: choice.value,
+									children: choice.label
+								}, choice.value))]
+							});
 						}
 						case "button": return renderButtonControl(field);
 					}
 				};
-				return (0, react_jsx_runtime.jsxs)("div", {
+				return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 					className: HubAccountCard_module_css_default.field,
 					children: [
-						field.kind !== "checkbox" && (0, react_jsx_runtime.jsx)("label", {
+						field.kind !== "checkbox" && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("label", {
 							className: HubAccountCard_module_css_default.label,
 							htmlFor: domId,
 							children: field.label
 						}),
 						control(),
-						field.description !== void 0 && (0, react_jsx_runtime.jsx)("p", {
+						field.description !== void 0 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 							className: HubAccountCard_module_css_default.hint,
 							children: field.description
 						})
 					]
 				}, field.key);
 			};
-			const dialogModal = dialogField?.dialog === void 0 ? null : (0, react_jsx_runtime.jsxs)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
+			const dialogModal = dialogField?.dialog === void 0 ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
 				open: true,
 				onClose: closeDialog,
 				title: dialogField.dialog.title ?? dialogField.label,
 				closeLabel: t("cancel"),
-				footer: (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+				footer: /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 					variant: "outline",
 					size: "sm",
 					disabled: dialogBusy,
 					onClick: closeDialog,
 					children: t("cancel")
-				}), (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+				}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 					variant: "primary",
 					size: "sm",
 					disabled: dialogBusy,
 					onClick: runDialogSubmit,
 					children: dialogBusy ? dialogField.busyLabel ?? t("busy") : dialogField.dialog.submitLabel ?? dialogField.label
 				})] }),
-				children: [dialogField.dialog.fields.map((input, index) => (0, react_jsx_runtime.jsxs)("div", {
+				children: [dialogField.dialog.fields.map((input, index) => /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 					className: HubAccountCard_module_css_default.field,
-					children: [(0, react_jsx_runtime.jsx)("label", {
+					children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("label", {
 						className: HubAccountCard_module_css_default.label,
 						htmlFor: `account-hub-dialog-${row.id}-${input.key}`,
 						children: input.label
-					}), input.kind === "select" ? (0, react_jsx_runtime.jsxs)("select", {
+					}), input.kind === "select" ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("select", {
 						id: `account-hub-dialog-${row.id}-${input.key}`,
 						className: HubAccountCard_module_css_default.select,
 						value: asString(dialogValues[input.key]),
@@ -576,11 +597,11 @@ window.__ModuleLoader__.load({
 								[input.key]: event.target.value
 							}));
 						},
-						children: [asString(dialogValues[input.key]) === "" && (0, react_jsx_runtime.jsx)("option", { value: "", children: "" }), (input.options ?? []).filter((option) => input.dependsOn === void 0 || option.when === void 0 || asString(dialogValues[input.dependsOn]) === option.when).map((option) => (0, react_jsx_runtime.jsx)("option", {
+						children: [asString(dialogValues[input.key]) === "" && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("option", { value: "" }), (input.options ?? []).filter((option) => input.dependsOn === void 0 || option.when === void 0 || asString(dialogValues[input.dependsOn]) === option.when).map((option) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("option", {
 							value: option.value,
 							children: option.label
 						}, option.value))]
-					}) : (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
+					}) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
 						id: `account-hub-dialog-${row.id}-${input.key}`,
 						type: input.kind,
 						value: asString(dialogValues[input.key]),
@@ -594,7 +615,7 @@ window.__ModuleLoader__.load({
 							}));
 						}
 					})]
-				}, input.key)), dialogNotice !== null && (0, react_jsx_runtime.jsx)("p", {
+				}, input.key)), dialogNotice !== null && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 					className: dialogNotice.tone === "error" ? HubAccountCard_module_css_default.error : HubAccountCard_module_css_default.notice,
 					children: dialogNotice.text
 				})]
@@ -611,11 +632,11 @@ window.__ModuleLoader__.load({
 					const link = asRecord(raw);
 					const href = asString(link.href);
 					const label = asString(link.label);
-					if (href === "" || label === "") return (0, react_jsx_runtime.jsx)("span", {
+					if (href === "" || label === "") return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 						className: HubAccountCard_module_css_default.unavailable,
 						children: label
 					});
-					return (0, react_jsx_runtime.jsx)("a", {
+					return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("a", {
 						className: `${HubAccountCard_module_css_default.unavailable} ${HubAccountCard_module_css_default.unavailableLink}`,
 						href,
 						target: "_blank",
@@ -623,66 +644,66 @@ window.__ModuleLoader__.load({
 						children: label
 					});
 				};
-				return (0, react_jsx_runtime.jsxs)("div", {
+				return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 					className: HubAccountCard_module_css_default.rich,
 					children: [
-						(0, react_jsx_runtime.jsxs)("div", {
+						/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 							className: HubAccountCard_module_css_default.officialCard,
 							children: [
-								(0, react_jsx_runtime.jsxs)("div", {
+								/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 									className: HubAccountCard_module_css_default.identityRow,
-									children: [(0, react_jsx_runtime.jsxs)("div", {
+									children: [/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 										className: HubAccountCard_module_css_default.identity,
-										children: [(0, react_jsx_runtime.jsx)("span", {
+										children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 											className: HubAccountCard_module_css_default.avatar,
-											children: brandLogo !== "" ? (0, react_jsx_runtime.jsx)("img", {
+											children: brandLogo !== "" ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("img", {
 												className: HubAccountCard_module_css_default.avatarBrand,
 												src: brandLogo,
 												alt: ""
-											}) : asString(identity.avatarUrl) !== "" ? (0, react_jsx_runtime.jsx)("img", {
+											}) : asString(identity.avatarUrl) !== "" ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("img", {
 												className: HubAccountCard_module_css_default.avatarImage,
 												src: asString(identity.avatarUrl),
 												alt: "",
 												referrerPolicy: "no-referrer"
-											}) : (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconUserOutlineMedium, { size: 16 })
-										}), (0, react_jsx_runtime.jsxs)("div", {
+											}) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconUserOutlineMedium, { size: 16 })
+										}), /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 											className: HubAccountCard_module_css_default.identityCopy,
-											children: [(0, react_jsx_runtime.jsx)("span", {
+											children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 												className: HubAccountCard_module_css_default.nameLine,
 												children: asString(identity.name) !== "" ? asString(identity.name) : t("signedIn")
-											}), (0, react_jsx_runtime.jsx)("span", {
+											}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 												className: HubAccountCard_module_css_default.statusLine,
 												role: "status",
 												children: asString(identity.contact)
 											})]
 										})]
-									}), (0, react_jsx_runtime.jsxs)("div", {
+									}), /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 										className: HubAccountCard_module_css_default.rowEnd,
-										children: [buttons.map(renderButtonControl), asString(identity.infoUrl) !== "" && (0, react_jsx_runtime.jsxs)("a", {
+										children: [buttons.map(renderButtonControl), asString(identity.infoUrl) !== "" && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("a", {
 											className: HubAccountCard_module_css_default.accountInfo,
 											href: asString(identity.infoUrl),
 											target: "_blank",
 											rel: "noopener noreferrer",
-											children: [asString(identity.infoLabel) !== "" ? asString(identity.infoLabel) : t("accountInfo"), (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconRightUpOutlineRegular, { size: 12 })]
+											children: [asString(identity.infoLabel) !== "" ? asString(identity.infoLabel) : t("accountInfo"), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconRightUpOutlineRegular, { size: 12 })]
 										})]
 									})]
 								}),
-								(detailRows.length > 0 || balanceRows.length > 0 || moreRows.length > 0) && (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }),
-							detailRows.map((raw, index) => {
-								const d = asRecord(raw);
-								return (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [index > 0 && (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), (0, react_jsx_runtime.jsxs)("div", {
+								(detailRows.length > 0 || balanceRows.length > 0 || moreRows.length > 0) && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }),
+								detailRows.map((raw, index) => {
+									const d = asRecord(raw);
+									return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [index > 0 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 										className: HubAccountCard_module_css_default.bRow,
-										children: [(0, react_jsx_runtime.jsx)("span", { children: asString(d.label) }), (0, react_jsx_runtime.jsx)("span", { children: asString(d.value) })]
+										children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: asString(d.label) }), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: asString(d.value) })]
 									})] }, `detail-${index}`);
 								}),
 								balanceRows.map((raw, index) => {
 									const r = asRecord(raw);
-									return (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [(index > 0 || detailRows.length > 0) && (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), (0, react_jsx_runtime.jsxs)("div", {
+									return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [(index > 0 || detailRows.length > 0) && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 										className: HubAccountCard_module_css_default.bRow,
-										children: [(0, react_jsx_runtime.jsx)("span", { children: asString(r.label) }), asString(r.value) !== "" ? (0, react_jsx_runtime.jsx)("span", {
+										children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: asString(r.label) }), asString(r.value) !== "" ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 											className: HubAccountCard_module_css_default.amount,
 											children: asString(r.value)
-										}) : r.loading === true ? (0, react_jsx_runtime.jsx)("span", {
+										}) : r.loading === true ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 											className: HubAccountCard_module_css_default.unavailable,
 											children: t("loading")
 										}) : rowLink(r.unavailable ?? null)]
@@ -692,19 +713,19 @@ window.__ModuleLoader__.load({
 									const m = asRecord(raw);
 									const links = Array.isArray(m.links) ? m.links : [];
 									if (links.length === 0) return null;
-									return (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [(index > 0 || detailRows.length > 0 || balanceRows.length > 0) && (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), (0, react_jsx_runtime.jsxs)("div", {
+									return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react.Fragment, { children: [(index > 0 || detailRows.length > 0 || balanceRows.length > 0) && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", { className: HubAccountCard_module_css_default.divider }), /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 										className: HubAccountCard_module_css_default.bRow,
-										children: [(0, react_jsx_runtime.jsx)("span", {
+										children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 											className: HubAccountCard_module_css_default.secondary,
 											children: asString(m.label)
-										}), (0, react_jsx_runtime.jsx)("div", {
+										}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 											className: HubAccountCard_module_css_default.links,
 											children: links.map((rawLink, linkIndex) => {
 												const link = asRecord(rawLink);
 												const href = asString(link.href);
 												const action = asString(link.action);
 												const label = asString(link.label);
-												if (action !== "") return (0, react_jsx_runtime.jsx)("button", {
+												if (action !== "") return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 													className: link.primary === true ? `${HubAccountCard_module_css_default.linkButton} ${HubAccountCard_module_css_default.primaryLink}` : HubAccountCard_module_css_default.linkButton,
 													onClick: () => {
 														(async () => {
@@ -722,7 +743,7 @@ window.__ModuleLoader__.load({
 													children: label
 												}, linkIndex);
 												if (href === "") return null;
-												return (0, react_jsx_runtime.jsx)("a", {
+												return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("a", {
 													className: link.primary === true ? `${HubAccountCard_module_css_default.linkButton} ${HubAccountCard_module_css_default.primaryLink}` : HubAccountCard_module_css_default.linkButton,
 													href,
 													target: "_blank",
@@ -735,7 +756,7 @@ window.__ModuleLoader__.load({
 								})
 							]
 						}),
-						notice !== null && (0, react_jsx_runtime.jsx)("p", {
+						notice !== null && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 							className: notice.tone === "error" ? HubAccountCard_module_css_default.error : HubAccountCard_module_css_default.notice,
 							children: notice.text
 						}),
@@ -745,28 +766,28 @@ window.__ModuleLoader__.load({
 			}
 			if (surface !== "models" && brandLogo !== "" && brandName !== "" && !visibleFields.some((field) => isValueField(field))) {
 				const actionFields = status.signingIn === true ? [] : visibleFields.filter((field) => field.kind === "button" || field.kind === "dialog");
-				return (0, react_jsx_runtime.jsxs)("div", {
+				return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 					className: HubAccountCard_module_css_default.brandCard,
 					children: [
-						(0, react_jsx_runtime.jsx)("img", {
+						/* @__PURE__ */ (0, react_jsx_runtime.jsx)("img", {
 							className: HubAccountCard_module_css_default.brandMark,
 							src: brandLogo,
 							alt: ""
 						}),
-						(0, react_jsx_runtime.jsx)("span", {
+						/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: HubAccountCard_module_css_default.brandName,
 							children: brandName
 						}),
-						statusText !== "" && (0, react_jsx_runtime.jsx)("span", {
+						statusText !== "" && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: [HubAccountCard_module_css_default.brandStatus, statusLevel === "error" ? HubAccountCard_module_css_default.brandStatusError : void 0].join(" "),
 							role: "status",
 							children: statusText
 						}),
-						actionFields.length > 0 && (0, react_jsx_runtime.jsx)("div", {
+						actionFields.length > 0 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 							className: HubAccountCard_module_css_default.brandActions,
 							children: actionFields.map(renderButtonControl)
 						}),
-						notice !== null && (0, react_jsx_runtime.jsx)("p", {
+						notice !== null && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 							className: notice.tone === "error" ? HubAccountCard_module_css_default.error : HubAccountCard_module_css_default.notice,
 							children: notice.text
 						}),
@@ -776,29 +797,29 @@ window.__ModuleLoader__.load({
 			}
 			if (surface === "models" && zone === "catalog") {
 				if (visibleFields.length === 0) return null;
-				return (0, react_jsx_runtime.jsx)(react_jsx_runtime.Fragment, { children: visibleFields.map(renderField) });
+				return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(react_jsx_runtime.Fragment, { children: visibleFields.map(renderField) });
 			}
-			return (0, react_jsx_runtime.jsxs)("div", {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 				className: surface === "models" ? HubAccountCard_module_css_default.plain : HubAccountCard_module_css_default.card,
 				children: [
-					surface !== "models" && (0, react_jsx_runtime.jsxs)("div", {
+					surface !== "models" && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: HubAccountCard_module_css_default.head,
-						children: [(0, react_jsx_runtime.jsx)("span", {
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: HubAccountCard_module_css_default.name,
 							children: row.displayName
-						}), statusText !== "" && (0, react_jsx_runtime.jsx)("span", {
+						}), statusText !== "" && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: [HubAccountCard_module_css_default.status, statusLevel === null ? void 0 : HubAccountCard_module_css_default[statusLevel]].join(" "),
 							children: statusText
 						})]
 					}),
 					visibleFields.map(renderField),
-					notice !== null && (0, react_jsx_runtime.jsx)("p", {
+					notice !== null && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: notice.tone === "error" ? HubAccountCard_module_css_default.error : HubAccountCard_module_css_default.notice,
 						children: notice.text
 					}),
-					visibleFields.some((field) => isValueField(field) && !isDraftBound(field) && field.autoSave !== true) && (0, react_jsx_runtime.jsx)("div", {
+					visibleFields.some((field) => isValueField(field) && !isDraftBound(field) && field.autoSave !== true) && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 						className: HubAccountCard_module_css_default.actions,
-						children: (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+						children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 							variant: "primary",
 							size: "sm",
 							disabled: !dirty || busy !== null,
@@ -813,7 +834,7 @@ window.__ModuleLoader__.load({
 			});
 		}
 		//#endregion
-		//#region lib/types/client/HubSection.js
+		//#region src/client/HubSection.tsx
 		/**
 		* Rendered seats of the settings account column: the section wrapper, its
 		* loaded row list, and one account's models-page provider card. Split from the
@@ -821,6 +842,27 @@ window.__ModuleLoader__.load({
 		* as the bundle input, and a JSX-bearing entry leaves that path unresolvable
 		* for tooling reading the preset (the third-party notices generator among it).
 		*/
+		/** Display order of the capability groups; a group with no rows renders nothing. */
+		const GROUP_ORDER = [
+			"chat",
+			"embedding",
+			"tts",
+			"asr"
+		];
+		/** The locale key of each group's heading. */
+		const GROUP_KEYS = {
+			chat: "groupChat",
+			embedding: "groupEmbedding",
+			tts: "groupTts",
+			asr: "groupAsr"
+		};
+		/** Style of the group heading shown only when several families coexist. */
+		const GROUP_HEADING = {
+			margin: "10px 0 4px",
+			fontSize: 12,
+			fontWeight: 500,
+			opacity: .65
+		};
 		/**
 		* Render the settings account column: the registry read lives here, row
 		* content is delegated per account to the `account.hub.row` slot.
@@ -830,31 +872,10 @@ window.__ModuleLoader__.load({
 		function AccountHubSection(props) {
 			const { face, renderSlot } = props;
 			if (face === void 0 || renderSlot === void 0) return null;
-			return (0, react_jsx_runtime.jsx)(Loaded, {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(Loaded, {
 				face,
 				renderSlot
 			});
-		}
-		/** Display order of the capability groups; a group with no rows renders nothing. */
-		const GROUP_ORDER = ["chat", "embedding", "tts", "asr"];
-		/** The locale key of each group's heading. */
-		const GROUP_KEYS = { chat: "groupChat", embedding: "groupEmbedding", tts: "groupTts", asr: "groupAsr" };
-		/** Style of the group heading shown only when several families coexist. */
-		const GROUP_HEADING = { margin: "10px 0 4px", fontSize: 12, fontWeight: 500, opacity: .65 };
-		/** Render one row: the declarative card, or the plugin's own slot row. */
-		function renderHubRow(face, renderSlot, row) {
-			return row.card !== void 0 ? (0, react_jsx_runtime.jsx)(HubAccountCard, {
-				t: face.t,
-				row,
-				invoke: (method, args) => face.invoke(row.id, method, args),
-				readParams: () => face.readParams(row.id),
-				commitParams: (ops) => face.commitParams(row.id, ops)
-			}, row.id) : renderSlot("account.hub.row", {
-				accountId: row.id,
-				displayName: row.displayName,
-				state: row.state,
-				invoke: (method, args) => face.invoke(row.id, method, args)
-			}, { entryKey: row.id });
 		}
 		/** @param props - the resolved face and the row renderer. @returns the row list. */
 		function Loaded({ face, renderSlot }) {
@@ -879,18 +900,36 @@ window.__ModuleLoader__.load({
 					dispose();
 				};
 			}, [face]);
-			const groups = GROUP_ORDER.map((type) => ({
-				type,
-				rows: rows.filter(({ row }) => (row.type ?? "chat") === type)
-			})).filter((group) => group.rows.length > 0);
-			return (0, react_jsx_runtime.jsx)("div", { children: failed !== null ? (0, react_jsx_runtime.jsxs)("p", { children: [
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", { children: failed !== null ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("p", { children: [
 				face.t("loadFailed"),
 				" — ",
 				failed
-			] }) : rows.length === 0 ? (0, react_jsx_runtime.jsx)("p", { children: face.t("empty") }) : groups.length <= 1 ? rows.map(({ row }) => renderHubRow(face, renderSlot, row)) : groups.map((group) => (0, react_jsx_runtime.jsxs)("div", { children: [
-				group.rows.length > 1 ? (0, react_jsx_runtime.jsx)("p", { style: GROUP_HEADING, children: face.t(GROUP_KEYS[group.type]) }) : null,
-				group.rows.map(({ row }) => renderHubRow(face, renderSlot, row))
-			] }, group.type)) });
+			] }) : rows.length === 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", { children: face.t("empty") }) : groups.length <= 1 ? rows.map(({ row }) => renderRow(row)) : groups.map((group) => /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", { children: [group.rows.length > 1 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
+				style: GROUP_HEADING,
+				children: face.t(GROUP_KEYS[group.type])
+			}), group.rows.map(({ row }) => renderRow(row))] }, group.type)) });
+			/** Render one row: the declarative card, or the plugin's own slot row. */
+			function renderRow(row) {
+				return row.card !== void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(HubAccountCard, {
+					t: face.t,
+					row,
+					invoke: (method, args) => face.invoke(row.id, method, args),
+					readParams: () => face.readParams(row.id),
+					commitParams: (ops) => face.commitParams(row.id, ops)
+				}, row.id) : renderSlot("account.hub.row", {
+					accountId: row.id,
+					displayName: row.displayName,
+					state: row.state,
+					invoke: (method, args) => face.invoke(row.id, method, args)
+				}, { entryKey: row.id });
+			}
+			/** Group the rows by resolved capability family, in display order. */
+			function groups() {
+				return GROUP_ORDER.map((type) => ({
+					type,
+					rows: rows.filter(({ row }) => (row.type ?? "chat") === type)
+				})).filter((group) => group.rows.length > 0);
+			}
 		}
 		/**
 		* Draw one account's models-page provider card. The seat renders for every
@@ -923,7 +962,7 @@ window.__ModuleLoader__.load({
 				};
 			}, [face, settingsNs]);
 			if (!settled || row === null) return null;
-			return (0, react_jsx_runtime.jsx)(HubAccountCard, {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(HubAccountCard, {
 				t: face.t,
 				row,
 				surface: "models",
@@ -935,7 +974,7 @@ window.__ModuleLoader__.load({
 			});
 		}
 		//#endregion
-		//#region lib/types/client/index.js
+		//#region src/client/index.ts
 		/** @returns the localized display name for the section nav. */
 		function sectionLabel(t) {
 			return t("nav");
