@@ -260,11 +260,14 @@ function ToolsView({ face }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: muted, children: group.subtitle }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: toolList, children: [
         group.tools.map((tool) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: toolLine, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: toolName, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: tool.presetScoped === true ? { ...toolName, color: "var(--dsw-alias-text-secondary)" } : toolName, children: [
             tool.name,
             tool.hasDocs === true ? " \xB7" : ""
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: toolDesc, children: tool.description })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: toolDesc, children: [
+            tool.description,
+            tool.presetScoped === true ? `${tool.description ? " \xB7 " : ""}\u968F\u9884\u8BBE\u4F5C\u7528\u57DF\u52A0\u8F7D` : null
+          ] })
         ] }, tool.name)),
         group.tools.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: muted, children: "\u8BE5\u6765\u6E90\u5F53\u524D\u6CA1\u6709\u53EF\u7528\u5DE5\u5177\u3002" })
       ] })

@@ -11,6 +11,12 @@ export interface DhToolRow {
   description: string
   /** Whether extended usage docs exist in the plan (script tools only). */
   hasDocs?: boolean
+  /**
+   * Catalog-only entry: the tool is not mounted in the scope this plugin
+   * runs in (first-party tools instantiate inside preset scopes), so it is
+   * listed from the static catalog without live description.
+   */
+  presetScoped?: boolean
 }
 
 /**

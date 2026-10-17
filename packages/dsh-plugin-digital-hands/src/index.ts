@@ -282,7 +282,10 @@ export default async function apply(ctx: Context, config: DigitalHandsConfig): P
       })
     }
 
-    // Native (global-layer) tools: attribute via the first-party catalog.
+    // Native tools: every first-party catalog card stays visible. Tools the
+    // current (global-layer) registry does not carry instantiate inside preset
+    // scopes instead — they are listed from the static catalog and flagged.
+    const runtime = new Map(ctx.tools.schemas().map((schema) => [schema.name, schema]))
     const attributed = new Map<string, DhToolRow[]>()
     const unknown: DhToolRow[] = []
     for (const schema of ctx.tools.schemas()) {
@@ -298,8 +301,16 @@ export default async function apply(ctx: Context, config: DigitalHandsConfig): P
       }
     }
     for (const entry of OFFICIAL_PLUGINS) {
-      const tools = attributed.get(entry.plugin)
-      if (tools === undefined) continue
+      const live = attributed.get(entry.plugin)
+      const tools: DhToolRow[] = entry.tools.map((name) => {
+        const schema = runtime.get(name)
+        if (schema !== undefined) return { name, description: schema.description ?? '' }
+        return { name, description: '', presetScoped: true }
+      })
+      // Runtime tools attributed to this plugin but absent from the static list.
+      for (const row of live ?? []) {
+        if (!entry.tools.includes(row.name)) tools.push(row)
+      }
       groups.push({
         origin: 'official',
         title: entry.title,

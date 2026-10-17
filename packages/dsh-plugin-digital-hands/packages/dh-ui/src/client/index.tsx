@@ -24,6 +24,8 @@ interface ToolRow {
   name: string
   description: string
   hasDocs?: boolean
+  /** Catalog-only: loads inside preset scopes, not mounted in this plugin's layer. */
+  presetScoped?: boolean
 }
 
 /** One source group: a plugin, a managed MCP server, or digital-hands itself. */
@@ -329,8 +331,13 @@ function ToolsView({ face }: { face: DhFace }): ReactNode {
           <div style={toolList}>
             {group.tools.map((tool) => (
               <div key={tool.name} style={toolLine}>
-                <span style={toolName}>{tool.name}{tool.hasDocs === true ? ' ·' : ''}</span>
-                <span style={toolDesc}>{tool.description}</span>
+                <span style={tool.presetScoped === true ? { ...toolName, color: 'var(--dsw-alias-text-secondary)' } : toolName}>
+                  {tool.name}{tool.hasDocs === true ? ' ·' : ''}
+                </span>
+                <span style={toolDesc}>
+                  {tool.description}
+                  {tool.presetScoped === true ? `${tool.description ? ' · ' : ''}随预设作用域加载` : null}
+                </span>
               </div>
             ))}
             {group.tools.length === 0 && <p style={muted}>该来源当前没有可用工具。</p>}
