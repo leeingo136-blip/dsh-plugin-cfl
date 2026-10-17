@@ -72,16 +72,26 @@ const LOGO_DATA_URI = 'data:image/svg+xml;base64,'
     + `<text x="12" y="16.5" font-family="Helvetica, Arial, sans-serif" font-size="10"`
     + ` font-weight="700" fill="#ffffff" text-anchor="middle">VE</text></svg>`, 'utf8').toString('base64')
 
-const BRAND = Object.freeze({ logoUrl: LOGO_DATA_URI, name: '本地向量' })
+/** The model id a weight file serves: the file stem (`bge-small-zh-v1.5`). */
+const modelIdOf = (file: string): string => file.replace(/\.gguf$/i, '')
 
-/** The hub card title: 本地 + the actual model name — the plugin's default
- *  weight's stem with any quantization tag dropped
- *  (`bge-small-zh-v1.5-q8_0.gguf` reads as 本地 bge-small-zh-v1.5); the bare
- *  brand when no weight ships with the build. */
+/** The hub card and directory title: 本地 + the actual model name — the
+ *  default weight's stem with any quantization tag dropped
+ *  (`bge-small-zh-v1.5-q8_0.gguf` reads as 本地 bge-small-zh-v1.5); the
+ *  built-in default's name when no weight ships with the build. Fixed at
+ *  build time: the catalog comes from the bundled `models/` directory, so
+ *  the title never changes at runtime. */
 function accountDisplayName(): string {
   const model = modelIdOf(currentWeightFile()).replace(/[-.]q\d[\w]*$/i, '')
   return `本地 ${model}`
 }
+
+/** The brand facts. The name doubles as every title the hub surfaces: the
+ *  account column's brand-layout header renders `brand.name` (a card of
+ *  buttons and notes has no value fields, so the brand layout wins over the
+ *  `displayName` head), and the models-page provider row renders the
+ *  directory entry's displayName — keep both on one string. */
+const BRAND = Object.freeze({ logoUrl: LOGO_DATA_URI, name: accountDisplayName() })
 
 /** One configured embedding model: the exposed id and its weight file. */
 export interface AvailableModel {
@@ -110,9 +120,6 @@ type SchemaNode = InstanceType<typeof zschema>
  * stem. The schema stays (empty) because the loader always mounts one.
  */
 export const Config = zschema.object({}) as unknown as SchemaNode
-
-/** The model id a weight file serves: the file stem (`bge-small-zh-v1.5`). */
-const modelIdOf = (file: string): string => file.replace(/\.gguf$/i, '')
 
 /** A model id resolution failure, mapped to the remote failure vocabulary. */
 export class ModelResolutionError extends Error {
@@ -247,7 +254,8 @@ export class EmbeddingAccount extends Service {
   }
 
   /** Align the directory entry with the engine's load state. Idempotent: the
-   *  load events can fire more often than the state actually flips. */
+   *  load events can fire more often than the state actually flips, and every
+   *  card publish re-checks so a refused swap converges on the next publish. */
   private syncProviderRow(): void {
     const entry: LlmConfigurableProvider = {
       provider: ROUTE,
@@ -260,8 +268,12 @@ export class EmbeddingAccount extends Service {
     try {
       this.providerHandle?.replace(visible ? [entry] : [])
       this.providerRowVisible = visible
-    } catch {
-      // A refused swap leaves the previous state; the next flip retries.
+    } catch (error) {
+      // A refused swap leaves the previous state; the next flip retries. Never
+      // swallow silently: a stuck row is exactly the kind of failure that
+      // must be findable in the host log.
+      console.warn(`[embedding-local] provider row ${visible ? 'restore' : 'withdraw'} refused:`,
+        error instanceof Error ? error.message : error)
     }
   }
 
@@ -397,6 +409,10 @@ export class EmbeddingAccount extends Service {
       brand: BRAND,
       details: rows,
     }
+    // The publish sites are exactly the load-state transitions the user can
+    // trigger (load gesture, unload, lazy first embed): converge the
+    // models-page row here too, so a missed load event self-heals.
+    this.syncProviderRow()
     this.ctx.emit(ACCOUNT_HUB_CHANGED, ID)
   }
 
