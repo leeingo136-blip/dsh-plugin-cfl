@@ -61,12 +61,6 @@ const ROUTE = 'Qwen-account'
 /** The credential reference name the profile renders. */
 const DEFAULT_CREDENTIAL_REF_NAME = 'QWEN_API_KEY'
 
-/** The DashScope catalog's dependable coding default, used before any
- *  discovery run; everything else arrives through model discovery. */
-const DEFAULT_ROUTE_MODELS: readonly ModelRow[] = [
-  { id: 'qwen3-coder-plus', name: 'Qwen3 Coder Plus', contextWindow: 262_144, maxTokens: 32_768 },
-]
-
 /** One adopted catalog row, mirroring the official model-list editor. */
 export interface ModelRow {
   id: string
@@ -303,26 +297,13 @@ export default class QwenAccountExternal extends Service {
 
   // ---- route registration -----------------------------------------------------
 
-  /** Whether the settings user layer carries an explicit `models` write —
-   *  an adoption, or a deliberate clearing. schemastery materializes the
-   *  mounted volatile array as an empty box even when the user never wrote
-   *  the field, so the config box alone cannot distinguish "never adopted"
-   *  from "emptied"; the user layer can (a field's presence there marks a
-   *  genuine user write). */
-  private modelsAdopted(): boolean {
-    try {
-      const user = this.ctx.settings.describe().find(row => row.ns === this.settingsNs)?.user
-      return typeof user === 'object' && user !== null && 'models' in user
-    } catch {
-      return false
-    }
-  }
-
   private routeProfiles(): ReadonlyMap<string, ResolvedPiAiProviderProfile> {
-    // An explicitly written catalog (`models: []` included) is respected as
-    // saved; only an untouched catalog falls back to the defaults.
+    // The picker shows exactly what the models page's editor has saved —
+    // no default fallback. An untouched catalog serves nothing: a picker
+    // entry appears only after a model is configured (visibility is
+    // configuration-gated, matching the embedding account's posture).
     const signedIn = this.signedIn
-    const models = signedIn ? (this.modelsAdopted() ? this.config.models?.get() ?? [] : DEFAULT_ROUTE_MODELS) : []
+    const models = signedIn ? this.config.models?.get() ?? [] : []
     const baseUrl = this.baseUrlValue
     const key = JSON.stringify([signedIn, baseUrl, this.credentialRefName, models])
     const cached = this.routeProfileValue

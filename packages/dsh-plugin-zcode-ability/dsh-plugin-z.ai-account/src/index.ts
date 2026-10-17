@@ -89,14 +89,6 @@ const ANTHROPIC_BASE_BY_PROVIDER = {
   bigmodel: 'https://open.bigmodel.cn/api/anthropic',
 } as const satisfies Record<OAuthProvider, string>
 
-/** The catalog served while the user has adopted none: one live model so a
- *  signed-in account keeps its models-page row (and a usable picker entry)
- *  before and independent of adoption. The models page's own editor
- *  （「获取可用模型」勾选保存） replaces it from then on. */
-const DEFAULT_ROUTE_MODELS: readonly ModelRow[] = [
-  { id: 'glm-4.6', contextWindow: 200_000, maxTokens: 32_768 },
-]
-
 /** One adopted catalog row, mirroring the official model-list editor: the
  *  fields the models page writes at this namespace's `models` key. */
 export interface ModelRow {
@@ -306,25 +298,12 @@ export default class ZaiAccountExternal extends Service {
    *  as a「加载失败」warning bar; an owned profile with no models lists zero
    *  models, so both the selector and the models page simply hide the row
    *  (each derives visibility from a non-empty catalog group). */
-  /** Whether the settings user layer carries an explicit `models` write —
-   *  an adoption, or a deliberate clearing. schemastery materializes the
-   *  mounted volatile array as an empty box even when the user never wrote
-   *  the field, so the config box alone cannot distinguish "never adopted"
-   *  from "emptied"; the user layer can (a field's presence there marks a
-   *  genuine user write). */
-  private modelsAdopted(): boolean {
-    try {
-      const user = this.ctx.settings.describe().find(row => row.ns === this.settingsNs)?.user
-      return typeof user === 'object' && user !== null && 'models' in user
-    } catch {
-      return false
-    }
-  }
-
   private routeProfiles(): ReadonlyMap<string, ResolvedPiAiProviderProfile> {
-    // An explicitly written catalog (`models: []` included) is respected as
-    // saved; only an untouched catalog falls back to the defaults.
-    const models = this.signedIn ? (this.modelsAdopted() ? this.config.models?.get() ?? [] : DEFAULT_ROUTE_MODELS) : []
+    // The picker shows exactly what the models page's editor has saved —
+    // no default fallback. An untouched catalog serves nothing: a picker
+    // entry appears only after a model is configured (visibility is
+    // configuration-gated, matching the embedding account's posture).
+    const models = this.signedIn ? this.config.models?.get() ?? [] : []
     const key = JSON.stringify([this.signedIn, this.providerCache, this.credentialRefName, models])
     const cached = this.routeProfileValue
     if (this.routeProfileKey !== key || cached === undefined) {
