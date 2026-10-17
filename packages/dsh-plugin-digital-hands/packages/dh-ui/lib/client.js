@@ -195,15 +195,15 @@ function apply(ctx) {
 }
 function DigitalHandsSection(props) {
   const { face } = props;
-  const [tab2, setTab] = (0, import_react.useState)("tools");
+  const [activeTab, setActiveTab] = (0, import_react.useState)("tools");
   if (face === void 0) return null;
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: section, children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: tabRow, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", style: tab2(tab2 === "tools"), onClick: () => setTab("tools"), children: "\u5DE5\u5177\u603B\u8D26" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", style: tab2(tab2 === "mcp"), onClick: () => setTab("mcp"), children: "MCP \u670D\u52A1\u5668" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", style: tab2(tab2 === "plans"), onClick: () => setTab("plans"), children: "\u65B9\u6848" })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", style: tab(activeTab === "tools"), onClick: () => setActiveTab("tools"), children: "\u5DE5\u5177\u603B\u8D26" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", style: tab(activeTab === "mcp"), onClick: () => setActiveTab("mcp"), children: "MCP \u670D\u52A1\u5668" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", style: tab(activeTab === "plans"), onClick: () => setActiveTab("plans"), children: "\u65B9\u6848" })
     ] }),
-    tab2 === "tools" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ToolsView, { face }) : tab2 === "mcp" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(McpView, { face }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PlansView, { face })
+    activeTab === "tools" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ToolsView, { face }) : activeTab === "mcp" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(McpView, { face }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PlansView, { face })
   ] });
 }
 function ToolsView({ face }) {
@@ -548,7 +548,7 @@ function PlansView({ face }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: hint, children: [
         "\u7F16\u8F91 ",
         selected,
-        ".yml\uFF08\u25CF = \u672C\u8F6E\u5DF2\u6302\u8F7D\uFF09\u3002\u4FDD\u5B58\u540E\u81EA\u52A8\u70ED\u91CD\u8F7D\u53D7\u7BA1\u5DE5\u5177\uFF1B\u8BED\u6CD5\u7684\u65B9\u6848\u4E0D\u4F1A\u88AB\u5199\u5165\u3002"
+        ".yml\uFF08\u25CF = \u672C\u8F6E\u5DF2\u6302\u8F7D\uFF09\u3002\u4FDD\u5B58\u540E\u81EA\u52A8\u70ED\u91CD\u8F7D\u53D7\u7BA1\u5DE5\u5177\uFF1B\u8BED\u6CD5\u9519\u8BEF\u7684\u65B9\u6848\u4E0D\u4F1A\u88AB\u5199\u5165\u3002"
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
         "textarea",

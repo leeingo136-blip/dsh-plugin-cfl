@@ -254,16 +254,18 @@ function apply(ctx: {
 /** The section, or null while the shell has not injected the face yet. */
 function DigitalHandsSection(props: { face?: DhFace }): ReactNode {
   const { face } = props
-  const [tab, setTab] = useState<'tools' | 'mcp' | 'plans'>('tools')
+  // NOTE: the state name must not shadow the `tab` style helper above —
+  // a previous `const [tab, setTab]` made `style={tab(...)}` call a string.
+  const [activeTab, setActiveTab] = useState<'tools' | 'mcp' | 'plans'>('tools')
   if (face === undefined) return null
   return (
     <div style={section}>
       <div style={tabRow}>
-        <button type="button" style={tab(tab === 'tools')} onClick={() => setTab('tools')}>工具总账</button>
-        <button type="button" style={tab(tab === 'mcp')} onClick={() => setTab('mcp')}>MCP 服务器</button>
-        <button type="button" style={tab(tab === 'plans')} onClick={() => setTab('plans')}>方案</button>
+        <button type="button" style={tab(activeTab === 'tools')} onClick={() => setActiveTab('tools')}>工具总账</button>
+        <button type="button" style={tab(activeTab === 'mcp')} onClick={() => setActiveTab('mcp')}>MCP 服务器</button>
+        <button type="button" style={tab(activeTab === 'plans')} onClick={() => setActiveTab('plans')}>方案</button>
       </div>
-      {tab === 'tools' ? <ToolsView face={face} /> : tab === 'mcp' ? <McpView face={face} /> : <PlansView face={face} />}
+      {activeTab === 'tools' ? <ToolsView face={face} /> : activeTab === 'mcp' ? <McpView face={face} /> : <PlansView face={face} />}
     </div>
   )
 }
@@ -588,7 +590,7 @@ function PlansView({ face }: { face: DhFace }): ReactNode {
       {selected !== null && (
         <>
           <p style={hint}>
-            编辑 {selected}.yml（● = 本轮已挂载）。保存后自动热重载受管工具；语法的方案不会被写入。
+            编辑 {selected}.yml（● = 本轮已挂载）。保存后自动热重载受管工具；语法错误的方案不会被写入。
           </p>
           <textarea style={textarea} value={draft} spellCheck={false}
             onChange={(e) => { setDraft(e.target.value); setDirty(true) }} />
