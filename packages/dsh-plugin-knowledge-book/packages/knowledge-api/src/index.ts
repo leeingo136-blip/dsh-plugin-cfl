@@ -100,13 +100,22 @@ export class KnowledgeController extends TypertRemoteService {
   /** Every skill across all sources (file-backed + runtime). */
   @Remote
   async skillList(): Promise<JsonValue> {
-    const runtimeSkills: Array<{ name: string; description: string }> = []
+    const runtimeSkills: Array<{ name: string; description: string; source?: string }> = []
     const skills = this.svc<SkillsRegistry>('skills')
     if (skills !== undefined) {
       try {
         const all = await skills.list({})
         for (const one of all) {
-          if (one.source === 'runtime') runtimeSkills.push({ name: one.name, description: one.description })
+          // Runtime skills carry the reserved provider "runtime"; their `source`
+          // string (when present) is the registering side's session identity.
+          const raw = one as { name: string; description: string; source?: unknown; provider?: unknown }
+          if (raw.provider === 'runtime') {
+            runtimeSkills.push({
+              name: raw.name,
+              description: raw.description,
+              ...(typeof raw.source === 'string' && raw.source !== '' ? { source: raw.source } : {}),
+            })
+          }
         }
       } catch {
         // Registry unavailable (no skill stack mounted): file listing still works.

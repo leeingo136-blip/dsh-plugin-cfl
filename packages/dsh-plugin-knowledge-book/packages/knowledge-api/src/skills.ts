@@ -174,14 +174,14 @@ export function skillSources(workspaces: WorkspaceLike): SkillSource[] {
   if (typeof bundledDir === 'string' && bundledDir !== '') {
     sources.push({ id: 'bundled', label: '插件', kind: 'bundled', editable: false, dir: bundledDir })
   }
-  sources.push({ id: 'runtime', label: '运行时', kind: 'runtime', editable: false })
+  sources.push({ id: 'runtime', label: '会话', kind: 'runtime', editable: false })
   return sources
 }
 
 /** Full listing: file-backed entries from the roots + runtime registrations. */
 export function listSkills(
   sources: SkillSource[],
-  runtimeSkills: Array<{ name: string; description: string }>,
+  runtimeSkills: Array<{ name: string; description: string; source?: string }>,
 ): SkillEntry[] {
   const entries: SkillEntry[] = []
   for (const source of sources) {
@@ -195,7 +195,9 @@ export function listSkills(
       name: skill.name,
       description: skill.description,
       sourceId: 'runtime',
-      sourceLabel: '运行时',
+      sourceLabel: skill.source !== undefined && skill.source !== '' && skill.source !== 'runtime'
+        ? `会话：${skill.source}`
+        : '会话',
       editable: false,
       form: 'runtime',
     })

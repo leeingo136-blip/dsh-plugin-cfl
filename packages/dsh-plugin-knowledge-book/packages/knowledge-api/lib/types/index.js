@@ -132,8 +132,16 @@ let KnowledgeController = (() => {
                 try {
                     const all = await skills.list({});
                     for (const one of all) {
-                        if (one.source === 'runtime')
-                            runtimeSkills.push({ name: one.name, description: one.description });
+                        // Runtime skills carry the reserved provider "runtime"; their `source`
+                        // string (when present) is the registering side's session identity.
+                        const raw = one;
+                        if (raw.provider === 'runtime') {
+                            runtimeSkills.push({
+                                name: raw.name,
+                                description: raw.description,
+                                ...(typeof raw.source === 'string' && raw.source !== '' ? { source: raw.source } : {}),
+                            });
+                        }
                     }
                 }
                 catch {

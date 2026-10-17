@@ -41,6 +41,7 @@ export declare function skillSources(workspaces: WorkspaceLike): SkillSource[];
 export declare function listSkills(sources: SkillSource[], runtimeSkills: Array<{
     name: string;
     description: string;
+    source?: string;
 }>): SkillEntry[];
 /** Body of one skill: file-backed entries read from disk, runtime via the registry. */
 export declare function readSkillBody(entry: SkillEntry, registryRead?: (name: string) => string | undefined): string;
