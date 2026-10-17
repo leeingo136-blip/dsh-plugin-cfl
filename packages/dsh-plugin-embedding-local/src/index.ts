@@ -32,7 +32,7 @@ import {
 } from './local-embed.ts'
 
 /** Stable identity: hub account id and plugin entry name. */
-export const name = 'embedding-account'
+export const name = 'embedding-local'
 const ID = name
 
 /** Browser-safe failure vocabulary of the embedding remote face. */
@@ -146,7 +146,7 @@ export class EmbeddingAccount extends Service {
       invoke: (method: string, args: JsonValue) => this.invoke(method, args),
       getState: () => this.view as unknown as JsonValue,
     })
-    ctx.effect(() => dispose, 'embedding-account: hub registration')
+    ctx.effect(() => dispose, 'embedding-local: hub registration')
   }
 
   /** Forward one hub-card operation to its implementation. */

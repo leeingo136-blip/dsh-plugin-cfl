@@ -1,5 +1,5 @@
 {
-  "name": "dsh-plugin-embedding-account",
+  "name": "dsh-plugin-embedding-local",
   "version": "0.1.1",
   "private": true,
   "description": "本地 GGUF 向量模型账号插件：node-llama-cpp 在进程内运行 llama.cpp embedding（GGUF），提供 embed/similarity 服务供其他插件调用",

@@ -4,8 +4,8 @@
 # harness sources: weights and runtime dependencies ship inside the package
 # and resolve at run time from `import.meta.url`.
 - insert:
-    - id: embedding-account
-      name: 'dsh-plugin-embedding-account'
+    - id: embedding-local
+      name: 'dsh-plugin-embedding-local'
       # A config-less activation: the card exposes load/unload and the probe
       # action; an empty object keeps the row valid where `undefined` would
       # fail validation.
