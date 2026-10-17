@@ -27,7 +27,11 @@ window.__ModuleLoader__.load({
 			signedIn: "Signed in",
 			accountInfo: "Account info",
 			loading: "Loading…",
-			cancel: "Cancel"
+			cancel: "Cancel",
+			groupChat: "Chat models",
+			groupEmbedding: "Embedding models",
+			groupTts: "Text-to-speech",
+			groupAsr: "Speech recognition"
 		};
 		/** Chinese strings (same keys as {@link en}). */
 		const zh = {
@@ -47,7 +51,11 @@ window.__ModuleLoader__.load({
 			signedIn: "已登录",
 			accountInfo: "账号信息",
 			loading: "加载中…",
-			cancel: "取消"
+			cancel: "取消",
+			groupChat: "对话模型",
+			groupEmbedding: "向量模型",
+			groupTts: "语音合成",
+			groupAsr: "语音识别"
 		};
 		//#endregion
 		//#region \0dsh-css:/Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/deep-seek-harness-plugin/dsh-plugin-account-hub/packages/ui-account-hub/src/client/HubAccountCard.module.css.mjs
@@ -827,6 +835,27 @@ window.__ModuleLoader__.load({
 				renderSlot
 			});
 		}
+		/** Display order of the capability groups; a group with no rows renders nothing. */
+		const GROUP_ORDER = ["chat", "embedding", "tts", "asr"];
+		/** The locale key of each group's heading. */
+		const GROUP_KEYS = { chat: "groupChat", embedding: "groupEmbedding", tts: "groupTts", asr: "groupAsr" };
+		/** Style of the group heading shown only when several families coexist. */
+		const GROUP_HEADING = { margin: "10px 0 4px", fontSize: 12, fontWeight: 500, opacity: .65 };
+		/** Render one row: the declarative card, or the plugin's own slot row. */
+		function renderHubRow(face, renderSlot, row) {
+			return row.card !== void 0 ? (0, react_jsx_runtime.jsx)(HubAccountCard, {
+				t: face.t,
+				row,
+				invoke: (method, args) => face.invoke(row.id, method, args),
+				readParams: () => face.readParams(row.id),
+				commitParams: (ops) => face.commitParams(row.id, ops)
+			}, row.id) : renderSlot("account.hub.row", {
+				accountId: row.id,
+				displayName: row.displayName,
+				state: row.state,
+				invoke: (method, args) => face.invoke(row.id, method, args)
+			}, { entryKey: row.id });
+		}
 		/** @param props - the resolved face and the row renderer. @returns the row list. */
 		function Loaded({ face, renderSlot }) {
 			const [rows, setRows] = (0, react.useState)([]);
@@ -850,22 +879,18 @@ window.__ModuleLoader__.load({
 					dispose();
 				};
 			}, [face]);
+			const groups = GROUP_ORDER.map((type) => ({
+				type,
+				rows: rows.filter(({ row }) => (row.type ?? "chat") === type)
+			})).filter((group) => group.rows.length > 0);
 			return (0, react_jsx_runtime.jsx)("div", { children: failed !== null ? (0, react_jsx_runtime.jsxs)("p", { children: [
 				face.t("loadFailed"),
 				" — ",
 				failed
-			] }) : rows.length === 0 ? (0, react_jsx_runtime.jsx)("p", { children: face.t("empty") }) : rows.map(({ row }) => row.card !== void 0 ? (0, react_jsx_runtime.jsx)(HubAccountCard, {
-				t: face.t,
-				row,
-				invoke: (method, args) => face.invoke(row.id, method, args),
-				readParams: () => face.readParams(row.id),
-				commitParams: (ops) => face.commitParams(row.id, ops)
-			}, row.id) : renderSlot("account.hub.row", {
-				accountId: row.id,
-				displayName: row.displayName,
-				state: row.state,
-				invoke: (method, args) => face.invoke(row.id, method, args)
-			}, { entryKey: row.id })) });
+			] }) : rows.length === 0 ? (0, react_jsx_runtime.jsx)("p", { children: face.t("empty") }) : groups.length <= 1 ? rows.map(({ row }) => renderHubRow(face, renderSlot, row)) : groups.map((group) => (0, react_jsx_runtime.jsxs)("div", { children: [
+				(0, react_jsx_runtime.jsx)("p", { style: GROUP_HEADING, children: face.t(GROUP_KEYS[group.type]) }),
+				group.rows.map(({ row }) => renderHubRow(face, renderSlot, row))
+			] }, group.type)) });
 		}
 		/**
 		* Draw one account's models-page provider card. The seat renders for every

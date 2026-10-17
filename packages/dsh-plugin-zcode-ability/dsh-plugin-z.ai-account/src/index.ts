@@ -444,6 +444,7 @@ export default class ZaiAccountExternal extends Service {
       // Anthropic wire; the plugin only supplies the provisioned key
       // (injected under the route's `apiKeyEnv` reference) and the endpoint
       // facts around it.
+      type: 'chat',
       workMode: 'credential-inject',
       card: CARD,
       invoke: (method: string) => this.invoke(method),

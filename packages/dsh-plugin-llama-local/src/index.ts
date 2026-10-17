@@ -475,6 +475,7 @@ export default class LocalLlamaAccount extends Service {
       modelsCard: true,
       // Direct production: the adapter builds its own StreamChunk stream and
       // hands it straight to harness. No credential, no HTTP.
+      type: 'chat',
       workMode: 'direct',
       // Live card: the hub re-reads `card` on every listing, so the model
       // note always mirrors the weight the engine would load right now —

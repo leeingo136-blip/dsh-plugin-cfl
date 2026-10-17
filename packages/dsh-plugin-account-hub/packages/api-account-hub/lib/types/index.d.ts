@@ -13,9 +13,11 @@ import type { SettingsPathOpView } from '@deepseek-ai/dsh-settings/types';
 import { TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol';
 import type { JsonValue } from '@deepseek-ai/dsh-util-values';
 import type { AccountHubAccountView, AccountHubCardDescriptor, AccountHubCardState, AccountHubChange, AccountHubFieldDescriptor, AccountHubFieldKind, AccountHubRegistration, AccountHubSelectOption, AccountHubWorkMode } from './types.ts';
-export type { AccountHubAccountView, AccountHubCardDescriptor, AccountHubCardState, AccountHubChange, AccountHubFieldDescriptor, AccountHubFieldKind, AccountHubRegistration, AccountHubSelectOption, AccountHubWorkMode, };
+export type { AccountHubAccountView, AccountHubCardDescriptor, AccountHubCardState, AccountHubChange, AccountHubFieldDescriptor, AccountHubFieldKind, AccountHubRegistration, AccountHubSelectOption, AccountHubType, AccountHubWorkMode, };
 /** Cordis event an account plugin emits after its published state changes. */
 export declare const ACCOUNT_HUB_CHANGED = "account-hub/changed";
+/** Every type value the hub accepts; anything else fails registration. */
+export declare const ACCOUNT_HUB_TYPES: readonly import("./types").AccountHubType[];
 declare module '@deepseek-ai/cordis' {
     interface Events {
         'account-hub/changed'(id: string): void;

@@ -19,6 +19,10 @@ export const en = {
   accountInfo: 'Account info',
   loading: 'Loading…',
   cancel: 'Cancel',
+  groupChat: 'Chat models',
+  groupEmbedding: 'Embedding models',
+  groupTts: 'Text-to-speech',
+  groupAsr: 'Speech recognition',
 } as const
 
 export type AccountHubKey = keyof typeof en
@@ -42,4 +46,8 @@ export const zh: { [Key in AccountHubKey]: string } = {
   accountInfo: '账号信息',
   loading: '加载中…',
   cancel: '取消',
+  groupChat: '对话模型',
+  groupEmbedding: '向量模型',
+  groupTts: '语音合成',
+  groupAsr: '语音识别',
 }

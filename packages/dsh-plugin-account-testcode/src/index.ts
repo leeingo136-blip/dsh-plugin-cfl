@@ -387,6 +387,7 @@ export default class TestCodeAccountExternal extends Service {
       modelsCard: true,
       // Direct production: the adapter fabricates the reply itself (no
       // upstream API) and hands the StreamChunk stream straight to harness.
+      type: 'chat',
       workMode: 'direct',
       card: CARD,
       invoke: (method: string, args: JsonValue) => this.invoke(method, args),

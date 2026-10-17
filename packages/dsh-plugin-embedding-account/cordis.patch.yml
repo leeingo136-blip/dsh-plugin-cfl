@@ -1,0 +1,12 @@
+# The local embedding account plugin's own patch layer, applied by the profile
+# once this package is installed as a profile dependency. The bare name
+# resolves through the package's `main` (dist/index.js). Nothing here touches
+# harness sources: weights and runtime dependencies ship inside the package
+# and resolve at run time from `import.meta.url`.
+- insert:
+    - id: embedding-account
+      name: 'dsh-plugin-embedding-account'
+      # A config-less activation: the card exposes load/unload and the probe
+      # action; an empty object keeps the row valid where `undefined` would
+      # fail validation.
+      config: {}

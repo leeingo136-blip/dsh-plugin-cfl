@@ -6,10 +6,26 @@
  * for tooling reading the preset (the third-party notices generator among it).
  */
 import { useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import type { ProviderCardExtrasOwnerProps } from '@dsh/ui-settings-models/client'
+import type { AccountHubType } from '@dsh/api-account-hub'
 import type { AccountHubRowOwnerProps, AccountHubSectionFace, AccountRow } from './index.ts'
+import type { AccountHubKey } from './locales.ts'
 import { HubAccountCard } from './HubAccountCard.tsx'
+
+/** Display order of the capability groups; a group with no rows renders nothing. */
+const GROUP_ORDER: readonly AccountHubType[] = ['chat', 'embedding', 'tts', 'asr']
+
+/** The locale key of each group's heading. */
+const GROUP_KEYS: Record<AccountHubType, AccountHubKey> = {
+  chat: 'groupChat',
+  embedding: 'groupEmbedding',
+  tts: 'groupTts',
+  asr: 'groupAsr',
+}
+
+/** Style of the group heading shown only when several families coexist. */
+const GROUP_HEADING: CSSProperties = { margin: '10px 0 4px', fontSize: 12, fontWeight: 500, opacity: 0.65 }
 
 /** One registered account as a seat holds it. */
 interface RowState {
@@ -61,21 +77,39 @@ function Loaded({ face, renderSlot }: { face: AccountHubSectionFace; renderSlot:
     <div>
       {failed !== null ? <p>{face.t('loadFailed')}{' — '}{failed}</p>
         : rows.length === 0 ? <p>{face.t('empty')}</p>
-          : rows.map(({ row }) => row.card !== undefined ? (
-            <HubAccountCard
-              key={row.id}
-              t={face.t}
-              row={row}
-              invoke={(method: string, args: unknown) => face.invoke(row.id, method, args)}
-              readParams={() => face.readParams(row.id)}
-              commitParams={ops => face.commitParams(row.id, ops)}
-            />
-          ) : renderSlot('account.hub.row', {
-            accountId: row.id, displayName: row.displayName, state: row.state,
-            invoke: (method: string, args: unknown) => face.invoke(row.id, method, args),
-          }, { entryKey: row.id }))}
+          : groups.length <= 1 ? rows.map(({ row }) => renderRow(row))
+            : groups.map(group => (
+              <div key={group.type}>
+                <p style={GROUP_HEADING}>{face.t(GROUP_KEYS[group.type])}</p>
+                {group.rows.map(({ row }) => renderRow(row))}
+              </div>
+            ))}
     </div>
   )
+
+  /** Render one row: the declarative card, or the plugin's own slot row. */
+  function renderRow(row: AccountRow): ReactNode {
+    return row.card !== undefined ? (
+      <HubAccountCard
+        key={row.id}
+        t={face.t}
+        row={row}
+        invoke={(method: string, args: unknown) => face.invoke(row.id, method, args)}
+        readParams={() => face.readParams(row.id)}
+        commitParams={ops => face.commitParams(row.id, ops)}
+      />
+    ) : renderSlot('account.hub.row', {
+      accountId: row.id, displayName: row.displayName, state: row.state,
+      invoke: (method: string, args: unknown) => face.invoke(row.id, method, args),
+    }, { entryKey: row.id })
+  }
+
+  /** Group the rows by resolved capability family, in display order. */
+  function groups(): { type: AccountHubType; rows: readonly RowState[] }[] {
+    return GROUP_ORDER
+      .map(type => ({ type, rows: rows.filter(({ row }) => (row.type ?? 'chat') === type) }))
+      .filter(group => group.rows.length > 0)
+  }
 }
 
 /** Props of the models-page provider-card seat: the row's owner facts plus the hub face. */

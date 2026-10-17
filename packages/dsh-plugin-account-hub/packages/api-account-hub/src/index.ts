@@ -16,14 +16,16 @@ import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type {
   AccountHubAccountView, AccountHubCardDescriptor, AccountHubCardState, AccountHubChange,
   AccountHubFieldDescriptor, AccountHubFieldKind, AccountHubRegistration,
-  AccountHubSelectOption, AccountHubWorkMode,
+  AccountHubSelectOption, AccountHubType, AccountHubWorkMode,
 } from './types.ts'
+import { ACCOUNT_HUB_TYPES } from './types.ts'
 
 export type {
   AccountHubAccountView, AccountHubCardDescriptor, AccountHubCardState, AccountHubChange,
   AccountHubFieldDescriptor, AccountHubFieldKind, AccountHubRegistration,
-  AccountHubSelectOption, AccountHubWorkMode,
+  AccountHubSelectOption, AccountHubType, AccountHubWorkMode,
 }
+export { ACCOUNT_HUB_TYPES }
 
 /** Cordis event an account plugin emits after its published state changes. */
 export const ACCOUNT_HUB_CHANGED = 'account-hub/changed'
@@ -67,8 +69,15 @@ export class AccountHub extends Service {
           + ` (got ${JSON.stringify(registration.workMode)})`,
       )
     }
+    if (registration.type !== undefined && !ACCOUNT_HUB_TYPES.includes(registration.type)) {
+      throw new Error(
+        `account "${registration.id}" declared unknown type ${JSON.stringify(registration.type)}`
+          + ` (known: ${ACCOUNT_HUB_TYPES.join(', ')})`,
+      )
+    }
     console.log(`[account-hub] registered: ${registration.id}`
-      + ` (displayName=${registration.displayName}, workMode=${registration.workMode})`)
+      + ` (displayName=${registration.displayName}, workMode=${registration.workMode}`
+      + `, type=${registration.type ?? 'chat'})`)
     this.accounts.set(registration.id, registration)
     this.ctx.emit(ACCOUNT_HUB_CHANGED, registration.id)
     return () => {
@@ -94,8 +103,8 @@ export class AccountHub extends Service {
     console.log(`[account-hub] list -> ${this.accounts.size} account(s)`)
     return [...this.accounts.values()]
       .toSorted((left, right) => rank(left.id) - rank(right.id))
-      .map(({ id, displayName, settingsNs, workMode, card, modelsCard, getState }) => ({
-        id, displayName, settingsNs, workMode,
+      .map(({ id, displayName, settingsNs, workMode, type, card, modelsCard, getState }) => ({
+        id, displayName, settingsNs, workMode, type: type ?? 'chat' as const,
         ...(card === undefined ? {} : { card }),
         ...(modelsCard === true ? { modelsCard: true } : {}),
         ...(getState === undefined ? {} : { state: getState() }),

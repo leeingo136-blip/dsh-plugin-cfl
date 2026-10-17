@@ -1,5 +1,6 @@
 import { Service } from "@deepseek-ai/cordis";
 import { Remote, RemoteError, TypertRemoteService } from "@deepseek-ai/dsh-typert-protocol";
+const ACCOUNT_HUB_TYPES = ["chat", "embedding", "tts", "asr"];
 //#region lib/types/index.js
 /**
 * dsh-account-hub — the in-host manager for optional account plugins.
@@ -71,7 +72,8 @@ var AccountHub = class extends Service {
 	/** Register one account plugin; a duplicate id replaces the earlier entry. */
 	register(registration) {
 		if (registration.workMode !== "credential-inject" && registration.workMode !== "direct") throw new Error(`account "${registration.id}" must declare workMode "credential-inject" or "direct" (got ${JSON.stringify(registration.workMode)})`);
-		console.log(`[account-hub] registered: ${registration.id} (displayName=${registration.displayName}, workMode=${registration.workMode})`);
+		if (registration.type !== void 0 && !ACCOUNT_HUB_TYPES.includes(registration.type)) throw new Error(`account "${registration.id}" declared unknown type ${JSON.stringify(registration.type)} (known: ${ACCOUNT_HUB_TYPES.join(", ")})`);
+		console.log(`[account-hub] registered: ${registration.id} (displayName=${registration.displayName}, workMode=${registration.workMode}, type=${registration.type ?? "chat"})`);
 		this.accounts.set(registration.id, registration);
 		this.ctx.emit(ACCOUNT_HUB_CHANGED, registration.id);
 		return () => {
@@ -91,11 +93,12 @@ var AccountHub = class extends Service {
 	*  DeepSeek account leads, the rest keep registration order. */
 	list() {
 		console.log(`[account-hub] list -> ${this.accounts.size} account(s)`);
-		return [...this.accounts.values()].toSorted((left, right) => rank(left.id) - rank(right.id)).map(({ id, displayName, settingsNs, workMode, card, modelsCard, getState }) => ({
+		return [...this.accounts.values()].toSorted((left, right) => rank(left.id) - rank(right.id)).map(({ id, displayName, settingsNs, workMode, type, card, modelsCard, getState }) => ({
 			id,
 			displayName,
 			settingsNs,
 			workMode,
+			type: type ?? "chat",
 			...card === void 0 ? {} : { card },
 			...modelsCard === true ? { modelsCard: true } : {},
 			...getState === void 0 ? {} : { state: getState() }
@@ -296,4 +299,4 @@ function apply(ctx) {
 	ctx.plugin(AccountHubController);
 }
 //#endregion
-export { ACCOUNT_HUB_CHANGED, AccountHub, AccountHubController, apply, name };
+export { ACCOUNT_HUB_CHANGED, ACCOUNT_HUB_TYPES, AccountHub, AccountHubController, apply, name };

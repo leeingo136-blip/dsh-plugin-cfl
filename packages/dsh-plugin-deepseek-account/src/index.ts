@@ -328,6 +328,7 @@ export default class DeepSeekAccountExternal extends Service {
       // Credentials only: the adapter rides the official harness DeepSeek
       // inference path; this plugin supplies the account token and endpoint
       // facts, harness keeps connecting, streaming, and metering.
+      type: 'chat',
       workMode: 'credential-inject',
       card: CARD,
       invoke: (method: string, args: JsonValue) => this.invoke(method, args),

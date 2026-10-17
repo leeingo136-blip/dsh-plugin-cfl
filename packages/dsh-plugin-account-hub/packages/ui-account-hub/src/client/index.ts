@@ -7,7 +7,7 @@
  * product, so an empty registry renders the section's empty-state copy.
  */
 import type { Context } from '@deepseek-ai/cordis'
-import type { AccountHubCardDescriptor } from '@dsh/api-account-hub'
+import type { AccountHubCardDescriptor, AccountHubType } from '@dsh/api-account-hub'
 import type { SettingsPathOpView } from '@deepseek-ai/dsh-api-remotes/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
@@ -75,6 +75,8 @@ export interface AccountRow {
   id: string
   displayName: string
   settingsNs: string
+  /** Resolved capability family; the section groups rows by it. */
+  type?: AccountHubType
   /** Declarative card the hub renders when present. */
   card?: AccountHubCardDescriptor
   /** Whether the hub also serves this account's models-page provider card. */

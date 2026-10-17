@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Local embedding",
+    "description": "Local GGUF embedding account backed by node-llama-cpp (bge-small-zh weights, bundled); serves an embed service other plugins can inject."
+  }
+}

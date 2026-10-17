@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "本地向量模型",
+    "description": "基于 node-llama-cpp 的本地 GGUF 向量模型账号（bge-small-zh 权重随仓库分发），提供 embed 服务供其他插件调用。"
+  }
+}

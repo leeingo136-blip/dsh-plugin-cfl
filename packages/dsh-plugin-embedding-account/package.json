@@ -1,0 +1,29 @@
+{
+  "name": "dsh-plugin-embedding-account",
+  "version": "0.1.1",
+  "private": true,
+  "description": "本地 GGUF 向量模型账号插件：node-llama-cpp 在进程内运行 llama.cpp embedding（GGUF），提供 embed/similarity 服务供其他插件调用",
+  "type": "module",
+  "main": "dist/index.js",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis-plugin-loader": "^1.0.5",
+    "@dsh/api-account-hub": "workspace:*",
+    "@deepseek-ai/dsh-typert-protocol": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-util-values": "0.2.0-rc.2",
+    "node-llama-cpp": "^3.22.1"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "~4.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22"
+  },
+  "engines": {
+    "dsh": "0.2.0-rc.2 || 0.2.1-rc.1"
+  }
+}

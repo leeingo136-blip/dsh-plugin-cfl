@@ -46,6 +46,9 @@ import { Service } from '@deepseek-ai/cordis';
 import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol';
 /** Cordis event an account plugin emits after its published state changes. */
 export const ACCOUNT_HUB_CHANGED = 'account-hub/changed';
+
+/** Every type value the hub accepts; anything else fails registration. */
+export const ACCOUNT_HUB_TYPES = ['chat', 'embedding', 'tts', 'asr'];
 /**
  * Registry of installed account plugins. Plugins register during their own
  * `apply` and dispose with their fiber; the browser only ever talks to this
@@ -69,8 +72,13 @@ export class AccountHub extends Service {
             throw new Error(`account "${registration.id}" must declare workMode "credential-inject" or "direct"`
                 + ` (got ${JSON.stringify(registration.workMode)})`);
         }
+        if (registration.type !== undefined && !ACCOUNT_HUB_TYPES.includes(registration.type)) {
+            throw new Error(`account "${registration.id}" declared unknown type ${JSON.stringify(registration.type)}`
+                + ` (known: ${ACCOUNT_HUB_TYPES.join(', ')})`);
+        }
         console.log(`[account-hub] registered: ${registration.id}`
-            + ` (displayName=${registration.displayName}, workMode=${registration.workMode})`);
+            + ` (displayName=${registration.displayName}, workMode=${registration.workMode}`
+            + `, type=${registration.type ?? 'chat'})`);
         this.accounts.set(registration.id, registration);
         this.ctx.emit(ACCOUNT_HUB_CHANGED, registration.id);
         return () => {
@@ -94,8 +102,8 @@ export class AccountHub extends Service {
         console.log(`[account-hub] list -> ${this.accounts.size} account(s)`);
         return [...this.accounts.values()]
             .toSorted((left, right) => rank(left.id) - rank(right.id))
-            .map(({ id, displayName, settingsNs, workMode, card, modelsCard, getState }) => ({
-            id, displayName, settingsNs, workMode,
+            .map(({ id, displayName, settingsNs, workMode, type, card, modelsCard, getState }) => ({
+            id, displayName, settingsNs, workMode, type: type ?? 'chat',
             ...(card === undefined ? {} : { card }),
             ...(modelsCard === true ? { modelsCard: true } : {}),
             ...(getState === undefined ? {} : { state: getState() }),

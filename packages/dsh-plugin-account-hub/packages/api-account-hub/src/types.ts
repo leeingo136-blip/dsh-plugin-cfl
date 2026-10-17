@@ -141,6 +141,19 @@ export interface AccountHubCardDescriptor {
 export type AccountHubWorkMode = 'credential-inject' | 'direct'
 
 /**
+ * Which capability family the account serves. The hub uses it to place the
+ * account's row into the matching section of the settings column, so a
+ * non-chat account (an embedding provider, a TTS or ASR engine) never reads
+ * as a conversation model. Registrations may omit it; the hub resolves the
+ * omission to `'chat'`, which keeps every earlier account plugin in the
+ * conversation section unchanged.
+ */
+export type AccountHubType = 'chat' | 'embedding' | 'tts' | 'asr'
+
+/** Every type value the hub accepts; anything else fails registration. */
+export const ACCOUNT_HUB_TYPES: readonly AccountHubType[] = ['chat', 'embedding', 'tts', 'asr']
+
+/**
  * One account plugin's registration with the hub. The plugin provides a
  * stable id (also the slot key and the invoke target), a display name for
  * the account column, the settings namespace its provider parameters land
@@ -161,6 +174,9 @@ export interface AccountHubRegistration {
   /** How this account's provider reaches its LLM; every account plugin must
    *  declare it at registration. */
   workMode: AccountHubWorkMode
+  /** Capability family this account serves (`'chat'` when omitted); the hub
+   *  groups the settings column by it. */
+  type?: AccountHubType
   /** Serve the models-page provider card (the card's 'models'-surface fields)
    *  under this account's provider row. Off by default, so account plugins
    *  whose models page is drawn by another editor stay untouched. */
@@ -191,6 +207,9 @@ export interface AccountHubAccountView {
   settingsNs: string
   /** How the account's provider reaches its LLM, as declared at registration. */
   workMode: AccountHubWorkMode
+  /** Resolved capability family (an omitted registration type reads as
+   *  `'chat'`); the section groups rows by it. */
+  type: AccountHubType
   /** Declarative card the hub renders when present. */
   card?: AccountHubCardDescriptor
   /** Whether the hub also serves this account's models-page provider card. */

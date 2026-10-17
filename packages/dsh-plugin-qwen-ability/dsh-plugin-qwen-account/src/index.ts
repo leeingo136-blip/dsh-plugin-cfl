@@ -396,6 +396,7 @@ export default class QwenAccountExternal extends Service {
       settingsNs: this.settingsNs,
       provider: ROUTE,
       modelsCard: true,
+      type: 'chat',
       workMode: 'credential-inject',
       card: CARD,
       invoke: (method: string, args: JsonValue) => this.invoke(method, args),
