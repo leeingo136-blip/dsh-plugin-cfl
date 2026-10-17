@@ -17,6 +17,10 @@ import type {} from '@deepseek-ai/cordis-plugin-loader'
 import { credentialKey } from '@deepseek-ai/dsh-credentials'
 import type {} from '@deepseek-ai/dsh-credentials'
 import type {} from '@deepseek-ai/dsh-settings'
+import type {} from '@deepseek-ai/dsh-skill'
+import { FileSystemSkillProvider } from '@deepseek-ai/dsh-skill-filesystem'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import type {} from '@deepseek-ai/dsh-llm'
 import { LlmAdapter, LlmError } from '@deepseek-ai/dsh-llm'
 import type {
@@ -253,7 +257,7 @@ class TestCodeAdapter extends LlmAdapter {
  * constructor and re-ingests the stored sign-in on init.
  */
 export default class TestCodeAccountExternal extends Service {
-  static inject = ['llm', 'credentials', 'accountHub']
+  static inject = ['llm', 'credentials', 'accountHub', 'skills']
   static Config = Config
 
   private readonly settingsNs: string
@@ -285,6 +289,7 @@ export default class TestCodeAccountExternal extends Service {
 
     this.registerProvider(ctx)
     this.registerHub(ctx)
+    this.registerBundledSkill(ctx)
     this.publish()
   }
 
@@ -394,6 +399,31 @@ export default class TestCodeAccountExternal extends Service {
       getState: () => this.view as unknown as JsonValue,
     })
     ctx.effect(() => dispose, 'testcode-account-external: hub registration')
+  }
+
+  /**
+   * Ship the plugin-level bundled skill (`skills/testcode-hello/SKILL.md`)
+   * through the official provider seam: a FileSystemSkillProvider scoped to
+   * exactly this package's skill directory — no default roots, source
+   * 'bundled' (read-only, lowest precedence). Disposal mirrors the stock
+   * skill-filesystem plugin: the watcher closes when the registration's
+   * effect unwinds.
+   */
+  private registerBundledSkill(ctx: Context): void {
+    if (ctx.skills === undefined) return
+    const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'skills')
+    let provider: FileSystemSkillProvider | undefined
+    ctx.skills.registerProvider(control => {
+      provider = new FileSystemSkillProvider(ctx, control, {
+        providerName: 'testcode-bundled',
+        includeDefaultRoots: false,
+        bundledSkillDir: dir,
+      })
+      return provider
+    })
+    ctx.effect(function* () {
+      yield async () => { await provider?.dispose() }
+    }, 'testcode-account-external: bundled skill watcher')
   }
 
   /** Forward one hub-card operation to its implementation. */
