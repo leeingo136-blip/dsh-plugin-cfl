@@ -80,7 +80,12 @@ function Loaded({ face, renderSlot }: { face: AccountHubSectionFace; renderSlot:
           : groups.length <= 1 ? rows.map(({ row }) => renderRow(row))
             : groups.map(group => (
               <div key={group.type}>
-                <p style={GROUP_HEADING}>{face.t(GROUP_KEYS[group.type])}</p>
+                {/* A section label earns its place over a multi-card group
+                  only: one floating heading above a lone card reads as stray
+                  text outside the card, so a single-card group renders bare. */}
+                {group.rows.length > 1 && (
+                  <p style={GROUP_HEADING}>{face.t(GROUP_KEYS[group.type])}</p>
+                )}
                 {group.rows.map(({ row }) => renderRow(row))}
               </div>
             ))}

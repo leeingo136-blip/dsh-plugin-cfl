@@ -888,7 +888,7 @@ window.__ModuleLoader__.load({
 				" — ",
 				failed
 			] }) : rows.length === 0 ? (0, react_jsx_runtime.jsx)("p", { children: face.t("empty") }) : groups.length <= 1 ? rows.map(({ row }) => renderHubRow(face, renderSlot, row)) : groups.map((group) => (0, react_jsx_runtime.jsxs)("div", { children: [
-				(0, react_jsx_runtime.jsx)("p", { style: GROUP_HEADING, children: face.t(GROUP_KEYS[group.type]) }),
+				group.rows.length > 1 ? (0, react_jsx_runtime.jsx)("p", { style: GROUP_HEADING, children: face.t(GROUP_KEYS[group.type]) }) : null,
 				group.rows.map(({ row }) => renderHubRow(face, renderSlot, row))
 			] }, group.type)) });
 		}

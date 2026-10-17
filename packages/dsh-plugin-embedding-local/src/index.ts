@@ -40,7 +40,7 @@ import zschema from '@deepseek-ai/schemastery'
 import {
   currentDimensions, currentWeightFile, embed, isLoaded, lastFailure,
   listWeightFiles, loadedFile, onLoadChange, ready, selectWeight, similarity,
-  unload,
+  unload, weightPresent,
 } from './local-embed.ts'
 
 /** Stable identity: hub account id, plugin entry name, and provider route. */
@@ -65,33 +65,22 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
   }
 }
 
-/** The brand mark: a small "VE" badge, inlined as a data URI. */
-const LOGO_DATA_URI = 'data:image/svg+xml;base64,'
-  + Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">`
-    + `<rect x="1" y="1" width="22" height="22" rx="6" fill="#0f6e56"/>`
-    + `<text x="12" y="16.5" font-family="Helvetica, Arial, sans-serif" font-size="10"`
-    + ` font-weight="700" fill="#ffffff" text-anchor="middle">VE</text></svg>`, 'utf8').toString('base64')
-
 /** The model id a weight file serves: the file stem (`bge-small-zh-v1.5`). */
 const modelIdOf = (file: string): string => file.replace(/\.gguf$/i, '')
 
 /** The hub card and directory title: 本地 + the actual model name — the
  *  default weight's stem with any quantization tag dropped
  *  (`bge-small-zh-v1.5-q8_0.gguf` reads as 本地 bge-small-zh-v1.5); the
- *  built-in default's name when no weight ships with the build. Fixed at
- *  build time: the catalog comes from the bundled `models/` directory, so
- *  the title never changes at runtime. */
+ *  built-in default's name when no weight ships with the build. */
 function accountDisplayName(): string {
   const model = modelIdOf(currentWeightFile()).replace(/[-.]q\d[\w]*$/i, '')
   return `本地 ${model}`
 }
 
-/** The brand facts. The name doubles as every title the hub surfaces: the
- *  account column's brand-layout header renders `brand.name` (a card of
- *  buttons and notes has no value fields, so the brand layout wins over the
- *  `displayName` head), and the models-page provider row renders the
- *  directory entry's displayName — keep both on one string. */
-const BRAND = Object.freeze({ logoUrl: LOGO_DATA_URI, name: accountDisplayName() })
+/** Fixed at build time: the catalog comes from the bundled `models/`
+ *  directory, so the title never changes at runtime. The account column's
+ *  card head and the models-page provider row both render it. */
+const PROVIDER_NAME = accountDisplayName()
 
 /** One configured embedding model: the exposed id and its weight file. */
 export interface AvailableModel {
@@ -106,7 +95,7 @@ export interface VolatileBox<T> {
 
 /** Plugin configuration type (all reads go through the settings service). */
 export interface Config {
-  available?: VolatileBox<AvailableModel[]>
+  enabled?: VolatileBox<boolean>
 }
 
 /** The schema class instance type, nameable without dragging cosmokit into
@@ -115,11 +104,17 @@ export interface Config {
 type SchemaNode = InstanceType<typeof zschema>
 
 /**
- * No runtime configuration: the model catalog is fixed at plugin build time —
- * every weight in the bundled `models/` directory is a model, its id the file
- * stem. The schema stays (empty) because the loader always mounts one.
+ * The schema carries exactly one field: `enabled`, the persisted load intent.
+ * It must stay non-empty — a zero-field namespace never reaches the settings
+ * projection, and the models page drops any provider row whose namespace it
+ * cannot see. Volatile keeps the projection (and the write path) alive. The
+ * model catalog itself stays build-time fixed: every weight in the bundled
+ * `models/` directory is a model, its id the file stem.
  */
-export const Config = zschema.object({}) as unknown as SchemaNode
+export const Config = zschema.object({
+  enabled: zschema.boolean().default(false).volatile()
+    .description('启用状态（重启后自动恢复上次启用的向量模型）'),
+}) as unknown as SchemaNode
 
 /** A model id resolution failure, mapped to the remote failure vocabulary. */
 export class ModelResolutionError extends Error {
@@ -193,11 +188,11 @@ export class EmbeddingService extends Service {
  * analogue of a signed-in session.
  */
 export class EmbeddingAccount extends Service {
-  static inject = ['llm', 'accountHub', 'embedding']
+  static inject = ['llm', 'accountHub', 'embedding', 'settings']
 
   private readonly settingsNs: string
   private view: AccountHubCardState = {
-    text: '未加载', level: 'warn', signedIn: false, brand: BRAND,
+    text: '未加载', level: 'warn', signedIn: false,
   }
 
   constructor(ctx: Context) {
@@ -219,6 +214,7 @@ export class EmbeddingAccount extends Service {
       'embedding-local: engine load-state subscription',
     )
     this.syncProviderRow()
+    this.restore()
   }
 
   private service(): EmbeddingService {
@@ -245,7 +241,7 @@ export class EmbeddingAccount extends Service {
   private registerProvider(ctx: Context): void {
     const handle = ctx.llm.registerConfigurableProviders([{
       provider: ROUTE,
-      displayName: BRAND.name,
+      displayName: PROVIDER_NAME,
       settingsNs: this.settingsNs,
       settingsPath: [],
     }])
@@ -259,7 +255,7 @@ export class EmbeddingAccount extends Service {
   private syncProviderRow(): void {
     const entry: LlmConfigurableProvider = {
       provider: ROUTE,
-      displayName: BRAND.name,
+      displayName: PROVIDER_NAME,
       settingsNs: this.settingsNs,
       settingsPath: [],
     }
@@ -283,9 +279,8 @@ export class EmbeddingAccount extends Service {
     const account = this
     const dispose = ctx.accountHub.register({
       id: ID,
-      // 本地 + 实际模型名：the bundled default weight's stem (e.g.
-      // 本地 bge-small-zh-v1.5); falls back when no weight ships.
-      displayName: accountDisplayName(),
+      // Same string the directory row carries (see PROVIDER_NAME).
+      displayName: PROVIDER_NAME,
       settingsNs: this.settingsNs,
       // The models-page provider id this account backs, and the opt-in that
       // serves the card's models-surface fields under that provider row.
@@ -349,8 +344,19 @@ export class EmbeddingAccount extends Service {
     }
   }
 
-  /** Eagerly load the plugin's default weight. */
+  /** Eagerly load the plugin's default weight, persisting the intent. */
   private async enable(): Promise<JsonValue> {
+    const result = await this.load()
+    // Persist only a successful adoption: a failed load must not restore
+    // itself (and re-fail) on every boot.
+    const failed = typeof result === 'object' && result !== null
+      && !Array.isArray(result) && (result as { error?: unknown }).error === true
+    if (!failed) this.setEnabled(true)
+    return result
+  }
+
+  /** Load without touching the persisted intent (boot restore, retries). */
+  private async load(): Promise<JsonValue> {
     let model: AvailableModel
     try {
       model = this.service().resolveModel()
@@ -373,9 +379,44 @@ export class EmbeddingAccount extends Service {
 
   /** Release the weight; the next embed loads it again on demand. */
   private async disable(): Promise<JsonValue> {
+    this.setEnabled(false)
     await unload()
     this.publish('未加载', 'warn', false)
     return { message: '向量模型已卸载' }
+  }
+
+  // ---- persisted enable intent -----------------------------------------------
+
+  /** Persist the enable flag through the same official settings seam every
+   *  plugin configuration write uses. Fire-and-forget: the card state does
+   *  not depend on the write landing, and `settings/document-updated` will
+   *  re-publish when it does. */
+  private setEnabled(value: boolean): void {
+    void this.ctx.settings.mutate(this.settingsNs, [
+      { op: 'set', path: ['enabled'], value },
+    ]).catch(() => { /* retried by the next gesture */ })
+  }
+
+  /** The persisted enable intent, user layer first. */
+  private readEnabled(): boolean {
+    try {
+      const row = this.ctx.settings.describe().find(one => one.ns === this.settingsNs)
+      const user = row?.user as { enabled?: unknown } | undefined
+      const value = row?.value as { enabled?: unknown } | undefined
+      return user?.enabled === true || (user?.enabled === undefined && value?.enabled === true)
+    } catch {
+      return false
+    }
+  }
+
+  /** Boot restore: a previously enabled engine reloads in the background so
+   *  the models-page row (and the capability) survive a restart, the way the
+   *  local chat model's persisted enable does. Fire-and-forget — activation
+   *  never waits on model I/O, and the card shows the loading posture while
+   *  it runs. A missing weight keeps the flag but nothing loads. */
+  private restore(): void {
+    if (!this.readEnabled() || !weightPresent()) return
+    void this.load()
   }
 
   /** Compose the full view and announce it to the hub watch stream. */
@@ -406,7 +447,6 @@ export class EmbeddingAccount extends Service {
       level,
       signedIn,
       ...(signingIn === true ? { signingIn: true } : {}),
-      brand: BRAND,
       details: rows,
     }
     // The publish sites are exactly the load-state transitions the user can
