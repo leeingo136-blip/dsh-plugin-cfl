@@ -147,6 +147,7 @@ async function releaseLoaded(): Promise<void> {
   } catch {
     // Same: best-effort release, the next load rebuilds everything.
   }
+  notifyLoadChange()
 }
 
 /** Adopt one weight: import the binding, load the model, open a context. */
@@ -160,6 +161,7 @@ function loadWeight(weight: EmbedWeight): Promise<void> {
       loaded = { model, context, file: weight.file }
       dimensions = 0
       lastError = undefined
+      notifyLoadChange()
     } catch (error) {
       lastError = error instanceof Error ? error.message : String(error)
       pending = undefined
@@ -167,6 +169,21 @@ function loadWeight(weight: EmbedWeight): Promise<void> {
     }
   })()
   return pending
+}
+
+/** A load-state flip: a weight finished loading, or the resident one left. */
+type LoadListener = () => void
+
+const loadListeners = new Set<LoadListener>()
+
+/** Observe load-state flips; the account row's visibility rides them. */
+export function onLoadChange(listener: LoadListener): () => void {
+  loadListeners.add(listener)
+  return () => { loadListeners.delete(listener) }
+}
+
+function notifyLoadChange(): void {
+  for (const listener of [...loadListeners]) listener()
 }
 
 /** True while the engine holds a loaded weight. */

@@ -28,19 +28,20 @@
 import { Context, Service } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/cordis-plugin-loader'
 import type {} from '@deepseek-ai/dsh-settings'
-import type {} from '@deepseek-ai/dsh-llm'
+import type { DirectoryRegistrationHandle, LlmConfigurableProvider } from '@deepseek-ai/dsh-llm'
 import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type {} from '@dsh/api-account-hub'
 import { ACCOUNT_HUB_CHANGED } from '@dsh/api-account-hub'
 import type {
-  AccountHubCardDescriptor, AccountHubCardState, AccountHubSelectOption,
+  AccountHubCardDescriptor, AccountHubCardState, AccountHubFieldDescriptor,
+  AccountHubSelectOption,
 } from '@dsh/api-account-hub'
 import zschema from '@deepseek-ai/schemastery'
 import {
   currentDimensions, currentWeightFile, embed, isLoaded, lastFailure,
-  listWeightFiles, loadedFile, ready, selectWeight, similarity, unload,
-  weightPresent,
+  listWeightFiles, loadedFile, onLoadChange, ready, selectWeight, similarity,
+  unload, weightPresent,
 } from './local-embed.ts'
 
 /** Stable identity: hub account id, plugin entry name, and provider route. */
@@ -227,6 +228,15 @@ export class EmbeddingAccount extends Service {
     this.registerProvider(ctx)
     this.registerHub(ctx)
     this.refresh()
+    // The models-page row mirrors the engine: a resident weight keeps the
+    // route in the directory, an unloaded engine withdraws it — the same
+    // posture a signed-out account takes. Load/unload gestures (and the
+    // lazy load any embed triggers) flip it through this subscription.
+    ctx.effect(
+      () => onLoadChange(() => { this.syncProviderRow() }),
+      'embedding-local: engine load-state subscription',
+    )
+    this.syncProviderRow()
   }
 
   private service(): EmbeddingService {
@@ -239,17 +249,45 @@ export class EmbeddingAccount extends Service {
    * The models-page provider route. No adapter is ever registered for it, so
    * nothing here enters the chat model catalog — the route exists only to
    * give the models page a row whose editor hosts this account's card (the
-   * hub's `modelsCard` seat). A plain declared route is always visible and
-   * carries no key badge: the namespace has no `apiKeyEnv`, and an empty
-   * `settingsPath` reads as configured.
+   * hub's `modelsCard` seat). A plain declared route carries no key badge,
+   * and an empty `settingsPath` reads as configured.
+   *
+   * The row is load-gated: {@link syncProviderRow} withdraws the entry while
+   * no weight is resident and restores it once one loads, so an unloaded
+   * engine reads exactly like a signed-out account — no card until the
+   * account column's load gesture (or a caller's first embed) brings one up.
    */
+  private providerHandle: DirectoryRegistrationHandle | undefined
+  private providerRowVisible = false
+
   private registerProvider(ctx: Context): void {
-    ctx.llm.registerConfigurableProviders([{
+    const handle = ctx.llm.registerConfigurableProviders([{
       provider: ROUTE,
       displayName: BRAND.name,
       settingsNs: this.settingsNs,
       settingsPath: [],
     }])
+    this.providerHandle = handle
+    this.providerRowVisible = true
+  }
+
+  /** Align the directory entry with the engine's load state. Idempotent: the
+   *  load events can fire more often than the state actually flips. */
+  private syncProviderRow(): void {
+    const entry: LlmConfigurableProvider = {
+      provider: ROUTE,
+      displayName: BRAND.name,
+      settingsNs: this.settingsNs,
+      settingsPath: [],
+    }
+    const visible = isLoaded()
+    if (visible === this.providerRowVisible) return
+    try {
+      this.providerHandle?.replace(visible ? [entry] : [])
+      this.providerRowVisible = visible
+    } catch {
+      // A refused swap leaves the previous state; the next flip retries.
+    }
   }
 
   // ---- hub registration -------------------------------------------------------
@@ -284,6 +322,58 @@ export class EmbeddingAccount extends Service {
     const files = listWeightFiles()
     const file = isLoaded() ? loadedFile()! : currentWeightFile()
     const dims = currentDimensions()
+    const catalogLabel = models.length === 0
+      ? '尚未配置模型：调用方看不到任何向量模型'
+      : `已配置 ${models.length} 个模型：${models.map(one => one.id).join('、')}`
+    /** The add/remove dialogs, mountable on either surface: while the engine
+     *  is unloaded the models page hides its row entirely, so the account
+     *  card carries the same gestures — the configure-then-load entry path,
+     *  mirroring a signed-out account keeping its sign-in button. */
+    const addModelField = (key: string, surface: 'account' | 'models'): AccountHubFieldDescriptor => ({
+      key,
+      kind: 'dialog',
+      surface,
+      label: '添加模型',
+      action: 'add-model',
+      busyLabel: '写入中…',
+      dialog: {
+        title: '添加向量模型',
+        submitLabel: '添加',
+        fields: [
+          {
+            key: 'modelId', kind: 'text', label: '模型 ID',
+            placeholder: '调用方使用的名字，如 bge-small-zh-v1.5',
+          },
+          {
+            key: 'file', kind: 'select', label: '权重文件',
+            ...(files.length > 0
+              ? { options: files.map(one => ({ value: one, label: one }) satisfies AccountHubSelectOption) }
+              : {}),
+          },
+        ],
+      },
+      description: '只有这里配置的模型，才会出现在调用 embedding 的插件面前。',
+    })
+    const removeModelField = (key: string, surface: 'account' | 'models'): AccountHubFieldDescriptor => ({
+      key,
+      kind: 'dialog',
+      surface,
+      label: '移除模型',
+      action: 'remove-model',
+      busyLabel: '写入中…',
+      dialog: {
+        title: '移除向量模型',
+        submitLabel: '移除',
+        fields: [
+          {
+            key: 'modelId', kind: 'select', label: '模型',
+            options: models.map(one => ({
+              value: one.id, label: `${one.id}（${one.file}）`,
+            }) satisfies AccountHubSelectOption),
+          },
+        ],
+      },
+    })
     return {
       fields: [
         {
@@ -302,49 +392,22 @@ export class EmbeddingAccount extends Service {
           key: 'weight', kind: 'note', surface: 'account',
           label: `当前权重：${file}${dims > 0 ? `（${dims} 维）` : ''}`,
         },
+        // While the engine is unloaded the models page carries no row, so
+        // the catalog gestures live here too — the only configure path.
+        ...(isLoaded() ? [] : [
+          {
+            key: 'catalogLocal', kind: 'note', surface: 'account',
+            label: catalogLabel,
+          },
+          addModelField('addModelLocal', 'account'),
+          removeModelField('removeModelLocal', 'account'),
+        ] as AccountHubFieldDescriptor[]),
         {
           key: 'catalog', kind: 'note', surface: 'models',
-          label: models.length === 0
-            ? '尚未配置模型：调用方看不到任何向量模型'
-            : `已配置 ${models.length} 个模型：${models.map(one => one.id).join('、')}`,
+          label: catalogLabel,
         },
-        {
-          key: 'addModel', kind: 'dialog', surface: 'models',
-          label: '添加模型', busyLabel: '写入中…',
-          dialog: {
-            title: '添加向量模型',
-            submitLabel: '添加',
-            fields: [
-              {
-                key: 'modelId', kind: 'text', label: '模型 ID',
-                placeholder: '调用方使用的名字，如 bge-small-zh-v1.5',
-              },
-              {
-                key: 'file', kind: 'select', label: '权重文件',
-                ...(files.length > 0
-                  ? { options: files.map(one => ({ value: one, label: one }) satisfies AccountHubSelectOption) }
-                  : {}),
-              },
-            ],
-          },
-          description: '只有这里配置的模型，才会出现在调用 embedding 的插件面前。',
-        },
-        {
-          key: 'removeModel', kind: 'dialog', surface: 'models',
-          label: '移除模型', busyLabel: '写入中…',
-          dialog: {
-            title: '移除向量模型',
-            submitLabel: '移除',
-            fields: [
-              {
-                key: 'modelId', kind: 'select', label: '模型',
-                options: models.map(one => ({
-                  value: one.id, label: `${one.id}（${one.file}）`,
-                }) satisfies AccountHubSelectOption),
-              },
-            ],
-          },
-        },
+        addModelField('addModel', 'models'),
+        removeModelField('removeModel', 'models'),
         {
           key: 'usage', kind: 'note', surface: 'account',
           label: '其他插件通过 embedding 服务的 embed/similarity/listModels 方法调用；不进入对话模型列表。',
