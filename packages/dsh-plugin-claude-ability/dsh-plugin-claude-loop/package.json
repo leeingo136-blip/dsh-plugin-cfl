@@ -1,7 +1,7 @@
 {
   "name": "@dsh/claude-loop",
   "description": "Claude scheduling toolset: cron_create / cron_list / cron_delete / loop_wakeup over a session scheduler that delivers follow-up turns on the owning agent.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -20,5 +20,8 @@
   },
   "devDependencies": {
     "@types/node": "^22"
+  },
+  "engines": {
+    "dsh": "0.2.0-rc.2 || 0.2.1-rc.1"
   }
 }

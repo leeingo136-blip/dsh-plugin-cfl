@@ -1,7 +1,7 @@
 {
   "name": "@dsh/qwen-account",
   "description": "Qwen 账号组件：对齐千问 Code 现行登录方式（选套餐端点 + 粘贴百炼 API Key），凭证镜像进凭据存储统一管理，服务 pi-ai openai-completions 路由。",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -27,5 +27,8 @@
   },
   "devDependencies": {
     "@types/node": "^22"
+  },
+  "engines": {
+    "dsh": "0.2.0-rc.2 || 0.2.1-rc.1"
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "dsh-plugin-account-testcode",
   "description": "External TestCode account plugin: dialog sign-in (123/abc), a fake 'TestCode Acc' inference provider with aav/vvi model groups, and a TestOK reply",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -26,5 +26,8 @@
   },
   "devDependencies": {
     "@types/node": "^22"
+  },
+  "engines": {
+    "dsh": "0.2.0-rc.2 || 0.2.1-rc.1"
   }
 }

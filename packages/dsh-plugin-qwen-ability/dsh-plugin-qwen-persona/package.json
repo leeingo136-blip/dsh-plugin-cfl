@@ -1,7 +1,7 @@
 {
   "name": "@dsh/qwen-persona",
   "description": "Qwen Code system-prompt posture: core mandates, communication guidelines, tone and security rules, git workflow and the final reminder, ported from qwen-code.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -19,5 +19,8 @@
   },
   "devDependencies": {
     "@types/node": "^22"
+  },
+  "engines": {
+    "dsh": "0.2.0-rc.2 || 0.2.1-rc.1"
   }
 }

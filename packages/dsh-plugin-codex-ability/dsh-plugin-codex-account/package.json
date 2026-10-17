@@ -1,7 +1,7 @@
 {
   "name": "@dsh/codex-account",
   "description": "Codex 账号组件：ChatGPT 订阅 OAuth（授权码+PKCE，本地回调）与 OpenAI Platform API Key 双路登录，凭证镜像进凭据存储统一管理，服务 pi-ai openai-responses 路由。",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -26,5 +26,8 @@
   },
   "devDependencies": {
     "@types/node": "^22"
+  },
+  "engines": {
+    "dsh": "0.2.0-rc.2 || 0.2.1-rc.1"
   }
 }

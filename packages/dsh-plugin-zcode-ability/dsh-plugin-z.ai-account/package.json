@@ -1,7 +1,7 @@
 {
   "name": "dsh-plugin-z.ai-account",
   "description": "Z.ai / GLM account component of dsh-plugin-zcode-ability: browser sign-in or pasted API key, the credential they produce, the Z.ai-account inference provider, and the account-hub registration whose declarative card renders the whole settings row. A component installed alongside presets, never inside one.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -29,5 +29,8 @@
   },
   "devDependencies": {
     "@types/node": "^22"
+  },
+  "engines": {
+    "dsh": "0.2.0-rc.2 || 0.2.1-rc.1"
   }
 }

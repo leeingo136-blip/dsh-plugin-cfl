@@ -1,7 +1,7 @@
 {
   "name": "@dsh/dh-ui",
   "description": "Settings section for Digital Hands: tool catalog, managed MCP servers, and plan editor.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "lib/index.js",

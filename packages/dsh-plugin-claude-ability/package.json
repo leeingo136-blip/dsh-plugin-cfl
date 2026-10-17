@@ -1,7 +1,7 @@
 {
   "name": "dsh-plugin-claude-ability",
   "description": "Claude capability container for DeepSeek Harness. Holds no logic of its own: it carries the declarative patch that mounts its four component packages (dsh-plugin-claude-{account,loop,persona,environment}) and the ported skill tree (skills/).",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "dsh": {

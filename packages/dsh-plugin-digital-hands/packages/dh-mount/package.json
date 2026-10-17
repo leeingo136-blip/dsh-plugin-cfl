@@ -1,7 +1,7 @@
 {
   "name": "@dsh/dh-mount",
   "description": "Client-side remote mount for Digital Hands: registers the digitalHands typert namespace (src-json codecs, no generated artifacts) as early as the remote carrier exists.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "lib/index.js",

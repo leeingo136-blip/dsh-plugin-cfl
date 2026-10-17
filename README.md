@@ -18,6 +18,23 @@ External plugins for the DeepSeek Harness, kept standalone from the harness repo
 | `dsh-plugin-qwen-ability` | Qwen 容器：账号 / persona / loop / environment（Qwen的折扇 预设） | ⚠️ 仅 qwen-account |
 | `dsh-plugin-codex-ability` | Codex 容器：账号 / persona / loop / environment（Codex吐息 预设） | ⚠️ 仅 codex-account |
 | `dsh-plugin-claude-ability` | Claude 容器：账号 / persona / loop / environment（Claude心流 预设） | ⚠️ 仅 claude-account |
+| `dsh-plugin-digital-hands` | 数据手：声明式工具方案（受管 MCP 服务器 + 本地脚本工具）与 tool_search 目录，设置页含工具总账 / MCP 管理 / 方案编辑器 | ——（本体） |
+
+## 版本适配 / Harness compatibility
+
+- **当前适配 DeepSeek Harness `0.2.1-rc.1`（同时兼容 `0.2.0-rc.2`）** / Currently targets DeepSeek Harness `0.2.1-rc.1` (still compatible with `0.2.0-rc.2`).
+- 自 dsh 0.2.1 起，启动链路对 profile patch 层的插件行做兼容性预检：manifest 未声明
+  `engines.dsh` 时，所有 `@deepseek-ai/dsh-*` peerDependencies 必须满足运行时版本，
+  否则对应插件行会被强制禁用（stderr 打印 `disabling profile plugin`）。本仓库全部
+  17 个含 dsh peer 的组件包均已声明 `engines.dsh`，并将 peer 枚举到 `0.2.1-rc.1`。
+- Since dsh 0.2.1, the boot pipeline runs a compatibility preflight over
+  profile-patch-layer plugin rows: without `engines.dsh`, every
+  `@deepseek-ai/dsh-*` peerDependency must match the running runtime or the row
+  is force-disabled (`disabling profile plugin` on stderr). All 17 component
+  packages with dsh peers now declare `engines.dsh` and enumerate `0.2.1-rc.1`.
+- 每次升级 harness 后，请将本仓库对应包的 `engines.dsh` / peer 范围枚举新版本并重装
+  profile 链接 / After each harness upgrade, enumerate the new version in
+  `engines.dsh` / peer ranges and re-sync the profile links.
 
 ## 依赖关系 / Dependencies
 

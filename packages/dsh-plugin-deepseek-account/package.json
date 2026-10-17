@@ -1,7 +1,7 @@
 {
   "name": "dsh-plugin-deepseek-account",
   "description": "External DeepSeek account plugin: platform OAuth sign-in, account-token inference provider, and dsh-account-hub registration",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -28,5 +28,8 @@
   },
   "devDependencies": {
     "@types/node": "^22"
+  },
+  "engines": {
+    "dsh": "0.2.0-rc.2 || 0.2.1-rc.1"
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "dsh-plugin-digital-hands",
   "description": "Digital Hands (数据手) — a tool-management component for DeepSeek Harness. Loads declarative tool plans (managed MCP servers + local script tools), registers them as first-class native tools, and exposes tool_search as a stable-schema catalog over both managed and natively mounted tools.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
