@@ -425,9 +425,35 @@ export default class QwenAccountExternal extends Service {
 
   // ---- published state --------------------------------------------------------
 
+  /** Whether the user-layer `models` write is confirmed present. */
+  private modelsRowReady = false
+
+  /** The models page keys an account-backed row's visibility on the live
+   *  catalog OR an explicit user-layer `models` write. With the default
+   *  catalog gone a freshly signed-in account serves none, so sign-in
+   *  plants one empty write — the row (and its card) stays reachable for
+   *  the first adopt. An existing write (adoption, deliberate clearing) is
+   *  never touched; sign-out unsets the field (the existing symmetric
+   *  gesture), so a later sign-in re-plants it. */
+  private async ensureModelsPageRow(): Promise<void> {
+    if (this.modelsRowReady || !this.signedIn) return
+    try {
+      const user = this.ctx.settings.describe().find(row => row.ns === this.settingsNs)?.user
+      if (typeof user === 'object' && user !== null && 'models' in user) {
+        this.modelsRowReady = true
+        return
+      }
+      await this.ctx.settings.mutate(this.settingsNs, [{ op: 'set', path: ['models'], value: [] }])
+      this.modelsRowReady = true
+    } catch {
+      // The next publish retries; the row stays hidden until the write lands.
+    }
+  }
+
   /** Recompute the hub-visible state: the signed-in fact or the signed-out
    *  brand row. */
   private publish(): void {
+    void this.ensureModelsPageRow()
     if (this.signedIn) {
       const endpoint = this.baseUrlValue
       this.view = {
