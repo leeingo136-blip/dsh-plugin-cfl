@@ -18,7 +18,7 @@
  *   and call `embed` / `similarity` / `listModels`;
  * - the `embedding` remote namespace: the same operations over the typert
  *   wire, reachable from browser-side tools the way `accountHub.list` is;
- * - the hub card: load/unload gestures and a probe action in the account
+ * - the hub card: load/unload gestures in the account
  *   column; model add/remove on the models page.
  *
  * Weights and runtime dependencies ship inside this package (`models/` and
@@ -34,14 +34,13 @@ import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type {} from '@dsh/api-account-hub'
 import { ACCOUNT_HUB_CHANGED } from '@dsh/api-account-hub'
 import type {
-  AccountHubCardDescriptor, AccountHubCardState, AccountHubFieldDescriptor,
-  AccountHubSelectOption,
+  AccountHubCardDescriptor, AccountHubCardState,
 } from '@dsh/api-account-hub'
 import zschema from '@deepseek-ai/schemastery'
 import {
   currentDimensions, currentWeightFile, embed, isLoaded, lastFailure,
   listWeightFiles, loadedFile, onLoadChange, ready, selectWeight, similarity,
-  unload, weightPresent,
+  unload,
 } from './local-embed.ts'
 
 /** Stable identity: hub account id, plugin entry name, and provider route. */
@@ -75,6 +74,15 @@ const LOGO_DATA_URI = 'data:image/svg+xml;base64,'
 
 const BRAND = Object.freeze({ logoUrl: LOGO_DATA_URI, name: '本地向量' })
 
+/** The hub card title: 本地 + the actual model name — the plugin's default
+ *  weight's stem with any quantization tag dropped
+ *  (`bge-small-zh-v1.5-q8_0.gguf` reads as 本地 bge-small-zh-v1.5); the bare
+ *  brand when no weight ships with the build. */
+function accountDisplayName(): string {
+  const model = modelIdOf(currentWeightFile()).replace(/[-.]q\d[\w]*$/i, '')
+  return `本地 ${model}`
+}
+
 /** One configured embedding model: the exposed id and its weight file. */
 export interface AvailableModel {
   id: string
@@ -97,18 +105,14 @@ export interface Config {
 type SchemaNode = InstanceType<typeof zschema>
 
 /**
- * The configuration schema. `available` is the whole model catalog callers
- * can see; the models-page card writes it, nothing else does. Volatile keeps
- * the settings projection (and therefore the namespace) alive.
+ * No runtime configuration: the model catalog is fixed at plugin build time —
+ * every weight in the bundled `models/` directory is a model, its id the file
+ * stem. The schema stays (empty) because the loader always mounts one.
  */
-export const Config = zschema.object({
-  available: zschema.array(
-    zschema.object({
-      id: zschema.string().required().description('对外暴露的模型 ID'),
-      file: zschema.string().required().description('models/ 目录下的权重文件名'),
-    }),
-  ).volatile().description('对其他插件可见的向量模型列表'),
-}) as unknown as SchemaNode
+export const Config = zschema.object({}) as unknown as SchemaNode
+
+/** The model id a weight file serves: the file stem (`bge-small-zh-v1.5`). */
+const modelIdOf = (file: string): string => file.replace(/\.gguf$/i, '')
 
 /** A model id resolution failure, mapped to the remote failure vocabulary. */
 export class ModelResolutionError extends Error {
@@ -120,75 +124,46 @@ export class ModelResolutionError extends Error {
 /**
  * The public embedding service. Other host plugins reach it with
  * `ctx.get('embedding')`; the lazily loading engine keeps plugin activation
- * free of any model I/O. The configured catalog is read from the settings
- * service on every document update — the models-page card is the only
- * writer, so the configured set here is exactly what the user chose.
+ * free of any model I/O. The catalog is fixed by the plugin itself: every
+ * weight under `models/` is a model, so a build ships exactly the models it
+ * promises and nothing at runtime can widen or shrink that set.
  */
 export class EmbeddingService extends Service {
-  static inject = ['settings']
-
-  private readonly namespace: string
-  private available: AvailableModel[] = []
-
   constructor(ctx: Context) {
     super(ctx, 'embedding')
-    this.namespace = ctx.fiber?.entry?.options.id ?? ID
-    ctx.on('settings/document-updated', (ns: string) => {
-      if (ns !== this.namespace) return
-      this.ingest()
-    })
-    this.ingest()
   }
 
-  /** Re-read the configured catalog from the settings document. */
-  private ingest(): void {
-    try {
-      const descriptor = this.ctx.settings.describe().find(row => row.ns === this.namespace)
-      const user: unknown = descriptor?.user
-      const value = typeof user === 'object' && user !== null
-        ? (user as { available?: unknown }).available
-        : undefined
-      this.available = Array.isArray(value)
-        ? value.flatMap(row => {
-          if (typeof row !== 'object' || row === null) return []
-          const { id, file } = row as { id?: unknown; file?: unknown }
-          return typeof id === 'string' && typeof file === 'string' ? [{ id, file }] : []
-        })
-        : []
-    } catch {
-      this.available = []
-    }
-  }
-
-  /** The raw configured catalog, re-read so a settings write lands without
-   *  depending on event delivery. */
+  /** The raw plugin-fixed catalog: every weight on disk, id = file stem. */
   availableModels(): readonly AvailableModel[] {
-    this.ingest()
-    return this.available
+    return listWeightFiles().map(file => ({ id: modelIdOf(file), file }))
   }
 
-  /** The configured models a caller may see, with on-disk/loaded facts. */
+  /** The models a caller may see, with on-disk/loaded facts. */
   listModels(): { id: string; file: string; loaded: boolean }[] {
     const resident = loadedFile()
-    return this.available
+    return this.availableModels()
       .filter(row => selectWeight(row.file) !== undefined)
       .map(row => ({ id: row.id, file: row.file, loaded: resident === row.file }))
   }
 
-  /** Resolve a caller-named model (or the first configured) to a weight file. */
+  /** Resolve a caller-named model (or the engine's default) to a weight file. */
   resolveModel(modelId?: string): AvailableModel {
-    if (this.available.length === 0) {
-      throw new ModelResolutionError('no-model', '未配置任何向量模型；请在 设置-模型 的本地向量卡片中添加。')
+    const catalog = this.availableModels()
+    if (catalog.length === 0) {
+      throw new ModelResolutionError('no-model', '插件未提供任何向量模型权重（models/ 目录为空）。')
     }
-    if (modelId === undefined) return this.available[0]!
-    const row = this.available.find(one => one.id === modelId)
+    if (modelId === undefined) {
+      const fallback = catalog.find(one => selectWeight(one.file)?.file === currentWeightFile())
+      return fallback ?? catalog[0]!
+    }
+    const row = catalog.find(one => one.id === modelId)
     if (row === undefined) {
-      throw new ModelResolutionError('unknown-model', `未配置的向量模型 "${modelId}"`, modelId)
+      throw new ModelResolutionError('unknown-model', `插件未提供向量模型 "${modelId}"`, modelId)
     }
     return row
   }
 
-  /** Embed one batch of texts against a configured model. */
+  /** Embed one batch of texts against a plugin-provided model. */
   embed(inputs: readonly string[], modelId?: string): Promise<number[][]> {
     return embed(inputs, this.resolveModel(modelId).file)
   }
@@ -211,7 +186,7 @@ export class EmbeddingService extends Service {
  * analogue of a signed-in session.
  */
 export class EmbeddingAccount extends Service {
-  static inject = ['llm', 'accountHub', 'embedding', 'settings']
+  static inject = ['llm', 'accountHub', 'embedding']
 
   private readonly settingsNs: string
   private view: AccountHubCardState = {
@@ -296,7 +271,9 @@ export class EmbeddingAccount extends Service {
     const account = this
     const dispose = ctx.accountHub.register({
       id: ID,
-      displayName: '本地向量模型',
+      // 本地 + 实际模型名：the bundled default weight's stem (e.g.
+      // 本地 bge-small-zh-v1.5); falls back when no weight ships.
+      displayName: accountDisplayName(),
       settingsNs: this.settingsNs,
       // The models-page provider id this account backs, and the opt-in that
       // serves the card's models-surface fields under that provider row.
@@ -307,73 +284,24 @@ export class EmbeddingAccount extends Service {
       // Direct serving: the engine runs in-process; there is no upstream and
       // no chat adapter at all.
       workMode: 'direct',
-      // Rebuilt on every read: the models-page card mirrors the configured
-      // catalog and the weights on disk, both of which change live.
+      // Rebuilt on every read: the card mirrors the engine's live state.
       get card() { return account.buildCard() },
-      invoke: (method: string, args: JsonValue) => this.invoke(method, args),
+      invoke: (method: string) => this.invoke(method),
       getState: () => this.view as unknown as JsonValue,
     })
     ctx.effect(() => dispose, 'embedding-local: hub registration')
   }
 
-  /** The declarative card: account gestures plus the models-page catalog editor. */
+  /** The declarative card: load/unload gestures plus read-only catalog info.
+   *  The model list is fixed by the plugin build — there is nothing to add or
+   *  remove at runtime, so the card only reports and toggles the engine. */
   private buildCard(): AccountHubCardDescriptor {
     const models = this.service().availableModels()
-    const files = listWeightFiles()
     const file = isLoaded() ? loadedFile()! : currentWeightFile()
     const dims = currentDimensions()
     const catalogLabel = models.length === 0
-      ? '尚未配置模型：调用方看不到任何向量模型'
-      : `已配置 ${models.length} 个模型：${models.map(one => one.id).join('、')}`
-    /** The add/remove dialogs, mountable on either surface: while the engine
-     *  is unloaded the models page hides its row entirely, so the account
-     *  card carries the same gestures — the configure-then-load entry path,
-     *  mirroring a signed-out account keeping its sign-in button. */
-    const addModelField = (key: string, surface: 'account' | 'models'): AccountHubFieldDescriptor => ({
-      key,
-      kind: 'dialog',
-      surface,
-      label: '添加模型',
-      action: 'add-model',
-      busyLabel: '写入中…',
-      dialog: {
-        title: '添加向量模型',
-        submitLabel: '添加',
-        fields: [
-          {
-            key: 'modelId', kind: 'text', label: '模型 ID',
-            placeholder: '调用方使用的名字，如 bge-small-zh-v1.5',
-          },
-          {
-            key: 'file', kind: 'select', label: '权重文件',
-            ...(files.length > 0
-              ? { options: files.map(one => ({ value: one, label: one }) satisfies AccountHubSelectOption) }
-              : {}),
-          },
-        ],
-      },
-      description: '只有这里配置的模型，才会出现在调用 embedding 的插件面前。',
-    })
-    const removeModelField = (key: string, surface: 'account' | 'models'): AccountHubFieldDescriptor => ({
-      key,
-      kind: 'dialog',
-      surface,
-      label: '移除模型',
-      action: 'remove-model',
-      busyLabel: '写入中…',
-      dialog: {
-        title: '移除向量模型',
-        submitLabel: '移除',
-        fields: [
-          {
-            key: 'modelId', kind: 'select', label: '模型',
-            options: models.map(one => ({
-              value: one.id, label: `${one.id}（${one.file}）`,
-            }) satisfies AccountHubSelectOption),
-          },
-        ],
-      },
-    })
+      ? '插件未提供任何向量模型权重（models/ 目录为空）'
+      : `插件提供 ${models.length} 个向量模型：${models.map(one => one.id).join('、')}`
     return {
       fields: [
         {
@@ -385,102 +313,38 @@ export class EmbeddingAccount extends Service {
           label: '卸载向量模型', action: 'disable', busyLabel: '卸载中…',
         },
         {
-          key: 'probe', kind: 'button', surface: 'account',
-          label: '探测', action: 'probe', busyLabel: '探测中…',
-        },
-        {
           key: 'weight', kind: 'note', surface: 'account',
           label: `当前权重：${file}${dims > 0 ? `（${dims} 维）` : ''}`,
         },
-        // While the engine is unloaded the models page carries no row, so
-        // the catalog gestures live here too — the only configure path.
-        ...(isLoaded() ? [] : [
-          {
-            key: 'catalogLocal', kind: 'note', surface: 'account',
-            label: catalogLabel,
-          },
-          addModelField('addModelLocal', 'account'),
-          removeModelField('removeModelLocal', 'account'),
-        ] as AccountHubFieldDescriptor[]),
         {
           key: 'catalog', kind: 'note', surface: 'models',
           label: catalogLabel,
         },
-        addModelField('addModel', 'models'),
-        removeModelField('removeModel', 'models'),
         {
-          key: 'usage', kind: 'note', surface: 'account',
+          key: 'usage', kind: 'note', surface: 'models',
           label: '其他插件通过 embedding 服务的 embed/similarity/listModels 方法调用；不进入对话模型列表。',
         },
       ],
     }
   }
 
-  /** Forward one hub-card operation to its implementation. Dialog submits
-   *  arrive as `{ values: { …card values, …dialog inputs } }`. */
-  private async invoke(method: string, args: JsonValue): Promise<JsonValue> {
+  /** Forward one hub-card operation to its implementation. */
+  private async invoke(method: string): Promise<JsonValue> {
     switch (method) {
       case 'enable': return this.enable()
       case 'disable': return this.disable()
-      case 'probe': return this.probe()
-      case 'add-model': return this.addModel(args)
-      case 'remove-model': return this.removeModel(args)
       default: throw new Error(`未知账号操作 "${method}"`)
     }
   }
 
-  /** Card values of a dialog submit, as a loose record. */
-  private dialogValues(args: JsonValue): Record<string, unknown> {
-    if (typeof args !== 'object' || args === null) return {}
-    const values = (args as unknown as { values?: unknown }).values
-    return typeof values === 'object' && values !== null
-      ? values as Record<string, unknown>
-      : {}
-  }
-
-  /** Append one model to the configured catalog (the settings service writes). */
-  private async addModel(args: JsonValue): Promise<JsonValue> {
-    const values = this.dialogValues(args)
-    const id = typeof values.modelId === 'string' ? values.modelId.trim() : ''
-    const file = typeof values.file === 'string' ? values.file : ''
-    if (id.length === 0) return { message: '模型 ID 不能为空', error: true }
-    if (!listWeightFiles().includes(file)) {
-      return { message: `权重文件不存在：${file || '（未选择）'}`, error: true }
-    }
-    const current = [...this.service().availableModels()]
-    if (current.some(one => one.id === id)) {
-      return { message: `模型 ID 已存在：${id}`, error: true }
-    }
-    await this.ctx.settings.mutate(this.settingsNs, [{
-      op: 'set', path: ['available'], value: [...current, { id, file }],
-    }])
-    this.refresh()
-    return { message: `已添加 ${id}`, close: true }
-  }
-
-  /** Drop one model from the configured catalog. */
-  private async removeModel(args: JsonValue): Promise<JsonValue> {
-    const values = this.dialogValues(args)
-    const id = typeof values.modelId === 'string' ? values.modelId : ''
-    const current = [...this.service().availableModels()]
-    if (!current.some(one => one.id === id)) {
-      return { message: `未配置的模型：${id || '（未选择）'}`, error: true }
-    }
-    await this.ctx.settings.mutate(this.settingsNs, [{
-      op: 'set', path: ['available'], value: current.filter(one => one.id !== id),
-    }])
-    this.refresh()
-    return { message: `已移除 ${id}`, close: true }
-  }
-
-  /** Eagerly load the first configured model's weight. */
+  /** Eagerly load the plugin's default weight. */
   private async enable(): Promise<JsonValue> {
     let model: AvailableModel
     try {
       model = this.service().resolveModel()
     } catch {
-      this.publish('未配置模型', 'warn', false)
-      return { message: '尚未配置模型：请在 设置-模型 的本地向量卡片中添加', error: true }
+      this.publish('缺少权重', 'error', false)
+      return { message: '插件未提供向量模型权重（models/ 目录为空）', error: true }
     }
     this.publish('加载中…', 'warn', false, true)
     try {
@@ -502,27 +366,6 @@ export class EmbeddingAccount extends Service {
     return { message: '向量模型已卸载' }
   }
 
-  /** One real embed round-trip; reports dimensions and latency. */
-  private async probe(): Promise<JsonValue> {
-    if (!weightPresent()) {
-      const message = `本地未找到权重文件（${currentWeightFile()}）。请在插件目录执行：node scripts/fetch-model.mjs`
-      this.publish('缺少权重', 'error', false)
-      return { message, error: true }
-    }
-    const started = Date.now()
-    try {
-      const vectors = await this.service().embed(['向量模型探测'])
-      const dims = vectors[0]?.length ?? 0
-      const elapsed = Date.now() - started
-      this.publish(`就绪（${dims} 维）`, 'ok', true)
-      return { message: `探测成功：${dims} 维，${elapsed} ms` }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      this.publish(`探测失败：${message}`, 'error', isLoaded())
-      return { message: `探测失败：${message}`, error: true }
-    }
-  }
-
   /** Compose the full view and announce it to the hub watch stream. */
   private publish(
     text: string,
@@ -538,7 +381,7 @@ export class EmbeddingAccount extends Service {
           ? [{ label: '维度', value: String(currentDimensions()) }]
           : []),
         {
-          label: '已配置模型',
+          label: '模型清单',
           value: models.length === 0 ? '无' : models.map(one => one.id).join('、'),
         },
         ...(lastFailure() !== undefined && !isLoaded()
