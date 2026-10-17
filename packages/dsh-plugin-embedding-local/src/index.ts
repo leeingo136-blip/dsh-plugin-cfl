@@ -38,7 +38,7 @@ import type {
 } from '@dsh/api-account-hub'
 import zschema from '@deepseek-ai/schemastery'
 import {
-  currentDimensions, currentWeightFile, embed, isLoaded, lastFailure,
+  currentDimensions, currentWeightFile, embed, isLoaded,
   listWeightFiles, loadedFile, onLoadChange, ready, selectWeight, similarity,
   unload, weightPresent,
 } from './local-embed.ts'
@@ -81,6 +81,18 @@ function accountDisplayName(): string {
  *  directory, so the title never changes at runtime. The account column's
  *  card head and the models-page provider row both render it. */
 const PROVIDER_NAME = accountDisplayName()
+
+/** The one-line brand row the account column renders: logo + title, with
+ *  the status and the load gesture beside them. Carrying `brand` in the
+ *  card state selects this compact layout over the stacked head. */
+const BRAND = Object.freeze({
+  logoUrl: 'data:image/svg+xml;base64,'
+    + Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">`
+      + `<rect x="1" y="1" width="22" height="22" rx="6" fill="#0f6e56"/>`
+      + `<text x="12" y="16.5" font-family="Helvetica, Arial, sans-serif" font-size="10"`
+      + ` font-weight="700" fill="#ffffff" text-anchor="middle">VE</text></svg>`, 'utf8').toString('base64'),
+  name: PROVIDER_NAME,
+})
 
 /** One configured embedding model: the exposed id and its weight file. */
 export interface AvailableModel {
@@ -192,7 +204,7 @@ export class EmbeddingAccount extends Service {
 
   private readonly settingsNs: string
   private view: AccountHubCardState = {
-    text: '未加载', level: 'warn', signedIn: false,
+    text: '未加载', level: 'warn', signedIn: false, brand: BRAND,
   }
 
   constructor(ctx: Context) {
@@ -304,12 +316,15 @@ export class EmbeddingAccount extends Service {
    *  remove at runtime, so the card only reports and toggles the engine. */
   private buildCard(): AccountHubCardDescriptor {
     const models = this.service().availableModels()
-    const file = isLoaded() ? loadedFile()! : currentWeightFile()
-    const dims = currentDimensions()
     const catalogLabel = models.length === 0
       ? '插件未提供任何向量模型权重（models/ 目录为空）'
       : `插件提供 ${models.length} 个向量模型：${models.map(one => one.id).join('、')}`
     return {
+      // The account column renders brand facts only (logo, name, status,
+      // gesture): the weight, dims, and catalog all duplicate the title or
+      // status line, and the brand row is a one-line layout that draws
+      // nothing else. The models-page seat keeps the read-only notes —
+      // there the editor frame carries the title, so they read as facts.
       fields: [
         {
           key: 'enable', kind: 'button', surface: 'account', when: 'signed-out',
@@ -318,10 +333,6 @@ export class EmbeddingAccount extends Service {
         {
           key: 'disable', kind: 'button', surface: 'account', when: 'signed-in',
           label: '卸载向量模型', action: 'disable', busyLabel: '卸载中…',
-        },
-        {
-          key: 'weight', kind: 'note', surface: 'account',
-          label: `当前权重：${file}${dims > 0 ? `（${dims} 维）` : ''}`,
         },
         {
           key: 'catalog', kind: 'note', surface: 'models',
@@ -419,35 +430,21 @@ export class EmbeddingAccount extends Service {
     void this.load()
   }
 
-  /** Compose the full view and announce it to the hub watch stream. */
+  /** Compose the full view and announce it to the hub watch stream. The
+   *  state is deliberately lean: the one-line brand row renders title +
+   *  status + gesture, and anything more would repeat those facts. */
   private publish(
     text: string,
     level: NonNullable<AccountHubCardState['level']>,
     signedIn: boolean,
     signingIn?: boolean,
   ): void {
-    const models = this.service().availableModels()
-    const rows: AccountHubCardState['details'] = {
-      rows: [
-        { label: '权重', value: isLoaded() ? loadedFile()! : currentWeightFile() },
-        ...(currentDimensions() > 0
-          ? [{ label: '维度', value: String(currentDimensions()) }]
-          : []),
-        {
-          label: '模型清单',
-          value: models.length === 0 ? '无' : models.map(one => one.id).join('、'),
-        },
-        ...(lastFailure() !== undefined && !isLoaded()
-          ? [{ label: '最近错误', value: lastFailure()! }]
-          : []),
-      ],
-    }
     this.view = {
       text,
       level,
       signedIn,
       ...(signingIn === true ? { signingIn: true } : {}),
-      details: rows,
+      brand: BRAND,
     }
     // The publish sites are exactly the load-state transitions the user can
     // trigger (load gesture, unload, lazy first embed): converge the
