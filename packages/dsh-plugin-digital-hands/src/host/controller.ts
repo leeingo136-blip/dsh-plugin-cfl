@@ -9,7 +9,7 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import type { DigitalHandsService } from './service.ts'
-import type { DhMcpStatus, DhPlanView, DhProbeResult, DhStatus, DhToolRow } from './types.ts'
+import type { DhPlanView, DhProbeResult, DhStatus, DhToolGroup } from './types.ts'
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
@@ -41,9 +41,9 @@ export class DigitalHandsController extends TypertRemoteService {
     return service
   }
 
-  /** The full tool catalog: natively mounted + managed. */
+  /** The grouped tool list: every visible tool attributed to its source. */
   @Remote
-  async listTools(): Promise<{ native: DhToolRow[]; managed: DhToolRow[] }> {
+  async listTools(): Promise<{ groups: DhToolGroup[] }> {
     return this.svc().snapshot()
   }
 
@@ -85,12 +85,10 @@ export class DigitalHandsController extends TypertRemoteService {
   @Remote
   async status(): Promise<DhStatus> {
     const service = this.svc()
-    const mcp: DhMcpStatus[] = service.mcpStatus()
-    const { managed } = service.snapshot()
     return {
-      mcp,
+      mcp: service.mcpStatus(),
       activePlans: [...service.activePlans],
-      managedTools: managed.length,
+      managedTools: service.managedCount(),
     }
   }
 

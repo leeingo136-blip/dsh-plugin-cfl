@@ -87,15 +87,7 @@ var tab = (active) => ({
   fontWeight: active ? 600 : 400,
   background: active ? "var(--dsw-alias-interactive-bg-hover, #8080801a)" : "transparent"
 });
-var table = { width: "100%", borderCollapse: "collapse", fontSize: 13 };
-var cell = {
-  textAlign: "left",
-  padding: "6px 8px",
-  borderBottom: "0.5px solid var(--dsw-alias-border-l2, var(--dsw-alias-border-default, #e2e2e2))",
-  color: "var(--dsw-alias-text-primary)",
-  verticalAlign: "top"
-};
-var cellKey = { ...cell, color: "var(--dsw-alias-text-secondary)", whiteSpace: "nowrap", fontSize: 12 };
+var select = { ...input, cursor: "pointer" };
 var textarea = {
   width: "100%",
   minHeight: 320,
@@ -109,17 +101,6 @@ var textarea = {
   fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
   lineHeight: 1.55,
   resize: "vertical"
-};
-var select = { ...input, cursor: "pointer" };
-var ORIGIN_LABEL = {
-  native: "\u539F\u751F",
-  mcp: "MCP",
-  script: "\u811A\u672C"
-};
-var ORIGIN_COLOR = {
-  native: "var(--dsw-alias-text-tertiary, var(--dsw-alias-text-secondary))",
-  mcp: "var(--dsw-alias-text-success, var(--dsw-ref-green-600, #1a7f37))",
-  script: "var(--dsw-alias-text-warning, var(--dsw-ref-yellow-600, #9a6700))"
 };
 var NEW_PLAN_TEMPLATE = `# Digital Hands \u65B9\u6848\uFF1A\u58F0\u660E\u53D7\u7BA1 MCP \u670D\u52A1\u5668\u4E0E\u811A\u672C\u5DE5\u5177\u3002
 # servers: \u6BCF\u6761\u4E00\u4E2A MCP \u670D\u52A1\u5668\uFF08transport: streamable-http \u9700\u8981 url\uFF0Cstdio \u9700\u8981 command/args\uFF09\u3002
@@ -199,20 +180,49 @@ function DigitalHandsSection(props) {
   if (face === void 0) return null;
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: section, children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: tabRow, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", style: tab(activeTab === "tools"), onClick: () => setActiveTab("tools"), children: "\u5DE5\u5177\u603B\u8D26" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", style: tab(activeTab === "tools"), onClick: () => setActiveTab("tools"), children: "\u5DE5\u5177\u5217\u8868" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", style: tab(activeTab === "mcp"), onClick: () => setActiveTab("mcp"), children: "MCP \u670D\u52A1\u5668" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", style: tab(activeTab === "plans"), onClick: () => setActiveTab("plans"), children: "\u65B9\u6848" })
     ] }),
     activeTab === "tools" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ToolsView, { face }) : activeTab === "mcp" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(McpView, { face }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PlansView, { face })
   ] });
 }
+var badge = {
+  fontSize: 11,
+  lineHeight: "16px",
+  padding: "0 8px",
+  borderRadius: 999,
+  border: "0.5px solid var(--dsw-alias-border-l2, var(--dsw-alias-border-default, #e2e2e2))",
+  whiteSpace: "nowrap"
+};
+var BADGES = {
+  official: { label: "\u7B2C\u4E00\u65B9\u63D2\u4EF6", style: badge },
+  "third-party": { label: "\u7B2C\u4E09\u65B9\u63D2\u4EF6", style: { ...badge, color: "var(--dsw-alias-text-secondary)" } },
+  mcp: { label: "MCP", style: { ...badge, color: "var(--dsw-alias-text-success, var(--dsw-ref-green-600, #1a7f37))" } },
+  self: { label: "\u7B2C\u4E09\u65B9\u63D2\u4EF6", style: { ...badge, color: "var(--dsw-alias-text-secondary)" } }
+};
+var toolList = { display: "flex", flexDirection: "column" };
+var toolLine = {
+  display: "flex",
+  gap: 12,
+  padding: "5px 0",
+  borderBottom: "0.5px solid var(--dsw-alias-border-l2, var(--dsw-alias-border-default, #e2e2e2))",
+  alignItems: "baseline"
+};
+var toolName = {
+  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+  fontSize: 12.5,
+  color: "var(--dsw-alias-text-primary)",
+  minWidth: 220,
+  flexShrink: 0
+};
+var toolDesc = { color: "var(--dsw-alias-text-secondary)", fontSize: 12.5, minWidth: 0 };
 function ToolsView({ face }) {
-  const [rows, setRows] = (0, import_react.useState)(null);
+  const [groups, setGroups] = (0, import_react.useState)(null);
   const [error, setError] = (0, import_react.useState)(null);
-  const [filter, setFilter] = (0, import_react.useState)("all");
   const refresh = (0, import_react.useCallback)(() => {
     face.listTools().then((value) => {
-      setRows(value);
+      setGroups(value.groups);
       setError(null);
     }).catch((cause) => {
       setError(cause instanceof Error ? cause.message : String(cause));
@@ -223,46 +233,42 @@ function ToolsView({ face }) {
     "\u52A0\u8F7D\u5931\u8D25\uFF1A",
     error
   ] }) });
-  if (rows === null) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: card, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: muted, children: "\u52A0\u8F7D\u4E2D\u2026" }) });
-  const managed = rows.managed;
-  const native = rows.native;
-  const shown = filter === "all" ? [...managed, ...native] : filter === "managed" ? managed : native;
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: card, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: head, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: title, children: "\u5DE5\u5177\u603B\u8D26" }),
+  if (groups === null) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: card, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: muted, children: "\u52A0\u8F7D\u4E2D\u2026" }) });
+  const list = Array.isArray(groups) ? groups : [];
+  const total = list.reduce((sum, group) => sum + group.tools.length, 0);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexDirection: "column", gap: 12 }, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { ...row, paddingLeft: 2 }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: muted, children: [
-        "\u53D7\u7BA1 ",
-        managed.length,
-        " \xB7 \u539F\u751F ",
-        native.length
+        list.length,
+        " \u4E2A\u6765\u6E90 \xB7 ",
+        total,
+        " \u4E2A\u5DE5\u5177"
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flex: 1 } }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", style: button, onClick: refresh, children: "\u5237\u65B0" })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: row, children: ["all", "managed", "native"].map((key) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { ...muted, cursor: "pointer", fontWeight: filter === key ? 600 : 400 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", checked: filter === key, onChange: () => setFilter(key) }),
-      " ",
-      key === "all" ? "\u5168\u90E8" : key === "managed" ? "\u53D7\u7BA1\uFF08\u6570\u636E\u624B\uFF09" : "\u539F\u751F\u6302\u8F7D"
-    ] }, key)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { style: table, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: cellKey, children: "\u5DE5\u5177\u540D" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: cellKey, children: "\u6765\u6E90" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: cell, children: "\u63CF\u8FF0" })
-      ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tbody", { children: [
-        shown.map((row2) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: cell, children: row2.name }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { style: { ...cell, color: ORIGIN_COLOR[row2.origin], whiteSpace: "nowrap", fontSize: 12 }, children: [
-            ORIGIN_LABEL[row2.origin],
-            row2.server !== void 0 ? ` \xB7 ${row2.server}` : "",
-            row2.hasDocs === true ? " \xB7 \u6709\u6587\u6863" : ""
+    list.map((group) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { ...card, gap: 6 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: head, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: title, children: group.title }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: BADGES[group.origin].style, children: BADGES[group.origin].label }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { flex: 1 } }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: muted, children: [
+          group.tools.length,
+          " \u4E2A\u5DE5\u5177"
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: muted, children: group.subtitle }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: toolList, children: [
+        group.tools.map((tool) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: toolLine, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: toolName, children: [
+            tool.name,
+            tool.hasDocs === true ? " \xB7" : ""
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { ...cell, color: "var(--dsw-alias-text-secondary)" }, children: row2.description })
-        ] }, row2.name)),
-        shown.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: cell, colSpan: 3, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: muted, children: "\u6CA1\u6709\u5DE5\u5177\u3002" }) }) })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: toolDesc, children: tool.description })
+        ] }, tool.name)),
+        group.tools.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: muted, children: "\u8BE5\u6765\u6E90\u5F53\u524D\u6CA1\u6709\u53EF\u7528\u5DE5\u5177\u3002" })
       ] })
-    ] })
+    ] }, `${group.origin}:${group.title}`))
   ] });
 }
 var EMPTY_FORM = { name: "", transport: "streamable-http", url: "", command: "", args: "", headers: "" };

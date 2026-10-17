@@ -12,12 +12,14 @@
 import { readFile, readdir, rename, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { parsePlan, plansRoot } from '../plan.ts'
-import type { DhMcpStatus, DhPlanView, DhProbeResult, DhToolRow } from './types.ts'
+import type { DhMcpStatus, DhPlanView, DhProbeResult, DhToolGroup } from './types.ts'
 
 /** The face the main component attaches after its apply resolves. */
 export interface DigitalHandsCapabilities {
-  /** Full catalog snapshot: natively mounted + managed tools. */
-  snapshot(): { native: DhToolRow[]; managed: DhToolRow[] }
+  /** Grouped catalog snapshot: every visible tool attributed to its source. */
+  snapshot(): { groups: DhToolGroup[] }
+  /** Managed tools currently mounted (MCP + scripts), for the status header. */
+  managedCount(): number
   /** Live managed-server states. */
   mcpStatus(): DhMcpStatus[]
   /** Tear down every managed registration and remount from the plan files. */
@@ -42,8 +44,12 @@ export class DigitalHandsService {
     return this.caps
   }
 
-  snapshot(): { native: DhToolRow[]; managed: DhToolRow[] } {
+  snapshot(): { groups: DhToolGroup[] } {
     return this.requireCaps().snapshot()
+  }
+
+  managedCount(): number {
+    return this.requireCaps().managedCount()
   }
 
   mcpStatus(): DhMcpStatus[] {

@@ -116,6 +116,13 @@ export class ManagedServer {
     this.spec = spec
   }
 
+  /** Human-readable endpoint for the settings UI: url, or the command line. */
+  address(): string {
+    return this.spec.transport === 'stdio'
+      ? [this.spec.command ?? '', ...(this.spec.args ?? [])].join(' ').trim()
+      : this.spec.url ?? ''
+  }
+
   getStatus(): { name: string; state: string; failure?: string; tools: number } {
     return {
       name: this.name,

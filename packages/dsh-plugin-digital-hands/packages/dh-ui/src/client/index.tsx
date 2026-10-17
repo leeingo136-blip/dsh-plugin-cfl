@@ -19,13 +19,19 @@ import type {} from '@deepseek-ai/dsh-client-ui-slots'
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
 import type {} from '@deepseek-ai/cordis'
 
-/** One tool row as the host catalog answers. */
+/** One tool entry inside a source group. */
 interface ToolRow {
   name: string
   description: string
-  origin: 'native' | 'mcp' | 'script'
-  server?: string
   hasDocs?: boolean
+}
+
+/** One source group: a plugin, a managed MCP server, or digital-hands itself. */
+interface ToolGroup {
+  origin: 'self' | 'mcp' | 'official' | 'third-party'
+  title: string
+  subtitle: string
+  tools: ToolRow[]
 }
 
 /** One managed server's live status. */
@@ -53,7 +59,7 @@ interface ProbeResult {
 
 /** The face injected into the section component. */
 interface DhFace {
-  listTools(): Promise<{ native: ToolRow[]; managed: ToolRow[] }>
+  listTools(): Promise<{ groups: ToolGroup[] }>
   listPlans(): Promise<PlanView[]>
   savePlan(name: string, yaml: string): Promise<void>
   deletePlan(name: string): Promise<void>
@@ -122,15 +128,7 @@ const tab = (active: boolean): React.CSSProperties => ({
   fontWeight: active ? 600 : 400,
   background: active ? 'var(--dsw-alias-interactive-bg-hover, #8080801a)' : 'transparent',
 })
-const table: React.CSSProperties = { width: '100%', borderCollapse: 'collapse', fontSize: 13 }
-const cell: React.CSSProperties = {
-  textAlign: 'left',
-  padding: '6px 8px',
-  borderBottom: '0.5px solid var(--dsw-alias-border-l2, var(--dsw-alias-border-default, #e2e2e2))',
-  color: 'var(--dsw-alias-text-primary)',
-  verticalAlign: 'top',
-}
-const cellKey: React.CSSProperties = { ...cell, color: 'var(--dsw-alias-text-secondary)', whiteSpace: 'nowrap', fontSize: 12 }
+const select: React.CSSProperties = { ...input, cursor: 'pointer' }
 const textarea: React.CSSProperties = {
   width: '100%',
   minHeight: 320,
@@ -144,18 +142,6 @@ const textarea: React.CSSProperties = {
   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
   lineHeight: 1.55,
   resize: 'vertical',
-}
-const select: React.CSSProperties = { ...input, cursor: 'pointer' }
-
-const ORIGIN_LABEL: Record<ToolRow['origin'], string> = {
-  native: '原生',
-  mcp: 'MCP',
-  script: '脚本',
-}
-const ORIGIN_COLOR: Record<ToolRow['origin'], string> = {
-  native: 'var(--dsw-alias-text-tertiary, var(--dsw-alias-text-secondary))',
-  mcp: 'var(--dsw-alias-text-success, var(--dsw-ref-green-600, #1a7f37))',
-  script: 'var(--dsw-alias-text-warning, var(--dsw-ref-yellow-600, #9a6700))',
 }
 
 const NEW_PLAN_TEMPLATE = `# Digital Hands 方案：声明受管 MCP 服务器与脚本工具。
@@ -215,7 +201,7 @@ function apply(ctx: {
 }): void {
   const remote = ctx.remote as unknown as {
     digitalHands: {
-      listTools(): Promise<RemoteResult<{ native: ToolRow[]; managed: ToolRow[] }>>
+      listTools(): Promise<RemoteResult<{ groups: ToolGroup[] }>>
       listPlans(): Promise<RemoteResult<PlanView[]>>
       savePlan(name: string, yaml: string): Promise<RemoteResult<{ reloaded: boolean }>>
       deletePlan(name: string): Promise<RemoteResult<{ reloaded: boolean }>>
@@ -261,7 +247,7 @@ function DigitalHandsSection(props: { face?: DhFace }): ReactNode {
   return (
     <div style={section}>
       <div style={tabRow}>
-        <button type="button" style={tab(activeTab === 'tools')} onClick={() => setActiveTab('tools')}>工具总账</button>
+        <button type="button" style={tab(activeTab === 'tools')} onClick={() => setActiveTab('tools')}>工具列表</button>
         <button type="button" style={tab(activeTab === 'mcp')} onClick={() => setActiveTab('mcp')}>MCP 服务器</button>
         <button type="button" style={tab(activeTab === 'plans')} onClick={() => setActiveTab('plans')}>方案</button>
       </div>
@@ -272,14 +258,44 @@ function DigitalHandsSection(props: { face?: DhFace }): ReactNode {
 
 // --- tools view -----------------------------------------------------------
 
+const badge: React.CSSProperties = {
+  fontSize: 11,
+  lineHeight: '16px',
+  padding: '0 8px',
+  borderRadius: 999,
+  border: '0.5px solid var(--dsw-alias-border-l2, var(--dsw-alias-border-default, #e2e2e2))',
+  whiteSpace: 'nowrap',
+}
+const BADGES: Record<ToolGroup['origin'], { label: string; style: React.CSSProperties }> = {
+  official: { label: '第一方插件', style: badge },
+  'third-party': { label: '第三方插件', style: { ...badge, color: 'var(--dsw-alias-text-secondary)' } },
+  mcp: { label: 'MCP', style: { ...badge, color: 'var(--dsw-alias-text-success, var(--dsw-ref-green-600, #1a7f37))' } },
+  self: { label: '第三方插件', style: { ...badge, color: 'var(--dsw-alias-text-secondary)' } },
+}
+const toolList: React.CSSProperties = { display: 'flex', flexDirection: 'column' }
+const toolLine: React.CSSProperties = {
+  display: 'flex',
+  gap: 12,
+  padding: '5px 0',
+  borderBottom: '0.5px solid var(--dsw-alias-border-l2, var(--dsw-alias-border-default, #e2e2e2))',
+  alignItems: 'baseline',
+}
+const toolName: React.CSSProperties = {
+  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+  fontSize: 12.5,
+  color: 'var(--dsw-alias-text-primary)',
+  minWidth: 220,
+  flexShrink: 0,
+}
+const toolDesc: React.CSSProperties = { color: 'var(--dsw-alias-text-secondary)', fontSize: 12.5, minWidth: 0 }
+
 function ToolsView({ face }: { face: DhFace }): ReactNode {
-  const [rows, setRows] = useState<{ native: ToolRow[]; managed: ToolRow[] } | null>(null)
+  const [groups, setGroups] = useState<ToolGroup[] | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [filter, setFilter] = useState<'all' | 'managed' | 'native'>('all')
 
   const refresh = useCallback(() => {
     face.listTools().then((value) => {
-      setRows(value)
+      setGroups(value.groups)
       setError(null)
     }).catch((cause: unknown) => {
       setError(cause instanceof Error ? cause.message : String(cause))
@@ -288,53 +304,39 @@ function ToolsView({ face }: { face: DhFace }): ReactNode {
   useEffect(refresh, [refresh])
 
   if (error !== null) return <div style={card}><p style={errorText}>加载失败：{error}</p></div>
-  if (rows === null) return <div style={card}><p style={muted}>加载中…</p></div>
-
-  const managed = rows.managed
-  const native = rows.native
-  const shown = filter === 'all' ? [...managed, ...native] : filter === 'managed' ? managed : native
+  if (groups === null) return <div style={card}><p style={muted}>加载中…</p></div>
+  // Defensive: a torn-down/mid-boot remote can resolve with a missing list —
+  // render the empty state instead of crashing the whole settings shell.
+  const list = Array.isArray(groups) ? groups : []
+  const total = list.reduce((sum, group) => sum + group.tools.length, 0)
 
   return (
-    <div style={card}>
-      <div style={head}>
-        <h3 style={title}>工具总账</h3>
-        <span style={muted}>受管 {managed.length} · 原生 {native.length}</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ ...row, paddingLeft: 2 }}>
+        <span style={muted}>{list.length} 个来源 · {total} 个工具</span>
         <span style={{ flex: 1 }} />
         <button type="button" style={button} onClick={refresh}>刷新</button>
       </div>
-      <div style={row}>
-        {(['all', 'managed', 'native'] as const).map((key) => (
-          <label key={key} style={{ ...muted, cursor: 'pointer', fontWeight: filter === key ? 600 : 400 }}>
-            <input type="radio" checked={filter === key} onChange={() => setFilter(key)} />
-            {' '}
-            {key === 'all' ? '全部' : key === 'managed' ? '受管（数据手）' : '原生挂载'}
-          </label>
-        ))}
-      </div>
-      <table style={table}>
-        <thead>
-          <tr>
-            <th style={cellKey}>工具名</th>
-            <th style={cellKey}>来源</th>
-            <th style={cell}>描述</th>
-          </tr>
-        </thead>
-        <tbody>
-          {shown.map((row) => (
-            <tr key={row.name}>
-              <td style={cell}>{row.name}</td>
-              <td style={{ ...cell, color: ORIGIN_COLOR[row.origin], whiteSpace: 'nowrap', fontSize: 12 }}>
-                {ORIGIN_LABEL[row.origin]}{row.server !== undefined ? ` · ${row.server}` : ''}
-                {row.hasDocs === true ? ' · 有文档' : ''}
-              </td>
-              <td style={{ ...cell, color: 'var(--dsw-alias-text-secondary)' }}>{row.description}</td>
-            </tr>
-          ))}
-          {shown.length === 0 && (
-            <tr><td style={cell} colSpan={3}><p style={muted}>没有工具。</p></td></tr>
-          )}
-        </tbody>
-      </table>
+      {list.map((group) => (
+        <div key={`${group.origin}:${group.title}`} style={{ ...card, gap: 6 }}>
+          <div style={head}>
+            <h3 style={title}>{group.title}</h3>
+            <span style={BADGES[group.origin].style}>{BADGES[group.origin].label}</span>
+            <span style={{ flex: 1 }} />
+            <span style={muted}>{group.tools.length} 个工具</span>
+          </div>
+          <p style={muted}>{group.subtitle}</p>
+          <div style={toolList}>
+            {group.tools.map((tool) => (
+              <div key={tool.name} style={toolLine}>
+                <span style={toolName}>{tool.name}{tool.hasDocs === true ? ' ·' : ''}</span>
+                <span style={toolDesc}>{tool.description}</span>
+              </div>
+            ))}
+            {group.tools.length === 0 && <p style={muted}>该来源当前没有可用工具。</p>}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

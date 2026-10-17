@@ -33,7 +33,7 @@ import type {} from '@deepseek-ai/cordis-plugin-loader'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import { DigitalHandsController } from './host/controller.ts'
 import { DigitalHandsService } from './host/service.ts'
-import type { DhToolRow } from './host/types.ts'
+import type { DhToolGroup, DhToolRow } from './host/types.ts'
 import { ManagedServer, probeServer } from './mcp.ts'
 import { loadScriptTools } from './script-tools.ts'
 import { resolvePlans, plansRoot, type DigitalHandsConfig, type ToolPlan } from './plan.ts'
@@ -50,6 +50,52 @@ interface ManagedEntry {
 }
 
 const TOOL_SEARCH_NAME = 'tool_search'
+
+/**
+ * First-party tool catalog: tool name → owning official plugin, extracted
+ * from the running dsh's `@deepseek-ai/dsh-tool-*` packages (0.2.1-rc.1).
+ * The registry does not attribute registrations to their source plugin, so
+ * the settings UI's source grouping uses this static catalog; anything it
+ * does not cover falls into the unattributed third-party group.
+ */
+const OFFICIAL_PLUGINS: ReadonlyArray<{ title: string; plugin: string; tools: readonly string[] }> = [
+  { title: '文件读写', plugin: 'dsh-tool-fs', tools: ['read', 'write', 'edit', 'read_image'] },
+  { title: '文件搜索', plugin: 'dsh-tool-fs-search', tools: ['glob', 'grep'] },
+  { title: 'Shell（bash）', plugin: 'dsh-tool-bash', tools: ['bash'] },
+  { title: 'Shell（PowerShell）', plugin: 'dsh-tool-pwsh', tools: ['pwsh'] },
+  { title: '终端会话', plugin: 'dsh-tool-terminal', tools: ['terminal_open', 'terminal_read', 'terminal_send', 'terminal_signal', 'terminal_list', 'terminal_close'] },
+  { title: '网络访问', plugin: 'dsh-tool-web', tools: ['web_search', 'web_fetch'] },
+  { title: '技能', plugin: 'dsh-tool-skill', tools: ['skill'] },
+  { title: '待办清单', plugin: 'dsh-tool-todo', tools: ['todo_write'] },
+  { title: '目标管理', plugin: 'dsh-tool-goal', tools: ['create_goal', 'get_goal', 'update_goal'] },
+  { title: '后台任务', plugin: 'dsh-tool-jobs', tools: ['job_list', 'job_output', 'job_kill'] },
+  { title: '定时计划', plugin: 'dsh-tool-schedule', tools: ['schedule_create', 'schedule_list', 'schedule_update', 'schedule_delete'] },
+  { title: '会话查询', plugin: 'dsh-tool-session-query', tools: ['session_search', 'session_trace', 'session_event_read', 'session_event_search', 'session_event_trace'] },
+  { title: '用户提问', plugin: 'dsh-tool-ask-user', tools: ['ask_user_question'] },
+  { title: '内容展示', plugin: 'dsh-tool-present', tools: ['present'] },
+  { title: '编辑器（str_replace）', plugin: 'dsh-tool-str-replace-editor', tools: ['str_replace_editor'] },
+  { title: '子代理模型', plugin: 'dsh-tool-subagent', tools: ['list_subagent_models'] },
+  { title: '子代理控制', plugin: 'dsh-tool-subagent-control', tools: ['interrupt_agent', 'send_message'] },
+  { title: 'Ralph 循环', plugin: 'dsh-tool-ralph', tools: ['ralph'] },
+  { title: '工作流', plugin: 'dsh-tool-workflow', tools: [] },
+  { title: '工作目录', plugin: 'dsh-tool-working-directory', tools: ['working_directory'] },
+  { title: '工作区依赖', plugin: 'dsh-tool-workspace-dependencies', tools: ['load_workspace_dependencies'] },
+  { title: 'Cordis 检查', plugin: 'dsh-tool-cordis', tools: ['cordis_inspect_list', 'cordis_inspect_query'] },
+  { title: 'MCP 资源', plugin: 'dsh-mcp-resources', tools: ['list_mcp_resources', 'read_mcp_resource', 'list_mcp_resource_templates'] },
+]
+
+/** tool name → its official plugin entry. */
+const OFFICIAL_BY_TOOL: ReadonlyMap<string, { title: string; plugin: string }> = new Map(
+  OFFICIAL_PLUGINS.flatMap((entry) => entry.tools.map((tool) => [tool, { title: entry.title, plugin: entry.plugin }] as const)),
+)
+
+/** Our own containers' loop tools (registered outside this plugin). */
+function containerAttribution(name: string): { title: string; plugin: string } | undefined {
+  if (name === 'loop_wakeup' || name.startsWith('cron_')) {
+    return { title: 'Qwen 心跳循环', plugin: 'dsh-plugin-qwen-ability（loop）' }
+  }
+  return undefined
+}
 
 export default async function apply(ctx: Context, config: DigitalHandsConfig): Promise<void> {
   // --- catalog state (rebuilt by each remount) ---
@@ -203,25 +249,78 @@ export default async function apply(ctx: Context, config: DigitalHandsConfig): P
   }
 
   // --- capabilities the settings service delegates to ---
-  const snapshot = (): { native: DhToolRow[]; managed: DhToolRow[] } => ({
-    native: [...ctx.tools.schemas()]
-      .filter((schema) => schema.name !== TOOL_SEARCH_NAME)
-      .filter((schema) => !managed.some((entry) => entry.name === schema.name))
-      .map((schema) => ({
-        name: schema.name,
-        description: schema.description ?? '',
-        origin: 'native' as const,
-      })),
-    managed: managed.map((entry): DhToolRow => ({
-      name: entry.name,
-      description: entry.description,
-      origin: entry.source,
-      ...(entry.server !== undefined ? { server: entry.server } : {}),
-      ...(entry.docs !== undefined ? { hasDocs: true } : {}),
-    })),
-  })
+  /** Managed public names, for separating own registrations from native ones. */
+  const managedNames = (): Set<string> => new Set(managed.map((entry) => entry.name))
+
+  const buildGroups = (): DhToolGroup[] => {
+    const groups: DhToolGroup[] = []
+
+    // Self: tool_search + every plan-declared script tool.
+    const selfTools: DhToolRow[] = [
+      { name: TOOL_SEARCH_NAME, description: '目录检索：按关键词列出全部受管与原生工具（含扩展文档）。' },
+      ...managed
+        .filter((entry) => entry.source === 'script')
+        .map((entry): DhToolRow => ({
+          name: entry.name,
+          description: entry.description,
+          ...(entry.docs !== undefined ? { hasDocs: true } : {}),
+        })),
+    ]
+    groups.push({ origin: 'self', title: '数据手', subtitle: 'dsh-plugin-digital-hands', tools: selfTools })
+
+    // Managed MCP servers: one group per server, address as the subtitle.
+    const claimed = managedNames()
+    for (const server of servers) {
+      const tools = managed
+        .filter((entry) => entry.source === 'mcp' && entry.server === server.name)
+        .map((entry): DhToolRow => ({ name: entry.name, description: entry.description }))
+      groups.push({
+        origin: 'mcp',
+        title: server.name,
+        subtitle: server.address(),
+        tools,
+      })
+    }
+
+    // Native (global-layer) tools: attribute via the first-party catalog.
+    const attributed = new Map<string, DhToolRow[]>()
+    const unknown: DhToolRow[] = []
+    for (const schema of ctx.tools.schemas()) {
+      if (schema.name === TOOL_SEARCH_NAME || claimed.has(schema.name)) continue
+      const row: DhToolRow = { name: schema.name, description: schema.description ?? '' }
+      const home = OFFICIAL_BY_TOOL.get(schema.name) ?? containerAttribution(schema.name)
+      if (home === undefined) {
+        unknown.push(row)
+      } else {
+        const bucket = attributed.get(home.plugin)
+        if (bucket === undefined) attributed.set(home.plugin, [row])
+        else bucket.push(row)
+      }
+    }
+    for (const entry of OFFICIAL_PLUGINS) {
+      const tools = attributed.get(entry.plugin)
+      if (tools === undefined) continue
+      groups.push({
+        origin: 'official',
+        title: entry.title,
+        subtitle: `@deepseek-ai/${entry.plugin}`,
+        tools: tools.sort((a, b) => (a.name < b.name ? -1 : 1)),
+      })
+    }
+    if (unknown.length > 0) {
+      groups.push({
+        origin: 'third-party',
+        title: '其他工具',
+        subtitle: '第一方目录外的已挂载工具（来源未标注）',
+        tools: unknown.sort((a, b) => (a.name < b.name ? -1 : 1)),
+      })
+    }
+    return groups
+  }
+
   service.attach({
-    snapshot,
+    snapshot: () => ({ groups: buildGroups() }),
+    managedCount: () => managed.length,
     mcpStatus: () => servers.map((server) => server.getStatus() as never),
     reload: async () => {
       teardownManaged()
