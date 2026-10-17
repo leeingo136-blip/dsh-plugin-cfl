@@ -259,3 +259,34 @@ function buildDefinition(input: DefinitionInput): { definition: ToolDefinition; 
   }
   return { definition, rawName: input.rawName, description: input.description }
 }
+
+/**
+ * Probe a candidate server spec from the settings UI: connect, list tool
+ * names, close. Nothing is registered — this only answers "does this server
+ * come up and what would it provide".
+ */
+export async function probeServer(spec: McpServerSpec): Promise<{ ok: boolean; tools?: string[]; error?: string }> {
+  const client = new Client({ name: 'dsh-digital-hands-probe', version: '0.1.0' })
+  const transport = spec.transport === 'stdio'
+    ? new StdioClientTransport({
+        command: spec.command ?? '',
+        args: [...(spec.args ?? [])],
+        env: buildChildEnv(spec.env ?? {}),
+        ...(spec.cwd !== undefined ? { cwd: spec.cwd } : {}),
+      })
+    : new StreamableHTTPClientTransport(new URL(spec.url ?? ''), {
+        requestInit: { headers: { ...spec.headers } },
+      })
+  try {
+    await client.connect(transport)
+    const capabilities = client.getServerCapabilities()
+    const listed = capabilities?.tools === undefined
+      ? { tools: [] }
+      : await client.listTools()
+    return { ok: true, tools: listed.tools.map((tool) => tool.name) }
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : String(error) }
+  } finally {
+    await client.close().catch(() => {})
+  }
+}

@@ -15,6 +15,10 @@
  *     changes the tool set; it only reads. Managed tools stay fully mounted
  *     and directly callable, so tool_search is navigation/documentation, not
  *     a gate.
+ *  5. Provide the settings UI's backing services: a `digitalHandsService`
+ *     (plan CRUD + capability delegation) and the `digitalHands` remote
+ *     namespace (src-json, no generated artifacts) that the settings section
+ *     calls through. Plan saves hot-reload the mounted set.
  *
  * Coexistence: this component does not touch the profile's official MCP
  * config, other plugins' registrations, or any agent preset. Tools mounted
@@ -27,7 +31,10 @@
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/cordis-plugin-loader'
 import { defineTool } from '@deepseek-ai/dsh-tools'
-import { ManagedServer } from './mcp.ts'
+import { DigitalHandsController } from './host/controller.ts'
+import { DigitalHandsService } from './host/service.ts'
+import type { DhToolRow } from './host/types.ts'
+import { ManagedServer, probeServer } from './mcp.ts'
 import { loadScriptTools } from './script-tools.ts'
 import { resolvePlans, plansRoot, type DigitalHandsConfig, type ToolPlan } from './plan.ts'
 
@@ -45,22 +52,18 @@ interface ManagedEntry {
 const TOOL_SEARCH_NAME = 'tool_search'
 
 export default async function apply(ctx: Context, config: DigitalHandsConfig): Promise<void> {
+  // --- catalog state (rebuilt by each remount) ---
   const disposers: (() => void)[] = []
   const servers: ManagedServer[] = []
   const managed: ManagedEntry[] = []
 
-  ctx.effect(() => () => {
-    for (const dispose of disposers) {
-      try {
-        dispose()
-      } catch {
-        /* registry may already be tearing down; nothing to do */
-      }
-    }
-    for (const server of servers) void server.dispose()
-  }, 'digital-hands: registrations')
+  // --- settings service: mounted before anything can fail, so the UI works
+  // even when every plan is broken ---
+  const service = new DigitalHandsService()
+  ctx.provide('digitalHandsService', service)
+  ctx.plugin(DigitalHandsController)
 
-  // --- tool_search: registered first so it exists even if plan mounting fails ---
+  // --- tool_search: registered once; it reads whatever is currently mounted ---
   const toolSearch = defineTool({
     name: TOOL_SEARCH_NAME,
     description:
@@ -129,70 +132,122 @@ export default async function apply(ctx: Context, config: DigitalHandsConfig): P
   })
   disposers.push(ctx.tools.register(toolSearch))
 
-  // --- Mount plans ---
-  let plans: ToolPlan[]
+  /** Tear down every managed registration and server connection. */
+  const teardownManaged = (): void => {
+    for (const dispose of disposers.splice(0)) {
+      try {
+        dispose()
+      } catch {
+        /* registry may already be tearing down; nothing to do */
+      }
+    }
+    for (const server of servers.splice(0)) void server.dispose()
+    managed.length = 0
+  }
+  ctx.effect(() => teardownManaged, 'digital-hands: registrations')
+
+  /** Mount every plan-declared server and script. Re-entrant: callers must
+   *  have torn the previous generation down first. */
+  const mountPlans = async (): Promise<ToolPlan[]> => {
+    const plans = await resolvePlans(config ?? {})
+    service.activePlans = plans
+      .filter((plan) => plan.servers.length > 0 || plan.scripts.length > 0)
+      .map((plan) => plan.name)
+    for (const plan of plans) {
+      for (const spec of plan.servers) {
+        const server = new ManagedServer(spec)
+        servers.push(server)
+        try {
+          const count = await server.sync(ctx)
+          ctx.logger.info('[digital-hands] MCP 服务器 %s 已挂载 %d 个工具。', spec.name, count)
+          for (const record of server.records) {
+            const docs = plan.docs?.[record.publicName]
+            managed.push({
+              name: record.publicName,
+              description: record.description,
+              source: 'mcp',
+              server: spec.name,
+              ...(docs !== undefined ? { docs } : {}),
+            })
+          }
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error)
+          server.markFailed(message)
+          ctx.logger.warn('[digital-hands] MCP 服务器 %s 挂载失败（已标记不可用）：%s', spec.name, message)
+        }
+      }
+
+      for (const scriptSpec of plan.scripts) {
+        try {
+          const { definitions, records } = await loadScriptTools(scriptSpec.path)
+          for (const definition of definitions) disposers.push(ctx.tools.register(definition))
+          for (const record of records) {
+            managed.push({
+              name: record.name,
+              description: record.description,
+              source: 'script',
+              ...(record.docs !== undefined ? { docs: record.docs } : {}),
+            })
+          }
+          ctx.logger.info('[digital-hands] 脚本 %s 已挂载 %d 个工具。', scriptSpec.path, records.length)
+        } catch (error) {
+          ctx.logger.warn(
+            '[digital-hands] 脚本 %s 挂载失败：%s',
+            scriptSpec.path,
+            error instanceof Error ? error.message : String(error),
+          )
+        }
+      }
+    }
+    return plans
+  }
+
+  // --- capabilities the settings service delegates to ---
+  const snapshot = (): { native: DhToolRow[]; managed: DhToolRow[] } => ({
+    native: [...ctx.tools.schemas()]
+      .filter((schema) => schema.name !== TOOL_SEARCH_NAME)
+      .filter((schema) => !managed.some((entry) => entry.name === schema.name))
+      .map((schema) => ({
+        name: schema.name,
+        description: schema.description ?? '',
+        origin: 'native' as const,
+      })),
+    managed: managed.map((entry): DhToolRow => ({
+      name: entry.name,
+      description: entry.description,
+      origin: entry.source,
+      ...(entry.server !== undefined ? { server: entry.server } : {}),
+      ...(entry.docs !== undefined ? { hasDocs: true } : {}),
+    })),
+  })
+  service.attach({
+    snapshot,
+    mcpStatus: () => servers.map((server) => server.getStatus() as never),
+    reload: async () => {
+      teardownManaged()
+      const plans = await mountPlans()
+      ctx.logger.info(
+        '[digital-hands] 热重载完成：%d 个受管工具（方案 %s）。',
+        managed.length,
+        plans.map((plan) => plan.name).join(', ') || '（无）',
+      )
+    },
+    probe: (spec) => probeServer(spec as never),
+  })
+
+  // --- initial mount ---
   try {
-    plans = await resolvePlans(config ?? {})
+    const plans = await mountPlans()
+    ctx.logger.info(
+      '[digital-hands] 初始化完成：%d 个受管工具（方案 %s）。方案目录：%s',
+      managed.length,
+      plans.map((plan) => plan.name).join(', ') || '（无）',
+      plansRoot(),
+    )
   } catch (error) {
     ctx.logger.warn(
       '[digital-hands] 方案加载失败，仅 tool_search 可用：%s',
       error instanceof Error ? error.message : String(error),
     )
-    return
   }
-
-  for (const plan of plans) {
-    for (const spec of plan.servers) {
-      const server = new ManagedServer(spec)
-      servers.push(server)
-      try {
-        const count = await server.sync(ctx)
-        ctx.logger.info('[digital-hands] MCP 服务器 %s 已挂载 %d 个工具。', spec.name, count)
-        for (const record of server.records) {
-          const docs = plan.docs?.[record.publicName]
-          managed.push({
-            name: record.publicName,
-            description: record.description,
-            source: 'mcp',
-            server: spec.name,
-            ...(docs !== undefined ? { docs } : {}),
-          })
-        }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
-        server.markFailed(message)
-        ctx.logger.warn('[digital-hands] MCP 服务器 %s 挂载失败（已标记不可用）：%s', spec.name, message)
-      }
-    }
-
-    for (const scriptSpec of plan.scripts) {
-      try {
-        const { definitions, records } = await loadScriptTools(scriptSpec.path)
-        for (const definition of definitions) disposers.push(ctx.tools.register(definition))
-        for (const record of records) {
-          managed.push({
-            name: record.name,
-            description: record.description,
-            source: 'script',
-            ...(record.docs !== undefined ? { docs: record.docs } : {}),
-          })
-        }
-        ctx.logger.info('[digital-hands] 脚本 %s 已挂载 %d 个工具。', scriptSpec.path, records.length)
-      } catch (error) {
-        ctx.logger.warn(
-          '[digital-hands] 脚本 %s 挂载失败：%s',
-          scriptSpec.path,
-          error instanceof Error ? error.message : String(error),
-        )
-      }
-    }
-  }
-
-  const totalManaged = managed.length
-  ctx.logger.info(
-    '[digital-hands] 初始化完成：%d 个受管工具（方案 %s）。方案目录：%s',
-    totalManaged,
-    plans.map((plan) => plan.name).join(', ') || '（无）',
-    plansRoot(),
-  )
 }

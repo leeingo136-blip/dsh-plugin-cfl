@@ -20,3 +20,13 @@
       inject: [tools]
       disabled: false
       config: {}
+    # Client-side remote mount: registers the `digitalHands` typert namespace
+    # as early as the remote carrier exists, so the settings section resolves
+    # it during its own activation.
+    - id: dh-mount
+      name: '@dsh/dh-mount'
+      disabled: false
+    # The settings section UI (tool catalog / MCP management / plan editor).
+    - id: dh-ui
+      name: '@dsh/dh-ui'
+      disabled: false
