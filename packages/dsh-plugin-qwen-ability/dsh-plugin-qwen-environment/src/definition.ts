@@ -108,7 +108,6 @@ export function presetPlugins(): readonly PresetPluginEntry[] {
     { id: 'persona', name: '@deepseek-ai/dsh-persona', config: {
       // Qwen Code's identity sentence, adapted to the harness host.
       prefix: 'You are Qwen Code, a coding agent powered by the {{model}} model.',
-      suffix: 'Your working directory is {{cwd}}.',
     } },
     { id: 'agent-instructions', name: '@deepseek-ai/dsh-agent-instructions', config: { maxBytes: 65536 } },
     // --- Qwen Code: the ported core-mandates posture ---

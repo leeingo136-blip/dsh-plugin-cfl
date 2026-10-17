@@ -94,7 +94,6 @@ export interface PresetPluginEntry {
 export function presetPlugins(): readonly PresetPluginEntry[] {
   return [
     { id: 'persona', name: '@deepseek-ai/dsh-persona', config: {
-      suffix: 'Your working directory is {{cwd}}.',
       prefix: 'You are a coding agent powered by the {{model}} model.',
     } },
     { id: 'agent-instructions', name: '@deepseek-ai/dsh-agent-instructions', config: { maxBytes: 65536 } },

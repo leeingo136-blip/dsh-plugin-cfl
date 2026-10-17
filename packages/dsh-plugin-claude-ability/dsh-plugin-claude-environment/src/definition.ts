@@ -108,7 +108,6 @@ export function presetPlugins(): readonly PresetPluginEntry[] {
     { id: 'persona', name: '@deepseek-ai/dsh-persona', config: {
       // Claude's identity sentence, adapted to the harness host.
       prefix: 'You are Claude Code, a coding agent powered by the {{model}} model.',
-      suffix: 'Your working directory is {{cwd}}.',
     } },
     { id: 'agent-instructions', name: '@deepseek-ai/dsh-agent-instructions', config: { maxBytes: 65536 } },
     // --- Claude: the ported core-mandates posture ---
