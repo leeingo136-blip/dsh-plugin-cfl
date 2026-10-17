@@ -1,15 +1,15 @@
 /**
- * Knowledge Book settings client: mounts the `knowledge` remote contribution,
- * then registers the two settings sections — 技能 (skill manager) and
- * 知识库 (local vector knowledge bases). The mount lands before the section
- * registration so a section's first render can call without waiting.
+ * Knowledge Book settings client: registers the two settings sections —
+ * 技能 (skill manager) and 知识库 (local vector knowledge bases). The
+ * `knowledge` remote namespace is mounted by the sibling `knowledge-mount`
+ * client plugin; injecting `remote.knowledge` parks this plugin's activation
+ * on the namespace service, mirroring the account column (`remote.accountHub`).
  */
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
-import knowledgeRemote from '@dsh/api-knowledge-book/remote'
 import { zh, en, type KnowledgeKey } from './locales.ts'
 import { SkillsSection, type SkillsFace } from './SkillsSection.tsx'
 import { KnowledgeSection, type RagFace } from './KnowledgeSection.tsx'
@@ -22,7 +22,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 
 const NS = 'settings.knowledge'
 
-export const inject = ['slots', 'locale', 'remote', 'theme']
+export const inject = ['slots', 'locale', 'remote', 'remote.knowledge', 'theme']
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type RemoteCall = (...args: any[]) => Promise<any>
@@ -34,9 +34,8 @@ async function unwrap<T>(promise: Promise<{ ok: true; value: T } | { ok: false; 
   throw new Error(result.error.message)
 }
 
-export async function apply(ctx: ClientContext): Promise<void> {
+export function apply(ctx: ClientContext): void {
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'ui-knowledge-book: copy dictionaries')
-  await ctx.remote.$mount(knowledgeRemote)
 
   const knowledge = (ctx.remote as unknown as Record<string, Record<string, RemoteCall>>).knowledge!
 

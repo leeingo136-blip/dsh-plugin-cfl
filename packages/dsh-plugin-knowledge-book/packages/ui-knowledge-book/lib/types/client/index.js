@@ -1,9 +1,8 @@
-import knowledgeRemote from '@dsh/api-knowledge-book/remote';
 import { zh, en } from "./locales.js";
 import { SkillsSection } from "./SkillsSection.js";
 import { KnowledgeSection } from "./KnowledgeSection.js";
 const NS = 'settings.knowledge';
-export const inject = ['slots', 'locale', 'remote', 'theme'];
+export const inject = ['slots', 'locale', 'remote', 'remote.knowledge', 'theme'];
 /** Unwrap the remote envelope; failures surface as rejections with the message. */
 async function unwrap(promise) {
     const result = await promise;
@@ -11,9 +10,8 @@ async function unwrap(promise) {
         return result.value;
     throw new Error(result.error.message);
 }
-export async function apply(ctx) {
+export function apply(ctx) {
     ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'ui-knowledge-book: copy dictionaries');
-    await ctx.remote.$mount(knowledgeRemote);
     const knowledge = ctx.remote.knowledge;
     const t = ctx.locale.bind(NS);
     const skillsFace = {

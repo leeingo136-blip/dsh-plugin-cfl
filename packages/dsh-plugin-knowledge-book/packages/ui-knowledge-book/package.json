@@ -4,10 +4,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "lib/index.js",
   "exports": {
     ".": {
       "types": "./lib/types/index.d.ts",
-      "default": "./lib/types/index.js"
+      "default": "./lib/index.js"
     },
     "./client": {
       "types": "./lib/types/client/index.d.ts",
