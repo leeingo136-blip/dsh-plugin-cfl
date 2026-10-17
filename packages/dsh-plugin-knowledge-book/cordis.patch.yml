@@ -1,0 +1,9 @@
+# 知识书容器：两个全新组件行，无条件插入。
+# - knowledge-api：宿主服务（技能文件管理 + sqlite-vec 知识库）与 knowledge 远程面
+# - ui-knowledge-book：设置中新增「技能」「知识库」两栏（settings.section 槽位）
+# 本容器不 retarget 任何官方行。
+- insert:
+    - id: knowledge-api
+      name: '@dsh/api-knowledge-book'
+    - id: ui-knowledge-book
+      name: '@dsh/ui-knowledge-book'
