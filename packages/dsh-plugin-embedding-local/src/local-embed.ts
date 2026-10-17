@@ -28,6 +28,15 @@ export function modelRoot(): string {
 /** The engine auto-selects the first GGUF whose name marks it an embedding weight. */
 const EMBED_PATTERN = /bge|embed|nomic|gte|e5/i
 
+/** Every GGUF weight found in `models/`, sorted; the card's file picker reads it. */
+export function listWeightFiles(): string[] {
+  try {
+    return readdirSync(modelRoot()).filter((name) => name.endsWith('.gguf')).sort()
+  } catch {
+    return []
+  }
+}
+
 /** One vendored embedding weight found on disk. */
 export interface EmbedWeight {
   file: string
@@ -35,17 +44,16 @@ export interface EmbedWeight {
 }
 
 /** Scan `models/` for an embedding GGUF; undefined when none is present. */
-export function selectWeight(): EmbedWeight | undefined {
-  let files: string[] = []
-  try {
-    files = readdirSync(modelRoot()).filter((name) => name.endsWith('.gguf'))
-  } catch {
-    files = []
+export function selectWeight(file?: string): EmbedWeight | undefined {
+  if (file !== undefined) {
+    const path = join(modelRoot(), file)
+    return existsSync(path) ? { file, path } : undefined
   }
-  const file = files.find((name) => EMBED_PATTERN.test(name)) ?? files[0]
-  if (file === undefined) return undefined
-  const path = join(modelRoot(), file)
-  return existsSync(path) ? { file, path } : undefined
+  const files = listWeightFiles()
+  const name = files.find((one) => EMBED_PATTERN.test(one)) ?? files[0]
+  if (name === undefined) return undefined
+  const path = join(modelRoot(), name)
+  return existsSync(path) ? { file: name, path } : undefined
 }
 
 /** True once a weight file is on disk. */
@@ -97,24 +105,64 @@ function queued<T>(task: () => Promise<T>): Promise<T> {
   return result
 }
 
-/** Load the engine once: import the binding, adopt the weights, open a context. */
-function ensureLoaded(): Promise<void> {
+/**
+ * Load the engine once: import the binding, adopt the weights, open a context.
+ * A `file` argument targets one weight: the already-loaded file is reused, any
+ * other loaded weight is released first — the engine serves one model at a
+ * time, so a switch costs an unload plus a load inside the same queued turn.
+ */
+function ensureLoaded(file?: string): Promise<void> {
+  const target = selectWeight(file)
+  if (target === undefined) {
+    return Promise.reject(new Error(
+      file !== undefined
+        ? `本地未找到向量模型权重（${file}）。请检查模型文件是否在 models/ 目录下。`
+        : `本地未找到向量模型权重（models/ 下无 .gguf）。请在插件目录执行：node scripts/fetch-model.mjs`,
+    ))
+  }
+  if (loaded?.file === target.file) return Promise.resolve()
+  if (loaded !== undefined) {
+    // A different weight is resident: release it before adopting the target.
+    // Unqueued on purpose — the caller (embed) already runs inside the
+    // serialized chain, and queueing here would wait on itself forever.
+    return releaseLoaded().then(() => loadWeight(target))
+  }
+  return loadWeight(target)
+}
+
+/** Release the resident weight synchronously inside the owning queue turn. */
+async function releaseLoaded(): Promise<void> {
+  const current = loaded
+  if (current === undefined) return
+  loaded = undefined
+  pending = undefined
+  dimensions = 0
+  try {
+    await current.context.dispose()
+  } catch {
+    // A context dispose failure must not block releasing the model.
+  }
+  try {
+    await current.model.dispose()
+  } catch {
+    // Same: best-effort release, the next load rebuilds everything.
+  }
+}
+
+/** Adopt one weight: import the binding, load the model, open a context. */
+function loadWeight(weight: EmbedWeight): Promise<void> {
   pending ??= (async () => {
-    const weight = selectWeight()
-    if (weight === undefined) {
-      throw new Error(
-        `本地未找到向量模型权重（models/ 下无 .gguf）。请在插件目录执行：node scripts/fetch-model.mjs`,
-      )
-    }
     try {
       const mod = await import('node-llama-cpp') as unknown as LlamaModule
       const llama = await mod.getLlama()
       const model = await llama.loadModel({ modelPath: weight.path })
       const context = await model.createEmbeddingContext()
       loaded = { model, context, file: weight.file }
+      dimensions = 0
       lastError = undefined
     } catch (error) {
       lastError = error instanceof Error ? error.message : String(error)
+      pending = undefined
       throw error
     }
   })()
@@ -149,14 +197,15 @@ export function ready(): boolean {
 /**
  * Embed one batch of texts, loading the engine on first use.
  *
- * Inputs run sequentially through the one context; an oversized batch only
- * costs time, never memory. The failure of one input fails the whole batch —
- * callers chunk if they need partial progress.
+ * A `file` argument targets one weight: a resident different weight is
+ * swapped out first. Inputs run sequentially through the one context; an
+ * oversized batch only costs time, never memory. The failure of one input
+ * fails the whole batch — callers chunk if they need partial progress.
  */
-export async function embed(inputs: readonly string[]): Promise<number[][]> {
+export async function embed(inputs: readonly string[], file?: string): Promise<number[][]> {
   if (inputs.length === 0) return []
   return queued(async () => {
-    await ensureLoaded()
+    await ensureLoaded(file)
     const context = loaded!.context
     const vectors: number[][] = []
     for (const input of inputs) {
@@ -188,20 +237,5 @@ export function similarity(a: readonly number[], b: readonly number[]): number {
 
 /** Release the weight and its context; safe to call when nothing is loaded. */
 export async function unload(): Promise<void> {
-  await queued(async () => {
-    const current = loaded
-    if (current === undefined) return
-    loaded = undefined
-    pending = undefined
-    try {
-      await current.context.dispose()
-    } catch {
-      // A context dispose failure must not block releasing the model.
-    }
-    try {
-      await current.model.dispose()
-    } catch {
-      // Same: best-effort release, the next load rebuilds everything.
-    }
-  })
+  await queued(releaseLoaded)
 }
