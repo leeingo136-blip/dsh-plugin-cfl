@@ -105,13 +105,15 @@ window.__ModuleLoader__.load({
 		* （名称/来源下拉/简介/正文），操作行在编辑态末行：删除靠左，保存/取消靠右，
 		* 新建态无删除；插件与会话技能只读；顶部搜索按名称/来源/正文过滤
 		* （三个勾选框可多选）；右上「新建」在顶部给出可编辑空卡，名称/正文/来源齐全
-		* 才可保存，冲突由宿主按 kebab-case 后缀规则自动重命名。
+		* 才可保存，冲突由宿主按 kebab-case 后缀规则自动重命名。正文维度搜索同时
+		* 匹配简介与正文；正文预览仅在正文维度命中搜索词的卡片上展开。
 		*/
 		const FILTERS = [
 			"name",
 			"source",
 			"body"
 		];
+		const EMPTY_STRINGS = /* @__PURE__ */ new Set();
 		/** 卡片右侧的小字来源标签。 */
 		function SourceTag({ label, t }) {
 			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
@@ -160,15 +162,31 @@ window.__ModuleLoader__.load({
 			]);
 			const shown = (0, react.useMemo)(() => {
 				const text = query.trim().toLowerCase();
-				if (text === "") return skills;
+				if (text === "") return {
+					list: skills,
+					bodyHits: EMPTY_STRINGS
+				};
 				const active = [...filters];
-				if (active.length === 0) return [];
-				return skills.filter((skill) => active.some((filter) => {
-					if (filter === "name") return skill.name.toLowerCase().includes(text);
-					if (filter === "source") return skill.sourceLabel.toLowerCase().includes(text);
-					const key = `${skill.sourceId}\u0000${skill.name}`;
-					return (bodies.get(key) ?? skill.description).toLowerCase().includes(text);
-				}));
+				if (active.length === 0) return {
+					list: [],
+					bodyHits: EMPTY_STRINGS
+				};
+				const bodyHits = /* @__PURE__ */ new Set();
+				return {
+					list: skills.filter((skill) => {
+						const key = `${skill.sourceId}\u0000${skill.name}`;
+						return active.some((filter) => {
+							if (filter === "name") return skill.name.toLowerCase().includes(text);
+							if (filter === "source") return skill.sourceLabel.toLowerCase().includes(text);
+							const body = bodies.get(key);
+							const hitDescription = skill.description.toLowerCase().includes(text);
+							const hitBody = body !== void 0 && body.toLowerCase().includes(text);
+							if (hitBody) bodyHits.add(key);
+							return hitDescription || hitBody;
+						});
+					}),
+					bodyHits
+				};
 			}, [
 				skills,
 				query,
@@ -244,19 +262,21 @@ window.__ModuleLoader__.load({
 					state: editing,
 					onClose: closeEditor
 				}),
-				shown.length === 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", { children: face.t("noResults") }) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+				shown.list.length === 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", { children: face.t("noResults") }) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 					style: styles$1.grid,
-					children: shown.map((skill) => {
+					children: shown.list.map((skill) => {
+						const editKey = `${skill.sourceId}\u0000${skill.name}`;
 						if (editing !== void 0 && editing.fromName === skill.name && editing.fromSourceId === skill.sourceId) return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(SkillEditor, {
 							face,
 							sources,
 							state: editing,
 							onClose: closeEditor
-						}, `${skill.sourceId}\u0000${skill.name}`);
+						}, editKey);
+						const preview = shown.bodyHits.has(editKey) && query.trim() !== "" ? bodies.get(editKey) : void 0;
 						return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(SkillCardView, {
 							face,
 							skill,
-							body: bodies.get(`${skill.sourceId}\u0000${skill.name}`) ?? skill.description,
+							body: preview,
 							onEdit: () => {
 								setNotice(null);
 								face.readSkill(skill.name, skill.sourceId).then((value) => {
@@ -270,7 +290,7 @@ window.__ModuleLoader__.load({
 									});
 								});
 							}
-						}, `${skill.sourceId}\u0000${skill.name}`);
+						}, editKey);
 					})
 				})
 			] });
@@ -304,7 +324,7 @@ window.__ModuleLoader__.load({
 						style: styles$1.cardDescription,
 						children: skill.description
 					}),
-					body !== "" && body !== skill.description && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("pre", {
+					body !== void 0 && body !== "" && body !== skill.description && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("pre", {
 						style: styles$1.cardBody,
 						children: clip(body, 8)
 					})

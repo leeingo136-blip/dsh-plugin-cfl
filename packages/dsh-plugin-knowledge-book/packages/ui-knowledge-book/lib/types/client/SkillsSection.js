@@ -4,11 +4,13 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  * （名称/来源下拉/简介/正文），操作行在编辑态末行：删除靠左，保存/取消靠右，
  * 新建态无删除；插件与会话技能只读；顶部搜索按名称/来源/正文过滤
  * （三个勾选框可多选）；右上「新建」在顶部给出可编辑空卡，名称/正文/来源齐全
- * 才可保存，冲突由宿主按 kebab-case 后缀规则自动重命名。
+ * 才可保存，冲突由宿主按 kebab-case 后缀规则自动重命名。正文维度搜索同时
+ * 匹配简介与正文；正文预览仅在正文维度命中搜索词的卡片上展开。
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives';
 const FILTERS = ['name', 'source', 'body'];
+const EMPTY_STRINGS = new Set();
 /** 卡片右侧的小字来源标签。 */
 function SourceTag({ label, t }) {
     return _jsx("span", { style: styles.sourceTag, children: label });
@@ -50,22 +52,32 @@ function SkillsLoaded({ face }) {
             void face.readSkill(skill.name, skill.sourceId).then(value => setBodies(previous => new Map(previous).set(key, value.body)), () => undefined);
         }
     }, [filters, skills, face]); // eslint-disable-line react-hooks/exhaustive-deps
+    // 过滤结果 + 正文命中集合：正文预览只在「正文维度命中搜索词」时展示。
+    // 正文维度同时匹配简介与正文；无搜索词时全部展示且不显示预览。
     const shown = useMemo(() => {
         const text = query.trim().toLowerCase();
         if (text === '')
-            return skills;
+            return { list: skills, bodyHits: EMPTY_STRINGS };
         const active = [...filters];
         if (active.length === 0)
-            return [];
-        return skills.filter(skill => active.some(filter => {
-            if (filter === 'name')
-                return skill.name.toLowerCase().includes(text);
-            if (filter === 'source')
-                return skill.sourceLabel.toLowerCase().includes(text);
+            return { list: [], bodyHits: EMPTY_STRINGS };
+        const bodyHits = new Set();
+        const list = skills.filter(skill => {
             const key = `${skill.sourceId}\u0000${skill.name}`;
-            const body = bodies.get(key) ?? skill.description;
-            return body.toLowerCase().includes(text);
-        }));
+            return active.some(filter => {
+                if (filter === 'name')
+                    return skill.name.toLowerCase().includes(text);
+                if (filter === 'source')
+                    return skill.sourceLabel.toLowerCase().includes(text);
+                const body = bodies.get(key);
+                const hitDescription = skill.description.toLowerCase().includes(text);
+                const hitBody = body !== undefined && body.toLowerCase().includes(text);
+                if (hitBody)
+                    bodyHits.add(key);
+                return hitDescription || hitBody;
+            });
+        });
+        return { list, bodyHits };
     }, [skills, query, filters, bodies]);
     if (failed !== null) {
         return _jsx("div", { children: _jsxs("p", { children: [face.t('loadFailed'), ' — ', failed] }) });
@@ -90,16 +102,21 @@ function SkillsLoaded({ face }) {
                                 name: '', description: '', body: '',
                                 sourceId: sources.find(one => one.editable)?.id ?? '',
                             });
-                        }, children: face.t('create') })] }), notice !== null && _jsx("p", { style: styles.notice, children: notice }), editing !== undefined && editing.fromName === undefined && (_jsx(SkillEditor, { face: face, sources: sources, state: editing, onClose: closeEditor })), shown.length === 0
+                        }, children: face.t('create') })] }), notice !== null && _jsx("p", { style: styles.notice, children: notice }), editing !== undefined && editing.fromName === undefined && (_jsx(SkillEditor, { face: face, sources: sources, state: editing, onClose: closeEditor })), shown.list.length === 0
                 ? _jsx("p", { children: face.t('noResults') })
-                : (_jsx("div", { style: styles.grid, children: shown.map(skill => {
+                : (_jsx("div", { style: styles.grid, children: shown.list.map(skill => {
+                        const editKey = `${skill.sourceId}\u0000${skill.name}`;
                         const editingThis = editing !== undefined &&
                             editing.fromName === skill.name &&
                             editing.fromSourceId === skill.sourceId;
                         if (editingThis) {
-                            return (_jsx(SkillEditor, { face: face, sources: sources, state: editing, onClose: closeEditor }, `${skill.sourceId}\u0000${skill.name}`));
+                            return (_jsx(SkillEditor, { face: face, sources: sources, state: editing, onClose: closeEditor }, editKey));
                         }
-                        return (_jsx(SkillCardView, { face: face, skill: skill, body: bodies.get(`${skill.sourceId}\u0000${skill.name}`) ?? skill.description, onEdit: () => {
+                        // 正文预览：仅当正文维度命中当前搜索词时才展开。
+                        const preview = shown.bodyHits.has(editKey) && query.trim() !== ''
+                            ? bodies.get(editKey)
+                            : undefined;
+                        return (_jsx(SkillCardView, { face: face, skill: skill, body: preview, onEdit: () => {
                                 setNotice(null);
                                 void face.readSkill(skill.name, skill.sourceId).then(value => {
                                     setEditing({
@@ -108,12 +125,13 @@ function SkillsLoaded({ face }) {
                                         body: value.body, sourceId: skill.sourceId,
                                     });
                                 });
-                            } }, `${skill.sourceId}\u0000${skill.name}`));
+                            } }, editKey));
                     }) }))] }));
 }
 function SkillCardView(props) {
     const { face, skill, body, onEdit } = props;
-    return (_jsxs("div", { style: styles.card, children: [_jsxs("div", { style: styles.cardHead, children: [_jsx("strong", { style: styles.cardName, children: skill.name }), _jsx("span", { style: { flex: 1 } }), _jsx(SourceTag, { label: skill.sourceLabel, t: face.t }), skill.editable && (_jsx(Button, { variant: 'outline', size: 'sm', onClick: onEdit, children: face.t('edit') }))] }), skill.description !== '' && _jsx("p", { style: styles.cardDescription, children: skill.description }), body !== '' && body !== skill.description && _jsx("pre", { style: styles.cardBody, children: clip(body, 8) })] }));
+    return (_jsxs("div", { style: styles.card, children: [_jsxs("div", { style: styles.cardHead, children: [_jsx("strong", { style: styles.cardName, children: skill.name }), _jsx("span", { style: { flex: 1 } }), _jsx(SourceTag, { label: skill.sourceLabel, t: face.t }), skill.editable && (_jsx(Button, { variant: 'outline', size: 'sm', onClick: onEdit, children: face.t('edit') }))] }), skill.description !== '' && _jsx("p", { style: styles.cardDescription, children: skill.description }), body !== undefined && body !== '' && body !== skill.description &&
+                _jsx("pre", { style: styles.cardBody, children: clip(body, 8) })] }));
 }
 function clip(text, maxLines) {
     const lines = text.split('\n');
