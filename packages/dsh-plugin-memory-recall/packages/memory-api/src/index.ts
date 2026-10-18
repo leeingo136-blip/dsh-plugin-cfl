@@ -15,6 +15,7 @@ import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typer
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import zschema from '@deepseek-ai/schemastery'
 import { ConnectionStore, localDatabaseDir, validate, type ConnectionFault } from './connections.ts'
+import { queryLocal } from './query.ts'
 
 export const name = 'memory-api'
 
@@ -119,6 +120,48 @@ export class MemoryRecallController extends TypertRemoteService {
     const embedding = this.svc<{ listModels(): Array<{ id: string; file: string; loaded: boolean }> }>('embedding')
     if (embedding === undefined) return asJson({ models: [], available: false })
     return asJson({ models: embedding.listModels(), available: true })
+  }
+
+  /**
+   * KNN search over one card's database: embed the query with the card's
+   * bound engine, then run a top-k nearest-neighbour query. Local cards
+   * search the sqlite-vec file at `address`; service cards are not
+   * implemented yet (the tools own that transport later).
+   */
+  @Remote
+  async connQuery(input: JsonValue): Promise<JsonValue> {
+    const body = input as { id?: unknown; query?: unknown; topK?: unknown }
+    const id = typeof body.id === 'string' ? body.id : ''
+    const text = typeof body.query === 'string' ? body.query.trim() : ''
+    if (text === '') throw new RemoteError('memory-recall/invalid-input', '检索内容不能为空', {})
+    const card = this.store.get(id)
+    if (card === undefined) throw new RemoteError('memory-recall/not-found', '卡片不存在', { id })
+
+    if (card.kind === 'service') {
+      throw new RemoteError('memory-recall/not-implemented', '网络服务检索尚未实现', { kind: 'service' })
+    }
+
+    const embedding = this.svc<{ embed(inputs: readonly string[], modelId?: string): Promise<number[][]> }>('embedding')
+    if (embedding === undefined) {
+      throw new RemoteError('memory-recall/embedding-unavailable', 'embedding 服务不可用：请先在账号列启用本地向量模型', {})
+    }
+    const vectors = await embedding.embed([text], card.embeddingModel === '' ? undefined : card.embeddingModel)
+    const vector = vectors[0]
+    if (vector === undefined || vector.length === 0) {
+      throw new RemoteError('memory-recall/embedding-failed', '查询向量生成失败', {})
+    }
+
+    const k = Math.min(Math.max(Number(body.topK) || 5, 1), 20)
+    const outcome = queryLocal(card.address, vector, k)
+    if (!Array.isArray(outcome)) {
+      switch (outcome.code) {
+        case 'db-missing':
+          throw new RemoteError('memory-recall/db-missing', `数据库文件不存在：${outcome.address}`, { address: outcome.address })
+        case 'db-empty':
+          throw new RemoteError('memory-recall/db-empty', '数据库为空：尚未写入任何知识（等待 knowledge_add 工具实现）', { address: outcome.address })
+      }
+    }
+    return asJson({ results: outcome })
   }
 }
 

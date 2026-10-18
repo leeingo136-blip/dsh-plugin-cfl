@@ -29,6 +29,11 @@ window.__ModuleLoader__.load({
 			fieldEmbedding: "Embedding 引擎",
 			embeddingPick: "请选择…",
 			embeddingUnavailable: "暂无可用模型：请先在账号列启用本地向量模型",
+			connectDb: "连接数据库",
+			queryPlaceholder: "输入要检索的内容…",
+			search: "搜索",
+			searching: "检索中…",
+			noResults: "没有命中结果",
 			save: "保存",
 			cancel: "取消",
 			delete: "删除",
@@ -58,6 +63,11 @@ window.__ModuleLoader__.load({
 			fieldEmbedding: "Embedding engine",
 			embeddingPick: "Choose…",
 			embeddingUnavailable: "No models available: enable the local embedding model first",
+			connectDb: "Connect database",
+			queryPlaceholder: "Type what to search for…",
+			search: "Search",
+			searching: "Searching…",
+			noResults: "No matches",
 			save: "Save",
 			cancel: "Cancel",
 			delete: "Delete",
@@ -93,6 +103,8 @@ window.__ModuleLoader__.load({
 			const [localDir, setLocalDir] = (0, react.useState)(void 0);
 			/** The card being edited (id), or 'new' for the creation editor, or undefined. */
 			const [editing, setEditing] = (0, react.useState)(void 0);
+			/** The card whose connect/search modal is open. */
+			const [querying, setQuerying] = (0, react.useState)(void 0);
 			const refresh = () => {
 				face.list().then((value) => {
 					setCards(value.connections);
@@ -164,13 +176,23 @@ window.__ModuleLoader__.load({
 						card,
 						onEdit: () => {
 							setEditing(card.id);
+						},
+						onConnect: () => {
+							setQuerying(card);
 						}
 					}, card.id))]
+				}),
+				querying !== void 0 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(QueryModal, {
+					face,
+					card: querying,
+					onClose: () => {
+						setQuerying(void 0);
+					}
 				})
 			] });
 		}
 		function CardView(props) {
-			const { face, card, onEdit } = props;
+			const { face, card, onEdit, onConnect } = props;
 			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 				style: styles.card,
 				children: [
@@ -186,6 +208,12 @@ window.__ModuleLoader__.load({
 								children: card.kind === "local" ? face.t("kindLocal") : face.t("kindService")
 							}),
 							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { style: { flex: 1 } }),
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+								variant: "outline",
+								size: "sm",
+								onClick: onConnect,
+								children: face.t("connectDb")
+							}),
 							/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 								variant: "outline",
 								size: "sm",
@@ -454,6 +482,97 @@ window.__ModuleLoader__.load({
 				]
 			});
 		}
+		/**
+		* Connect-and-search modal: type a query, KNN against the card's database
+		* with its bound embedding engine. Enter searches; results list under the
+		* input with distances.
+		*/
+		function QueryModal(props) {
+			const { face, card, onClose } = props;
+			const [text, setText] = (0, react.useState)("");
+			const [results, setResults] = (0, react.useState)(void 0);
+			const [busy, setBusy] = (0, react.useState)(false);
+			const [error, setError] = (0, react.useState)(null);
+			const search = () => {
+				const query = text.trim();
+				if (query === "" || busy) return;
+				setBusy(true);
+				setError(null);
+				face.query({
+					id: card.id,
+					query
+				}).then((value) => {
+					setBusy(false);
+					setResults(value.results);
+				}, (cause) => {
+					setBusy(false);
+					setError(cause instanceof Error ? cause.message : String(cause));
+				});
+			};
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
+				open: true,
+				onClose,
+				title: `${face.t("connectDb")} — ${card.name}`,
+				closeLabel: face.t("cancel"),
+				description: card.address,
+				footer: /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+					variant: "primary",
+					size: "sm",
+					disabled: text.trim() === "" || busy,
+					onClick: search,
+					children: face.t("search")
+				}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+					variant: "outline",
+					size: "sm",
+					disabled: busy,
+					onClick: onClose,
+					children: face.t("cancel")
+				})] }),
+				children: /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+					style: styles.modalBody,
+					children: [
+						/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
+							"data-modal-autofocus": true,
+							style: styles.modalInput,
+							value: text,
+							placeholder: face.t("queryPlaceholder"),
+							disabled: busy,
+							onChange: (event) => {
+								setText(event.target.value);
+							},
+							onKeyDown: (event) => {
+								if (event.key === "Enter") search();
+							}
+						}),
+						busy && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+							style: styles.hint,
+							children: face.t("searching")
+						}),
+						error !== null && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+							style: styles.error,
+							children: error
+						}),
+						results !== void 0 && !busy && error === null && results.length === 0 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+							style: styles.hint,
+							children: face.t("noResults")
+						}),
+						results !== void 0 && results.length > 0 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+							style: styles.resultList,
+							children: results.map((hit, index) => /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+								style: styles.resultItem,
+								children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+									style: styles.resultDistance,
+									children: hit.distance.toFixed(4)
+								}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+									style: styles.resultContent,
+									children: hit.content
+								})]
+							}, index))
+						})
+					]
+				})
+			});
+		}
 		const styles = {
 			toolbar: {
 				display: "flex",
@@ -538,6 +657,39 @@ window.__ModuleLoader__.load({
 				display: "flex",
 				alignItems: "center",
 				gap: 8
+			},
+			modalBody: {
+				display: "flex",
+				flexDirection: "column",
+				gap: 10,
+				minWidth: 420
+			},
+			modalInput: { width: "100%" },
+			resultList: {
+				display: "flex",
+				flexDirection: "column",
+				gap: 6,
+				maxHeight: 320,
+				overflowY: "auto"
+			},
+			resultItem: {
+				display: "flex",
+				gap: 10,
+				alignItems: "baseline",
+				padding: "8px 10px",
+				borderRadius: 8,
+				background: "var(--dsh-surface, rgba(127,127,127,0.08))"
+			},
+			resultDistance: {
+				fontFamily: "monospace",
+				fontSize: 12,
+				opacity: .65,
+				flexShrink: 0
+			},
+			resultContent: {
+				fontSize: 13,
+				whiteSpace: "pre-wrap",
+				wordBreak: "break-word"
 			}
 		};
 		//#endregion
@@ -571,7 +723,8 @@ window.__ModuleLoader__.load({
 				remove: async (id) => {
 					await unwrap(memory.connDelete({ id }));
 				},
-				embeddingModels: () => unwrap(memory.embeddingModels())
+				embeddingModels: () => unwrap(memory.embeddingModels()),
+				query: (input) => unwrap(memory.connQuery(input))
 			};
 			ctx.slots.inject("settings.section", () => ctx.slots.register({
 				name: "settings.section",

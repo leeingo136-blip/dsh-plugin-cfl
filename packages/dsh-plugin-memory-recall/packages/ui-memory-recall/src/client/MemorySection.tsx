@@ -5,7 +5,7 @@
  * 作为工具参数明确连接哪个数据库；删除在编辑器末行左侧，保存/取消居右。
  */
 import { useEffect, useState } from 'react'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, Input, Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { MemoryKey } from './locales.ts'
 
 /** One saved RAG connection card (wire shape of the memory-recall namespace). */
@@ -33,6 +33,13 @@ export interface MemoryFace {
   update(input: { id: string; name?: string; description?: string; kind?: string; address?: string; embeddingModel?: string }): Promise<ConnectionCard>
   remove(id: string): Promise<void>
   embeddingModels(): Promise<{ models: EmbeddingModelInfo[]; available: boolean }>
+  query(input: { id: string; query: string; topK?: number }): Promise<{ results: Array<QueryHitWire> }>
+}
+
+/** One KNN hit (wire shape). */
+export interface QueryHitWire {
+  content: string
+  distance: number
 }
 
 /** Editor draft state. */
@@ -65,6 +72,8 @@ function MemoryLoaded({ face }: { face: MemoryFace }): ReactNode {
   const [localDir, setLocalDir] = useState<string | undefined>(undefined)
   /** The card being edited (id), or 'new' for the creation editor, or undefined. */
   const [editing, setEditing] = useState<string | 'new' | undefined>(undefined)
+  /** The card whose connect/search modal is open. */
+  const [querying, setQuerying] = useState<ConnectionCard | undefined>(undefined)
 
   const refresh = (): void => {
     void face.list().then(
@@ -129,21 +138,38 @@ function MemoryLoaded({ face }: { face: MemoryFace }): ReactNode {
                   }}
                 />
               )
-            : <CardView key={card.id} face={face} card={card} onEdit={() => { setEditing(card.id) }} />
+            : (
+                <CardView
+                  key={card.id}
+                  face={face}
+                  card={card}
+                  onEdit={() => { setEditing(card.id) }}
+                  onConnect={() => { setQuerying(card) }}
+                />
+              )
         ))}
       </div>
+
+      {querying !== undefined && (
+        <QueryModal
+          face={face}
+          card={querying}
+          onClose={() => { setQuerying(undefined) }}
+        />
+      )}
     </div>
   )
 }
 
-function CardView(props: { face: MemoryFace; card: ConnectionCard; onEdit(): void }): ReactNode {
-  const { face, card, onEdit } = props
+function CardView(props: { face: MemoryFace; card: ConnectionCard; onEdit(): void; onConnect(): void }): ReactNode {
+  const { face, card, onEdit, onConnect } = props
   return (
     <div style={styles.card}>
       <div style={styles.cardHead}>
         <strong style={styles.cardName}>{card.name}</strong>
         <span style={styles.badge}>{card.kind === 'local' ? face.t('kindLocal') : face.t('kindService')}</span>
         <span style={{ flex: 1 }} />
+        <Button variant='outline' size='sm' onClick={onConnect}>{face.t('connectDb')}</Button>
         <Button variant='outline' size='sm' onClick={onEdit}>{face.t('editCard')}</Button>
       </div>
       {card.description !== '' && <p style={styles.cardDescription}>{card.description}</p>}
@@ -317,6 +343,80 @@ function CardEditor(props: {
   )
 }
 
+/**
+ * Connect-and-search modal: type a query, KNN against the card's database
+ * with its bound embedding engine. Enter searches; results list under the
+ * input with distances.
+ */
+function QueryModal(props: { face: MemoryFace; card: ConnectionCard; onClose(): void }): ReactNode {
+  const { face, card, onClose } = props
+  const [text, setText] = useState('')
+  const [results, setResults] = useState<readonly QueryHitWire[] | undefined>(undefined)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const search = (): void => {
+    const query = text.trim()
+    if (query === '' || busy) return
+    setBusy(true)
+    setError(null)
+    void face.query({ id: card.id, query }).then(value => {
+      setBusy(false)
+      setResults(value.results)
+    }, (cause: unknown) => {
+      setBusy(false)
+      setError(cause instanceof Error ? cause.message : String(cause))
+    })
+  }
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title={`${face.t('connectDb')} — ${card.name}`}
+      closeLabel={face.t('cancel')}
+      description={card.address}
+      footer={
+        <>
+          <Button variant='primary' size='sm' disabled={text.trim() === '' || busy} onClick={search}>
+            {face.t('search')}
+          </Button>
+          <Button variant='outline' size='sm' disabled={busy} onClick={onClose}>
+            {face.t('cancel')}
+          </Button>
+        </>
+      }
+    >
+      <div style={styles.modalBody}>
+        <Input
+          data-modal-autofocus
+          style={styles.modalInput}
+          value={text}
+          placeholder={face.t('queryPlaceholder')}
+          disabled={busy}
+          onChange={event => { setText(event.target.value) }}
+          onKeyDown={event => { if (event.key === 'Enter') search() }}
+        />
+        {busy && <span style={styles.hint}>{face.t('searching')}</span>}
+        {error !== null && <span style={styles.error}>{error}</span>}
+        {results !== undefined && !busy && error === null && results.length === 0 && (
+          <span style={styles.hint}>{face.t('noResults')}</span>
+        )}
+        {results !== undefined && results.length > 0 && (
+          <div style={styles.resultList}>
+            {results.map((hit, index) => (
+              <div key={index} style={styles.resultItem}>
+                <span style={styles.resultDistance}>{hit.distance.toFixed(4)}</span>
+                <span style={styles.resultContent}>{hit.content}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </Modal>
+  )
+}
+
 const styles = {
   toolbar: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 },
   error: { color: '#c0392b', fontSize: 13 },
@@ -343,4 +443,17 @@ const styles = {
   input: { padding: '6px 10px', borderRadius: 8, border: '1px solid var(--dsh-border, #ccc)' },
   dangerButton: { color: 'var(--dsw-alias-state-error-primary, #c0392b)' },
   editorFooter: { display: 'flex', alignItems: 'center', gap: 8 },
+  modalBody: { display: 'flex', flexDirection: 'column' as const, gap: 10, minWidth: 420 },
+  modalInput: { width: '100%' },
+  resultList: {
+    display: 'flex', flexDirection: 'column' as const, gap: 6,
+    maxHeight: 320, overflowY: 'auto' as const,
+  },
+  resultItem: {
+    display: 'flex', gap: 10, alignItems: 'baseline',
+    padding: '8px 10px', borderRadius: 8,
+    background: 'var(--dsh-surface, rgba(127,127,127,0.08))',
+  },
+  resultDistance: { fontFamily: 'monospace', fontSize: 12, opacity: 0.65, flexShrink: 0 },
+  resultContent: { fontSize: 13, whiteSpace: 'pre-wrap' as const, wordBreak: 'break-word' as const },
 }

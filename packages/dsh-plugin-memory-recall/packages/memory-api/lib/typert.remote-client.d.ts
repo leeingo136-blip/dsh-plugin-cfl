@@ -12,6 +12,7 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
     connUpdate: (connUpdate: JsonValue) => Promise<RemoteResult<JsonValue>>
     connDelete: (connDelete: JsonValue) => Promise<RemoteResult<JsonValue>>
     embeddingModels: () => Promise<RemoteResult<JsonValue>>
+    connQuery: (connQuery: JsonValue) => Promise<RemoteResult<JsonValue>>
   }
   interface TypertRemoteMap {
     'memory-recall/connList': () => Promise<RemoteResult<JsonValue>>
@@ -19,6 +20,7 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
     'memory-recall/connUpdate': (connUpdate: JsonValue) => Promise<RemoteResult<JsonValue>>
     'memory-recall/connDelete': (connDelete: JsonValue) => Promise<RemoteResult<JsonValue>>
     'memory-recall/embeddingModels': () => Promise<RemoteResult<JsonValue>>
+    'memory-recall/connQuery': (connQuery: JsonValue) => Promise<RemoteResult<JsonValue>>
   }
   interface TypertRemoteNamespaceMap {
     'memory-recall': TypertRemoteNamespace$6d656d6f72792d726563616c6c

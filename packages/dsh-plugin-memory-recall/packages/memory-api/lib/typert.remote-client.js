@@ -111,6 +111,31 @@ const TYPERT_REMOTE = {
         typeSymbol: '@dsh/api-memory-recall#JsonValue',
         create: jsonValue$schema,
       },
+    },
+    {
+      id: '@dsh/api-memory-recall#memory-recall/connQuery',
+      service: 'memoryRecallController',
+      namespace: 'memory-recall',
+      method: 'connQuery',
+      invocation: { kind: 'direct' },
+      parameters: [
+        {
+          name: 'input',
+          wire: 'input',
+          source: 'json',
+          codec: {
+            mode: 'strict',
+            typeSymbol: '@dsh/api-memory-recall#memory-recall/connQuery:input',
+            create: jsonValue$schema,
+          },
+        }
+
+      ],
+      result: {
+        mode: 'strict',
+        typeSymbol: '@dsh/api-memory-recall#JsonValue',
+        create: jsonValue$schema,
+      },
     }
   ],
 }

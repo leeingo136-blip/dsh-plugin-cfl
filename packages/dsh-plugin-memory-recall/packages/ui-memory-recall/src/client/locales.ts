@@ -22,6 +22,12 @@ export interface MemoryKey {
   embeddingPick: string
   embeddingUnavailable: string
 
+  connectDb: string
+  queryPlaceholder: string
+  search: string
+  searching: string
+  noResults: string
+
   save: string
   cancel: string
   delete: string
@@ -54,6 +60,12 @@ export const zh: MemoryKey = {
   embeddingPick: '请选择…',
   embeddingUnavailable: '暂无可用模型：请先在账号列启用本地向量模型',
 
+  connectDb: '连接数据库',
+  queryPlaceholder: '输入要检索的内容…',
+  search: '搜索',
+  searching: '检索中…',
+  noResults: '没有命中结果',
+
   save: '保存',
   cancel: '取消',
   delete: '删除',
@@ -85,6 +97,12 @@ export const en: MemoryKey = {
   fieldEmbedding: 'Embedding engine',
   embeddingPick: 'Choose…',
   embeddingUnavailable: 'No models available: enable the local embedding model first',
+
+  connectDb: 'Connect database',
+  queryPlaceholder: 'Type what to search for…',
+  search: 'Search',
+  searching: 'Searching…',
+  noResults: 'No matches',
 
   save: 'Save',
   cancel: 'Cancel',

@@ -35,6 +35,7 @@ var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, 
 import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol';
 import zschema from '@deepseek-ai/schemastery';
 import { ConnectionStore, localDatabaseDir, validate } from "./connections.js";
+import { queryLocal } from "./query.js";
 export const name = 'memory-api';
 /**
  * No runtime settings surface of our own (v1); the schema stays because the
@@ -70,6 +71,7 @@ let MemoryRecallController = (() => {
     let _connUpdate_decorators;
     let _connDelete_decorators;
     let _embeddingModels_decorators;
+    let _connQuery_decorators;
     return class MemoryRecallController extends _classSuper {
         static {
             const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(_classSuper[Symbol.metadata] ?? null) : void 0;
@@ -78,11 +80,13 @@ let MemoryRecallController = (() => {
             _connUpdate_decorators = [Remote];
             _connDelete_decorators = [Remote];
             _embeddingModels_decorators = [Remote];
+            _connQuery_decorators = [Remote];
             __esDecorate(this, null, _connList_decorators, { kind: "method", name: "connList", static: false, private: false, access: { has: obj => "connList" in obj, get: obj => obj.connList }, metadata: _metadata }, null, _instanceExtraInitializers);
             __esDecorate(this, null, _connCreate_decorators, { kind: "method", name: "connCreate", static: false, private: false, access: { has: obj => "connCreate" in obj, get: obj => obj.connCreate }, metadata: _metadata }, null, _instanceExtraInitializers);
             __esDecorate(this, null, _connUpdate_decorators, { kind: "method", name: "connUpdate", static: false, private: false, access: { has: obj => "connUpdate" in obj, get: obj => obj.connUpdate }, metadata: _metadata }, null, _instanceExtraInitializers);
             __esDecorate(this, null, _connDelete_decorators, { kind: "method", name: "connDelete", static: false, private: false, access: { has: obj => "connDelete" in obj, get: obj => obj.connDelete }, metadata: _metadata }, null, _instanceExtraInitializers);
             __esDecorate(this, null, _embeddingModels_decorators, { kind: "method", name: "embeddingModels", static: false, private: false, access: { has: obj => "embeddingModels" in obj, get: obj => obj.embeddingModels }, metadata: _metadata }, null, _instanceExtraInitializers);
+            __esDecorate(this, null, _connQuery_decorators, { kind: "method", name: "connQuery", static: false, private: false, access: { has: obj => "connQuery" in obj, get: obj => obj.connQuery }, metadata: _metadata }, null, _instanceExtraInitializers);
             if (_metadata) Object.defineProperty(this, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
         }
         store = (__runInitializers(this, _instanceExtraInitializers), new ConnectionStore());
@@ -139,6 +143,45 @@ let MemoryRecallController = (() => {
             if (embedding === undefined)
                 return asJson({ models: [], available: false });
             return asJson({ models: embedding.listModels(), available: true });
+        }
+        /**
+         * KNN search over one card's database: embed the query with the card's
+         * bound engine, then run a top-k nearest-neighbour query. Local cards
+         * search the sqlite-vec file at `address`; service cards are not
+         * implemented yet (the tools own that transport later).
+         */
+        async connQuery(input) {
+            const body = input;
+            const id = typeof body.id === 'string' ? body.id : '';
+            const text = typeof body.query === 'string' ? body.query.trim() : '';
+            if (text === '')
+                throw new RemoteError('memory-recall/invalid-input', '检索内容不能为空', {});
+            const card = this.store.get(id);
+            if (card === undefined)
+                throw new RemoteError('memory-recall/not-found', '卡片不存在', { id });
+            if (card.kind === 'service') {
+                throw new RemoteError('memory-recall/not-implemented', '网络服务检索尚未实现', { kind: 'service' });
+            }
+            const embedding = this.svc('embedding');
+            if (embedding === undefined) {
+                throw new RemoteError('memory-recall/embedding-unavailable', 'embedding 服务不可用：请先在账号列启用本地向量模型', {});
+            }
+            const vectors = await embedding.embed([text], card.embeddingModel === '' ? undefined : card.embeddingModel);
+            const vector = vectors[0];
+            if (vector === undefined || vector.length === 0) {
+                throw new RemoteError('memory-recall/embedding-failed', '查询向量生成失败', {});
+            }
+            const k = Math.min(Math.max(Number(body.topK) || 5, 1), 20);
+            const outcome = queryLocal(card.address, vector, k);
+            if (!Array.isArray(outcome)) {
+                switch (outcome.code) {
+                    case 'db-missing':
+                        throw new RemoteError('memory-recall/db-missing', `数据库文件不存在：${outcome.address}`, { address: outcome.address });
+                    case 'db-empty':
+                        throw new RemoteError('memory-recall/db-empty', '数据库为空：尚未写入任何知识（等待 knowledge_add 工具实现）', { address: outcome.address });
+                }
+            }
+            return asJson({ results: outcome });
         }
     };
 })();

@@ -44,6 +44,13 @@ export declare class MemoryRecallController extends TypertRemoteService {
      * stays usable and the UI shows a hint instead.
      */
     embeddingModels(): Promise<JsonValue>;
+    /**
+     * KNN search over one card's database: embed the query with the card's
+     * bound engine, then run a top-k nearest-neighbour query. Local cards
+     * search the sqlite-vec file at `address`; service cards are not
+     * implemented yet (the tools own that transport later).
+     */
+    connQuery(input: JsonValue): Promise<JsonValue>;
 }
 export declare function apply(ctx: Context): void;
 export {};

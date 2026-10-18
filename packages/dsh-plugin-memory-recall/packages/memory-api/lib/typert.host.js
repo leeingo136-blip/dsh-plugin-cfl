@@ -44,6 +44,11 @@ export const TYPERT = {
             "kind": "method",
             "name": "embeddingModels",
             "signature": "embeddingModels(): Promise<JsonValue>"
+          },
+          {
+            "kind": "method",
+            "name": "connQuery",
+            "signature": "connQuery(input: JsonValue): Promise<JsonValue>"
           }
         ],
         "types": []
@@ -150,6 +155,31 @@ export const TYPERT = {
       method: 'embeddingModels',
       invocation: { kind: 'direct' },
       parameters: [
+
+      ],
+      result: {
+        mode: 'strict',
+        typeSymbol: '@dsh/api-memory-recall#JsonValue',
+        create: jsonValue$schema,
+      },
+    },
+    {
+      id: '@dsh/api-memory-recall#memory-recall/connQuery',
+      service: 'memoryRecallController',
+      namespace: 'memory-recall',
+      method: 'connQuery',
+      invocation: { kind: 'direct' },
+      parameters: [
+        {
+          name: 'input',
+          wire: 'input',
+          source: 'json',
+          codec: {
+            mode: 'strict',
+            typeSymbol: '@dsh/api-memory-recall#memory-recall/connQuery:input',
+            create: jsonValue$schema,
+          },
+        }
 
       ],
       result: {

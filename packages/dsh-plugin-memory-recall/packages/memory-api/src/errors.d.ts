@@ -7,6 +7,16 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
     'memory-recall/name-duplicate': { readonly name: string }
     /** The card id is unknown. */
     'memory-recall/not-found': { readonly id: string }
+    /** A requested capability has no implementation yet (service transport). */
+    'memory-recall/not-implemented': { readonly kind: string }
+    /** The embedding service is not mounted (local model plugin disabled). */
+    'memory-recall/embedding-unavailable': {}
+    /** The engine produced no usable query vector. */
+    'memory-recall/embedding-failed': {}
+    /** The local database file at the card address does not exist. */
+    'memory-recall/db-missing': { readonly address: string }
+    /** The local database exists but carries no knowledge yet. */
+    'memory-recall/db-empty': { readonly address: string }
   }
 }
 

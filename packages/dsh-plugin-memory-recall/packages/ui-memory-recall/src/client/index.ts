@@ -47,6 +47,7 @@ export function apply(ctx: ClientContext): void {
     update: input => unwrap(memory.connUpdate(input)),
     remove: async id => { await unwrap(memory.connDelete({ id })) },
     embeddingModels: () => unwrap(memory.embeddingModels()),
+    query: input => unwrap(memory.connQuery(input)),
   }
 
   ctx.slots.inject('settings.section', () => ctx.slots.register({
