@@ -1,0 +1,14 @@
+# 技能书容器：三个全新组件行，无条件插入。
+# - skill-api：宿主服务（官方 skill 目录的技能文件管理）与 skill-book 远程面
+# - skill-mount：client 面独立挂载组件（只挂 skill-book 远程贡献，inject ['remote']；
+#   与官方 account-hub-mount 同构——挂载与消费分离，消费方注入 remote.skill-book 命名空间
+#   服务以 park 到挂载完成）
+# - ui-skill-book：设置中新增「技能」一栏（settings.section 槽位）
+# 本容器不 retarget 任何官方行。
+- insert:
+    - id: skill-api
+      name: '@dsh/api-skill-book'
+    - id: skill-mount
+      name: '@dsh/skill-mount'
+    - id: ui-skill-book
+      name: '@dsh/ui-skill-book'
