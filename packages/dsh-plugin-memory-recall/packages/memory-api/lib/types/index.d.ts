@@ -13,6 +13,11 @@ import { Context } from '@deepseek-ai/cordis';
 import { TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol';
 import type { JsonValue } from '@deepseek-ai/dsh-util-values';
 import zschema from '@deepseek-ai/schemastery';
+/** Shared with the toolset package: it opens the same cards this controller manages. */
+export { ConnectionStore, localDatabaseDir } from './connections.ts';
+export type { ConnectionFault, ConnectionInput, ConnectionKind, ConnectionRecord } from './connections.ts';
+export { clearChunks, deleteByContent, ensureLocalDatabase, insertChunks, openDb, queryLocal } from './query.ts';
+export type { ChunkInput, DeleteOutcome, QueryHit, WriteFault } from './query.ts';
 export declare const name = "memory-api";
 /** The schema class instance type, nameable without dragging cosmokit in. */
 type SchemaNode = InstanceType<typeof zschema>;
@@ -53,5 +58,4 @@ export declare class MemoryRecallController extends TypertRemoteService {
     connQuery(input: JsonValue): Promise<JsonValue>;
 }
 export declare function apply(ctx: Context): void;
-export {};
 //# sourceMappingURL=index.d.ts.map

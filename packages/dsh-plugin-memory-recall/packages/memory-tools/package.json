@@ -9,8 +9,10 @@
     ".": "./dist/index.js"
   },
   "dependencies": {
+    "@dsh/api-memory-recall": "workspace:*",
     "@deepseek-ai/cordis-plugin-loader": "^1.0.5",
-    "@deepseek-ai/dsh-tools": "0.2.1-rc.2"
+    "@deepseek-ai/dsh-tools": "0.2.1-rc.2",
+    "@deepseek-ai/schemastery": "^3.18.4"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "~4.0.4",

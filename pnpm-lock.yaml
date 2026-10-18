@@ -589,6 +589,12 @@ importers:
       '@deepseek-ai/dsh-tools':
         specifier: 0.2.1-rc.2
         version: 0.2.1-rc.2(484a077a99424b8596be40b14db4948d)
+      '@deepseek-ai/schemastery':
+        specifier: ^3.18.4
+        version: 3.18.5
+      '@dsh/api-memory-recall':
+        specifier: workspace:*
+        version: link:../memory-api
     devDependencies:
       '@types/node':
         specifier: ^22

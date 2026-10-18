@@ -17,6 +17,12 @@ import zschema from '@deepseek-ai/schemastery'
 import { ConnectionStore, localDatabaseDir, validate, type ConnectionFault } from './connections.ts'
 import { queryLocal } from './query.ts'
 
+/** Shared with the toolset package: it opens the same cards this controller manages. */
+export { ConnectionStore, localDatabaseDir } from './connections.ts'
+export type { ConnectionFault, ConnectionInput, ConnectionKind, ConnectionRecord } from './connections.ts'
+export { clearChunks, deleteByContent, ensureLocalDatabase, insertChunks, openDb, queryLocal } from './query.ts'
+export type { ChunkInput, DeleteOutcome, QueryHit, WriteFault } from './query.ts'
+
 export const name = 'memory-api'
 
 /** The schema class instance type, nameable without dragging cosmokit in. */
@@ -152,16 +158,10 @@ export class MemoryRecallController extends TypertRemoteService {
     }
 
     const k = Math.min(Math.max(Number(body.topK) || 5, 1), 20)
-    const outcome = queryLocal(card.address, vector, k)
-    if (!Array.isArray(outcome)) {
-      switch (outcome.code) {
-        case 'db-missing':
-          throw new RemoteError('memory-recall/db-missing', `数据库文件不存在：${outcome.address}`, { address: outcome.address })
-        case 'db-empty':
-          throw new RemoteError('memory-recall/db-empty', '数据库为空：尚未写入任何知识（等待 knowledge_add 工具实现）', { address: outcome.address })
-      }
-    }
-    return asJson({ results: outcome })
+    // queryLocal heals the database on demand, so a card whose file was
+    // deleted (or never written) yields an empty result rather than an error.
+    const results = queryLocal(card.address, vector, k)
+    return asJson({ results })
   }
 }
 
