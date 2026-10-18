@@ -14,7 +14,7 @@ import type {} from '@deepseek-ai/cordis-plugin-loader'
 import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import zschema from '@deepseek-ai/schemastery'
-import { ConnectionStore, validate, type ConnectionFault } from './connections.ts'
+import { ConnectionStore, localDatabaseDir, validate, type ConnectionFault } from './connections.ts'
 
 export const name = 'memory-api'
 
@@ -67,10 +67,10 @@ export class MemoryRecallController extends TypertRemoteService {
     return (this.ctx as unknown as HostContext).get<T>(name)
   }
 
-  /** Every saved connection card. */
+  /** Every saved connection card, plus editor defaults (local dir inside the plugin). */
   @Remote
   async connList(): Promise<JsonValue> {
-    return asJson({ connections: this.store.list() })
+    return asJson({ connections: this.store.list(), defaults: { localDir: localDatabaseDir() } })
   }
 
   /** Create one connection card (the name must be unique — tools use it as the handle). */

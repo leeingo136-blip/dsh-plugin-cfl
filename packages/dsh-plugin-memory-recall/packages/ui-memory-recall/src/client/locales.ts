@@ -17,6 +17,7 @@ export interface MemoryKey {
   fieldAddress: string
   addressPlaceholderLocal: string
   addressPlaceholderService: string
+  addressHintLocal: string
   fieldEmbedding: string
   embeddingPick: string
   embeddingUnavailable: string
@@ -48,6 +49,7 @@ export const zh: MemoryKey = {
   fieldAddress: '数据库地址',
   addressPlaceholderLocal: '/path/to/database.sqlite',
   addressPlaceholderService: 'https://example.com/rag',
+  addressHintLocal: '留空时默认保存在插件数据目录内，随名称自动生成',
   fieldEmbedding: 'Embedding 引擎',
   embeddingPick: '请选择…',
   embeddingUnavailable: '暂无可用模型：请先在账号列启用本地向量模型',
@@ -79,6 +81,7 @@ export const en: MemoryKey = {
   fieldAddress: 'Address',
   addressPlaceholderLocal: '/path/to/database.sqlite',
   addressPlaceholderService: 'https://example.com/rag',
+  addressHintLocal: 'Defaults to a file inside the plugin data directory, derived from the name',
   fieldEmbedding: 'Embedding engine',
   embeddingPick: 'Choose…',
   embeddingUnavailable: 'No models available: enable the local embedding model first',

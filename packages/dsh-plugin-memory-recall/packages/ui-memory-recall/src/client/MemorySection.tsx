@@ -28,7 +28,7 @@ export interface EmbeddingModelInfo {
 
 export interface MemoryFace {
   t(key: keyof MemoryKey): string
-  list(): Promise<{ connections: ConnectionCard[] }>
+  list(): Promise<{ connections: ConnectionCard[]; defaults?: { localDir?: string } }>
   create(input: { name: string; description: string; kind: string; address: string; embeddingModel: string }): Promise<ConnectionCard>
   update(input: { id: string; name?: string; description?: string; kind?: string; address?: string; embeddingModel?: string }): Promise<ConnectionCard>
   remove(id: string): Promise<void>
@@ -61,12 +61,18 @@ export function MemorySection(props: { face?: MemoryFace }): ReactNode {
 function MemoryLoaded({ face }: { face: MemoryFace }): ReactNode {
   const [cards, setCards] = useState<readonly ConnectionCard[]>([])
   const [failed, setFailed] = useState<string | null>(null)
+  /** Plugin-internal default directory for local database files (from connList). */
+  const [localDir, setLocalDir] = useState<string | undefined>(undefined)
   /** The card being edited (id), or 'new' for the creation editor, or undefined. */
   const [editing, setEditing] = useState<string | 'new' | undefined>(undefined)
 
   const refresh = (): void => {
     void face.list().then(
-      value => { setCards(value.connections); setFailed(null) },
+      value => {
+        setCards(value.connections)
+        setLocalDir(value.defaults?.localDir)
+        setFailed(null)
+      },
       (error: unknown) => setFailed(error instanceof Error ? error.message : String(error)),
     )
   }
@@ -100,6 +106,7 @@ function MemoryLoaded({ face }: { face: MemoryFace }): ReactNode {
             face={face}
             cards={cards}
             draft={draftOf()}
+            localDir={localDir}
             onDone={() => { setEditing(undefined); refresh() }}
             onCancel={() => { setEditing(undefined) }}
           />
@@ -112,6 +119,7 @@ function MemoryLoaded({ face }: { face: MemoryFace }): ReactNode {
                   face={face}
                   cards={cards}
                   draft={draftOf(card)}
+                  localDir={localDir}
                   cardId={card.id}
                   onDone={() => { setEditing(undefined); refresh() }}
                   onCancel={() => { setEditing(undefined) }}
@@ -157,13 +165,20 @@ function CardEditor(props: {
   face: MemoryFace
   cards: readonly ConnectionCard[]
   draft: Draft
+  localDir?: string
   cardId?: string
   onDone(): void
   onCancel(): void
   onDelete?(): void
 }): ReactNode {
-  const { face, cards, cardId, onDone, onCancel, onDelete } = props
+  const { face, cards, cardId, localDir, onDone, onCancel, onDelete } = props
   const [draft, setDraft] = useState<Draft>(props.draft)
+  /**
+   * While untouched, the local address keeps deriving itself from the
+   * plugin-internal directory and the card name; the first manual edit
+   * hands control to the user for good.
+   */
+  const [addressTouched, setAddressTouched] = useState(props.draft.address !== '')
   const [models, setModels] = useState<readonly EmbeddingModelInfo[]>([])
   const [embeddingAvailable, setEmbeddingAvailable] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -175,6 +190,17 @@ function CardEditor(props: {
       setEmbeddingAvailable(value.available)
     }, () => { setEmbeddingAvailable(false) })
   }, [face])
+
+  useEffect(() => {
+    if (addressTouched || localDir === undefined) return
+    if (draft.kind === 'local') {
+      const base = draft.name.trim() === '' ? 'database' : draft.name.trim()
+      const want = `${localDir.replace(/\/+$/, '')}/${base}.sqlite`
+      if (draft.address !== want) setDraft(current => ({ ...current, address: want }))
+    } else if (draft.address !== '') {
+      setDraft(current => ({ ...current, address: '' }))
+    }
+  }, [addressTouched, localDir, draft.kind, draft.name, draft.address])
 
   const nameTaken = cards.some(one => one.name === draft.name.trim() && one.id !== cardId)
   const complete = draft.name.trim() !== '' && draft.address.trim() !== '' && draft.embeddingModel !== ''
@@ -245,8 +271,9 @@ function CardEditor(props: {
           style={styles.input}
           value={draft.address}
           placeholder={draft.kind === 'local' ? face.t('addressPlaceholderLocal') : face.t('addressPlaceholderService')}
-          onChange={event => { setDraft({ ...draft, address: event.target.value }) }}
+          onChange={event => { setAddressTouched(true); setDraft({ ...draft, address: event.target.value }) }}
         />
+        {draft.kind === 'local' && <span style={styles.hint}>{face.t('addressHintLocal')}</span>}
       </label>
 
       <label style={styles.field}>

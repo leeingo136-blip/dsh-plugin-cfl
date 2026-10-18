@@ -59,4 +59,10 @@ export declare class ConnectionStore {
 }
 /** Dev sanity helper: the data root this store writes into. */
 export declare function dataRoot(): string;
+/**
+ * Where tool-managed local databases live by default — inside the package's
+ * own data root, keeping the in-repo self-contained posture. The editor
+ * prefills local addresses here so cards stay inside the plugin by default.
+ */
+export declare function localDatabaseDir(): string;
 //# sourceMappingURL=connections.d.ts.map

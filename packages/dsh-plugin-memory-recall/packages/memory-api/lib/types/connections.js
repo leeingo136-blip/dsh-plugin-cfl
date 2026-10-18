@@ -128,4 +128,15 @@ export function dataRoot() {
         mkdirSync(DATA_ROOT, { recursive: true });
     return DATA_ROOT;
 }
+/**
+ * Where tool-managed local databases live by default — inside the package's
+ * own data root, keeping the in-repo self-contained posture. The editor
+ * prefills local addresses here so cards stay inside the plugin by default.
+ */
+export function localDatabaseDir() {
+    const dir = join(DATA_ROOT, 'databases');
+    if (!existsSync(dir))
+        mkdirSync(dir, { recursive: true });
+    return dir;
+}
 //# sourceMappingURL=connections.js.map

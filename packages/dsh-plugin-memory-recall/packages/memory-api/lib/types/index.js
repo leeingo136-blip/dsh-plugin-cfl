@@ -34,7 +34,7 @@ var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, 
 };
 import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol';
 import zschema from '@deepseek-ai/schemastery';
-import { ConnectionStore, validate } from "./connections.js";
+import { ConnectionStore, localDatabaseDir, validate } from "./connections.js";
 export const name = 'memory-api';
 /**
  * No runtime settings surface of our own (v1); the schema stays because the
@@ -93,9 +93,9 @@ let MemoryRecallController = (() => {
         svc(name) {
             return this.ctx.get(name);
         }
-        /** Every saved connection card. */
+        /** Every saved connection card, plus editor defaults (local dir inside the plugin). */
         async connList() {
-            return asJson({ connections: this.store.list() });
+            return asJson({ connections: this.store.list(), defaults: { localDir: localDatabaseDir() } });
         }
         /** Create one connection card (the name must be unique — tools use it as the handle). */
         async connCreate(input) {

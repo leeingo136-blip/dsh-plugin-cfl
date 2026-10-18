@@ -25,6 +25,7 @@ window.__ModuleLoader__.load({
 			fieldAddress: "数据库地址",
 			addressPlaceholderLocal: "/path/to/database.sqlite",
 			addressPlaceholderService: "https://example.com/rag",
+			addressHintLocal: "留空时默认保存在插件数据目录内，随名称自动生成",
 			fieldEmbedding: "Embedding 引擎",
 			embeddingPick: "请选择…",
 			embeddingUnavailable: "暂无可用模型：请先在账号列启用本地向量模型",
@@ -53,6 +54,7 @@ window.__ModuleLoader__.load({
 			fieldAddress: "Address",
 			addressPlaceholderLocal: "/path/to/database.sqlite",
 			addressPlaceholderService: "https://example.com/rag",
+			addressHintLocal: "Defaults to a file inside the plugin data directory, derived from the name",
 			fieldEmbedding: "Embedding engine",
 			embeddingPick: "Choose…",
 			embeddingUnavailable: "No models available: enable the local embedding model first",
@@ -87,11 +89,14 @@ window.__ModuleLoader__.load({
 		function MemoryLoaded({ face }) {
 			const [cards, setCards] = (0, react.useState)([]);
 			const [failed, setFailed] = (0, react.useState)(null);
+			/** Plugin-internal default directory for local database files (from connList). */
+			const [localDir, setLocalDir] = (0, react.useState)(void 0);
 			/** The card being edited (id), or 'new' for the creation editor, or undefined. */
 			const [editing, setEditing] = (0, react.useState)(void 0);
 			const refresh = () => {
 				face.list().then((value) => {
 					setCards(value.connections);
+					setLocalDir(value.defaults?.localDir);
 					setFailed(null);
 				}, (error) => setFailed(error instanceof Error ? error.message : String(error)));
 			};
@@ -126,6 +131,7 @@ window.__ModuleLoader__.load({
 						face,
 						cards,
 						draft: draftOf(),
+						localDir,
 						onDone: () => {
 							setEditing(void 0);
 							refresh();
@@ -137,6 +143,7 @@ window.__ModuleLoader__.load({
 						face,
 						cards,
 						draft: draftOf(card),
+						localDir,
 						cardId: card.id,
 						onDone: () => {
 							setEditing(void 0);
@@ -217,8 +224,14 @@ window.__ModuleLoader__.load({
 			});
 		}
 		function CardEditor(props) {
-			const { face, cards, cardId, onDone, onCancel, onDelete } = props;
+			const { face, cards, cardId, localDir, onDone, onCancel, onDelete } = props;
 			const [draft, setDraft] = (0, react.useState)(props.draft);
+			/**
+			* While untouched, the local address keeps deriving itself from the
+			* plugin-internal directory and the card name; the first manual edit
+			* hands control to the user for good.
+			*/
+			const [addressTouched, setAddressTouched] = (0, react.useState)(props.draft.address !== "");
 			const [models, setModels] = (0, react.useState)([]);
 			const [embeddingAvailable, setEmbeddingAvailable] = (0, react.useState)(true);
 			const [busy, setBusy] = (0, react.useState)(false);
@@ -231,6 +244,26 @@ window.__ModuleLoader__.load({
 					setEmbeddingAvailable(false);
 				});
 			}, [face]);
+			(0, react.useEffect)(() => {
+				if (addressTouched || localDir === void 0) return;
+				if (draft.kind === "local") {
+					const base = draft.name.trim() === "" ? "database" : draft.name.trim();
+					const want = `${localDir.replace(/\/+$/, "")}/${base}.sqlite`;
+					if (draft.address !== want) setDraft((current) => ({
+						...current,
+						address: want
+					}));
+				} else if (draft.address !== "") setDraft((current) => ({
+					...current,
+					address: ""
+				}));
+			}, [
+				addressTouched,
+				localDir,
+				draft.kind,
+				draft.name,
+				draft.address
+			]);
 			const nameTaken = cards.some((one) => one.name === draft.name.trim() && one.id !== cardId);
 			const complete = draft.name.trim() !== "" && draft.address.trim() !== "" && draft.embeddingModel !== "";
 			const submit = () => {
@@ -333,20 +366,28 @@ window.__ModuleLoader__.load({
 					}),
 					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("label", {
 						style: styles.field,
-						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
-							style: styles.fieldLabel,
-							children: face.t("fieldAddress")
-						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
-							style: styles.input,
-							value: draft.address,
-							placeholder: draft.kind === "local" ? face.t("addressPlaceholderLocal") : face.t("addressPlaceholderService"),
-							onChange: (event) => {
-								setDraft({
-									...draft,
-									address: event.target.value
-								});
-							}
-						})]
+						children: [
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+								style: styles.fieldLabel,
+								children: face.t("fieldAddress")
+							}),
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
+								style: styles.input,
+								value: draft.address,
+								placeholder: draft.kind === "local" ? face.t("addressPlaceholderLocal") : face.t("addressPlaceholderService"),
+								onChange: (event) => {
+									setAddressTouched(true);
+									setDraft({
+										...draft,
+										address: event.target.value
+									});
+								}
+							}),
+							draft.kind === "local" && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+								style: styles.hint,
+								children: face.t("addressHintLocal")
+							})
+						]
 					}),
 					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("label", {
 						style: styles.field,

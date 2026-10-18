@@ -30,7 +30,7 @@ export declare class MemoryRecallController extends TypertRemoteService {
     constructor(ctx: Context);
     /** One lazy optional-service lookup, untyped at the boundary. */
     private svc;
-    /** Every saved connection card. */
+    /** Every saved connection card, plus editor defaults (local dir inside the plugin). */
     connList(): Promise<JsonValue>;
     /** Create one connection card (the name must be unique — tools use it as the handle). */
     connCreate(input: JsonValue): Promise<JsonValue>;
