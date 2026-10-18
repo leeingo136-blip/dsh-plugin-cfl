@@ -38,7 +38,8 @@ import { ConnectionStore, localDatabaseDir, validate } from "./connections.js";
 import { queryLocal } from "./query.js";
 /** Shared with the toolset package: it opens the same cards this controller manages. */
 export { ConnectionStore, localDatabaseDir } from "./connections.js";
-export { clearChunks, deleteByContent, ensureLocalDatabase, insertChunks, openDb, queryLocal } from "./query.js";
+export { clearChunks, deleteByContent, ensureLocalDatabase, insertChunks, listChunks, openDb, queryLocal } from "./query.js";
+export { countTopic, expandAdjacent, scoreRows, topicWeight, weightedFrequency } from "./recall.js";
 export const name = 'memory-api';
 /**
  * No runtime settings surface of our own (v1); the schema stays because the

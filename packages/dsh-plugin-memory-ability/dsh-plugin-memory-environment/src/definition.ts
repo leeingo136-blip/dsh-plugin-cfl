@@ -57,7 +57,7 @@ export const PRESET_NAME = '记忆工坊'
 export const PRESET_ORDER = -7
 /** Description as declared in the patch row. */
 export const PRESET_DESCRIPTION =
-  '记忆回想工作方式。标准能力 + 记忆回想六工具全开（knowledge_* 真实 RAG 读写「知识库」卡片；memory_recall/add、dream 为占位）'
+  '记忆回想工作方式。标准能力 + 记忆回想六工具全开（knowledge_* 真实 RAG 读写「知识库」；memory_add/recall 为实验性记忆接口；dream 为占位）'
 
 /** The card every memory-recall tool is bound to in this preset. */
 const MEMORY_CARD = '知识库'

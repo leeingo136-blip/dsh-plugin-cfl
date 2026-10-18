@@ -18,10 +18,24 @@
 import { DatabaseSync } from 'node:sqlite';
 /** A type literal (not an interface) so it stays JSON-wire-assignable. */
 export type QueryHit = {
+    id: number;
     content: string;
     distance: number;
     addedAt: string;
 };
+/** One memory slice in chronological order (the recall algorithm's row shape). */
+export interface RecallRow {
+    id: number;
+    content: string;
+    addedAt: string;
+    kind: string;
+    source: string;
+}
+/** Batch-level metadata stored alongside every slice of one insert. */
+export interface ChunkMeta {
+    kind?: string;
+    source?: string;
+}
 /** Open one local database with the vec0 extension loaded. */
 export declare function openDb(address: string): DatabaseSync;
 /**
@@ -52,7 +66,7 @@ export interface ChunkInput {
  * means the card's bound embedding model changed after creation, which the
  * caller surfaces instead of letting sqlite-vec fail obscurely.
  */
-export declare function insertChunks(address: string, items: readonly ChunkInput[], addedAt: string): WriteFault | {
+export declare function insertChunks(address: string, items: readonly ChunkInput[], addedAt: string, meta?: ChunkMeta): WriteFault | {
     added: number;
 };
 /** What one delete removed (contents capped for reporting sanity). */
@@ -68,6 +82,12 @@ export interface DeleteOutcome {
 export declare function deleteByContent(address: string, needle: string): DeleteOutcome;
 /** Clear every entry of one database (the `all` switch of knowledge_delete). */
 export declare function clearChunks(address: string): DeleteOutcome;
+/**
+ * Every slice of one database in chronological order (added_at, then rowid —
+ * a batch keeps its insertion order). This is the recall algorithm's input:
+ * adjacency in this list is what "时间上下的相邻切片" means.
+ */
+export declare function listChunks(address: string): RecallRow[];
 /**
  * KNN search over one local database. The database is healed on demand, so
  * a missing file or an empty store is a legitimate empty result, not an

@@ -25,9 +25,25 @@ const require = createRequire(import.meta.url)
 
 /** A type literal (not an interface) so it stays JSON-wire-assignable. */
 export type QueryHit = {
+  id: number
   content: string
   distance: number
   addedAt: string
+}
+
+/** One memory slice in chronological order (the recall algorithm's row shape). */
+export interface RecallRow {
+  id: number
+  content: string
+  addedAt: string
+  kind: string
+  source: string
+}
+
+/** Batch-level metadata stored alongside every slice of one insert. */
+export interface ChunkMeta {
+  kind?: string
+  source?: string
 }
 
 /** Open one local database with the vec0 extension loaded. */
@@ -65,14 +81,20 @@ export function ensureLocalDatabase(address: string, dim = 512): void {
       CREATE TABLE IF NOT EXISTS chunks(
         rowid INTEGER PRIMARY KEY,
         content TEXT NOT NULL,
-        added_at TEXT NOT NULL
+        added_at TEXT NOT NULL,
+        kind TEXT NOT NULL DEFAULT '',
+        source TEXT NOT NULL DEFAULT ''
       );
       CREATE VIRTUAL TABLE IF NOT EXISTS v_chunks USING vec0(embedding float[${dim}]);
     `)
-    // Healing pass for databases created by the pre-added_at prototype.
+    // Healing passes for databases created by earlier prototypes: the
+    // pre-added_at store and the knowledge-only schema (no kind/source yet).
     const columns = db.prepare('PRAGMA table_info(chunks)').all() as Array<{ name: string }>
-    if (columns.length > 0 && !columns.some(one => one.name === 'added_at')) {
-      db.exec("ALTER TABLE chunks ADD COLUMN added_at TEXT NOT NULL DEFAULT ''")
+    if (columns.length > 0) {
+      const names = new Set(columns.map(one => one.name))
+      if (!names.has('added_at')) db.exec("ALTER TABLE chunks ADD COLUMN added_at TEXT NOT NULL DEFAULT ''")
+      if (!names.has('kind')) db.exec("ALTER TABLE chunks ADD COLUMN kind TEXT NOT NULL DEFAULT ''")
+      if (!names.has('source')) db.exec("ALTER TABLE chunks ADD COLUMN source TEXT NOT NULL DEFAULT ''")
     }
   } finally {
     db.close()
@@ -100,8 +122,11 @@ export function insertChunks(
   address: string,
   items: readonly ChunkInput[],
   addedAt: string,
+  meta: ChunkMeta = {},
 ): WriteFault | { added: number } {
   ensureLocalDatabase(address)
+  const kind = meta.kind ?? ''
+  const source = meta.source ?? ''
   const db = openDb(address)
   try {
     const dim = vectorDim(db) ?? 512
@@ -112,10 +137,10 @@ export function insertChunks(
     }
     db.exec('BEGIN')
     try {
-      const insertChunk = db.prepare('INSERT INTO chunks(content, added_at) VALUES (?, ?)')
+      const insertChunk = db.prepare('INSERT INTO chunks(content, added_at, kind, source) VALUES (?, ?, ?, ?)')
       const insertVector = db.prepare('INSERT INTO v_chunks(rowid, embedding) VALUES (?, ?)')
       for (const item of items) {
-        const info = insertChunk.run(item.content, addedAt)
+        const info = insertChunk.run(item.content, addedAt, kind, source)
         // vec0 rejects float-typed rowid binds: node:sqlite carries JS
         // numbers as float64, so the rowid must cross as BigInt.
         insertVector.run(BigInt(info.lastInsertRowid), Buffer.from(new Float32Array([...item.vector]).buffer))
@@ -195,6 +220,25 @@ export function clearChunks(address: string): DeleteOutcome {
 }
 
 /**
+ * Every slice of one database in chronological order (added_at, then rowid —
+ * a batch keeps its insertion order). This is the recall algorithm's input:
+ * adjacency in this list is what "时间上下的相邻切片" means.
+ */
+export function listChunks(address: string): RecallRow[] {
+  ensureLocalDatabase(address)
+  const db = openDb(address)
+  try {
+    return db.prepare(`
+      SELECT rowid AS id, content AS content, added_at AS addedAt, kind AS kind, source AS source
+      FROM chunks
+      ORDER BY added_at ASC, rowid ASC
+    `).all() as unknown as RecallRow[]
+  } finally {
+    db.close()
+  }
+}
+
+/**
  * KNN search over one local database. The database is healed on demand, so
  * a missing file or an empty store is a legitimate empty result, not an
  * error. Relevance (distance) orders the hits; `added_at` rides along for
@@ -213,7 +257,7 @@ export function queryLocal(address: string, vector: readonly number[], k: number
     ).get() as { n: number }
     if ((present?.n ?? 0) === 0) return []
     return db.prepare(`
-      SELECT c.content AS content, v.distance AS distance, c.added_at AS addedAt
+      SELECT c.rowid AS id, c.content AS content, v.distance AS distance, c.added_at AS addedAt
       FROM v_chunks v
       JOIN chunks c ON c.rowid = v.rowid
       WHERE v.embedding MATCH ? AND k = ?

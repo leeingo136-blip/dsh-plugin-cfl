@@ -22,7 +22,7 @@
       config:
         id: memory-lab
         name: 记忆工坊
-        description: 记忆回想工作方式。标准能力 + 记忆回想六工具全开（knowledge_* 真实 RAG 读写「知识库」卡片；memory_recall/add、dream 为占位）
+        description: 记忆回想工作方式。标准能力 + 记忆回想六工具全开（knowledge_* 真实 RAG 读写「知识库」；memory_add/recall 为实验性记忆接口；dream 为占位）
         order: -7
         plugins:
           - id: persona

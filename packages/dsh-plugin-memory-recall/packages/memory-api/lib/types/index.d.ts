@@ -16,8 +16,10 @@ import zschema from '@deepseek-ai/schemastery';
 /** Shared with the toolset package: it opens the same cards this controller manages. */
 export { ConnectionStore, localDatabaseDir } from './connections.ts';
 export type { ConnectionFault, ConnectionInput, ConnectionKind, ConnectionRecord } from './connections.ts';
-export { clearChunks, deleteByContent, ensureLocalDatabase, insertChunks, openDb, queryLocal } from './query.ts';
-export type { ChunkInput, DeleteOutcome, QueryHit, WriteFault } from './query.ts';
+export { clearChunks, deleteByContent, ensureLocalDatabase, insertChunks, listChunks, openDb, queryLocal } from './query.ts';
+export type { ChunkInput, ChunkMeta, DeleteOutcome, QueryHit, RecallRow, WriteFault } from './query.ts';
+export { countTopic, expandAdjacent, scoreRows, topicWeight, weightedFrequency } from './recall.ts';
+export type { ExpandOptions, ScoredRow } from './recall.ts';
 export declare const name = "memory-api";
 /** The schema class instance type, nameable without dragging cosmokit in. */
 type SchemaNode = InstanceType<typeof zschema>;

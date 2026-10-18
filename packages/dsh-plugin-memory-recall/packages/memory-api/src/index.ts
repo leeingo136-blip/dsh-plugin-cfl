@@ -20,8 +20,10 @@ import { queryLocal } from './query.ts'
 /** Shared with the toolset package: it opens the same cards this controller manages. */
 export { ConnectionStore, localDatabaseDir } from './connections.ts'
 export type { ConnectionFault, ConnectionInput, ConnectionKind, ConnectionRecord } from './connections.ts'
-export { clearChunks, deleteByContent, ensureLocalDatabase, insertChunks, openDb, queryLocal } from './query.ts'
-export type { ChunkInput, DeleteOutcome, QueryHit, WriteFault } from './query.ts'
+export { clearChunks, deleteByContent, ensureLocalDatabase, insertChunks, listChunks, openDb, queryLocal } from './query.ts'
+export type { ChunkInput, ChunkMeta, DeleteOutcome, QueryHit, RecallRow, WriteFault } from './query.ts'
+export { countTopic, expandAdjacent, scoreRows, topicWeight, weightedFrequency } from './recall.ts'
+export type { ExpandOptions, ScoredRow } from './recall.ts'
 
 export const name = 'memory-api'
 
