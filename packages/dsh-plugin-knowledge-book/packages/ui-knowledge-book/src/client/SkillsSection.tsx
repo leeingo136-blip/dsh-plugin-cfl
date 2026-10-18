@@ -1,8 +1,8 @@
 /**
- * 设置-技能：全部技能一卡一条。可编辑来源的卡片行内编辑（名称/正文/来源下拉），
- * 插件与会话技能只读；顶部搜索按名称/来源/正文过滤（三个勾选框可多选）；
- * 右上「新建」给出可编辑空卡，名称/正文/来源齐全才可保存，冲突由宿主按
- * kebab-case 后缀规则自动重命名。
+ * 设置-技能：全部技能一卡一条。可编辑来源的卡片点「编辑」后原位变为编辑态
+ * （名称/正文/来源下拉），插件与会话技能只读；顶部搜索按名称/来源/正文过滤
+ * （三个勾选框可多选）；右上「新建」在顶部给出可编辑空卡，名称/正文/来源齐全
+ * 才可保存，冲突由宿主按 kebab-case 后缀规则自动重命名。
  */
 import { useEffect, useMemo, useState } from 'react'
 import type { KnowledgeKey } from './locales.ts'
@@ -72,6 +72,12 @@ function SkillsLoaded({ face }: { face: SkillsFace }): ReactNode {
     void face.listSources().then(value => setSources(value.sources))
   }
   useEffect(refresh, [face])
+
+  const closeEditor = (message: string | undefined, renamed?: boolean): void => {
+    setEditing(undefined)
+    if (message !== undefined) setNotice(renamed === true ? face.t('savedRenamed') : message)
+    refresh()
+  }
 
   // 正文搜索需要正文：勾选「正文」后批量拉取并缓存（本地文件，量小）。
   useEffect(() => {
@@ -154,16 +160,12 @@ function SkillsLoaded({ face }: { face: SkillsFace }): ReactNode {
 
       {notice !== null && <p style={styles.notice}>{notice}</p>}
 
-      {editing !== undefined && (
+      {editing !== undefined && editing.fromName === undefined && (
         <SkillEditor
           face={face}
           sources={sources}
           state={editing}
-          onClose={(message, renamed) => {
-            setEditing(undefined)
-            if (message !== undefined) setNotice(renamed === true ? face.t('savedRenamed') : message)
-            refresh()
-          }}
+          onClose={closeEditor}
         />
       )}
 
@@ -171,27 +173,43 @@ function SkillsLoaded({ face }: { face: SkillsFace }): ReactNode {
         ? <p>{face.t('noResults')}</p>
         : (
             <div style={styles.grid}>
-              {shown.map(skill => (
-                <SkillCardView
-                  key={`${skill.sourceId}\u0000${skill.name}`}
-                  face={face}
-                  skill={skill}
-                  body={bodies.get(`${skill.sourceId}\u0000${skill.name}`) ?? skill.description}
-                  onEdit={() => {
-                    setNotice(null)
-                    void face.readSkill(skill.name, skill.sourceId).then(value => {
-                      setEditing({
-                        fromName: skill.name, fromSourceId: skill.sourceId,
-                        name: skill.name, body: value.body, sourceId: skill.sourceId,
+              {shown.map(skill => {
+                const editingThis = editing !== undefined &&
+                  editing.fromName === skill.name &&
+                  editing.fromSourceId === skill.sourceId
+                if (editingThis) {
+                  return (
+                    <SkillEditor
+                      key={`${skill.sourceId}\u0000${skill.name}`}
+                      face={face}
+                      sources={sources}
+                      state={editing}
+                      onClose={closeEditor}
+                    />
+                  )
+                }
+                return (
+                  <SkillCardView
+                    key={`${skill.sourceId}\u0000${skill.name}`}
+                    face={face}
+                    skill={skill}
+                    body={bodies.get(`${skill.sourceId}\u0000${skill.name}`) ?? skill.description}
+                    onEdit={() => {
+                      setNotice(null)
+                      void face.readSkill(skill.name, skill.sourceId).then(value => {
+                        setEditing({
+                          fromName: skill.name, fromSourceId: skill.sourceId,
+                          name: skill.name, body: value.body, sourceId: skill.sourceId,
+                        })
                       })
-                    })
-                  }}
-                  onDelete={() => {
-                    if (!window.confirm(face.t('confirmDelete'))) return
-                    void face.deleteSkill(skill.name, skill.sourceId).then(refresh)
-                  }}
-                />
-              ))}
+                    }}
+                    onDelete={() => {
+                      if (!window.confirm(face.t('confirmDelete'))) return
+                      void face.deleteSkill(skill.name, skill.sourceId).then(refresh)
+                    }}
+                  />
+                )
+              })}
             </div>
           )}
     </div>

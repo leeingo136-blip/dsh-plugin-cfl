@@ -1,9 +1,9 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 /**
- * 设置-技能：全部技能一卡一条。可编辑来源的卡片行内编辑（名称/正文/来源下拉），
- * 插件与会话技能只读；顶部搜索按名称/来源/正文过滤（三个勾选框可多选）；
- * 右上「新建」给出可编辑空卡，名称/正文/来源齐全才可保存，冲突由宿主按
- * kebab-case 后缀规则自动重命名。
+ * 设置-技能：全部技能一卡一条。可编辑来源的卡片点「编辑」后原位变为编辑态
+ * （名称/正文/来源下拉），插件与会话技能只读；顶部搜索按名称/来源/正文过滤
+ * （三个勾选框可多选）；右上「新建」在顶部给出可编辑空卡，名称/正文/来源齐全
+ * 才可保存，冲突由宿主按 kebab-case 后缀规则自动重命名。
  */
 import { useEffect, useMemo, useState } from 'react';
 const FILTERS = ['name', 'source', 'body'];
@@ -31,6 +31,12 @@ function SkillsLoaded({ face }) {
         void face.listSources().then(value => setSources(value.sources));
     };
     useEffect(refresh, [face]);
+    const closeEditor = (message, renamed) => {
+        setEditing(undefined);
+        if (message !== undefined)
+            setNotice(renamed === true ? face.t('savedRenamed') : message);
+        refresh();
+    };
     // 正文搜索需要正文：勾选「正文」后批量拉取并缓存（本地文件，量小）。
     useEffect(() => {
         if (!filters.has('body'))
@@ -81,26 +87,29 @@ function SkillsLoaded({ face }) {
                                 fromName: undefined, fromSourceId: undefined,
                                 name: '', body: '', sourceId: sources.find(one => one.editable)?.id ?? '',
                             });
-                        }, children: face.t('create') })] }), notice !== null && _jsx("p", { style: styles.notice, children: notice }), editing !== undefined && (_jsx(SkillEditor, { face: face, sources: sources, state: editing, onClose: (message, renamed) => {
-                    setEditing(undefined);
-                    if (message !== undefined)
-                        setNotice(renamed === true ? face.t('savedRenamed') : message);
-                    refresh();
-                } })), shown.length === 0
+                        }, children: face.t('create') })] }), notice !== null && _jsx("p", { style: styles.notice, children: notice }), editing !== undefined && editing.fromName === undefined && (_jsx(SkillEditor, { face: face, sources: sources, state: editing, onClose: closeEditor })), shown.length === 0
                 ? _jsx("p", { children: face.t('noResults') })
-                : (_jsx("div", { style: styles.grid, children: shown.map(skill => (_jsx(SkillCardView, { face: face, skill: skill, body: bodies.get(`${skill.sourceId}\u0000${skill.name}`) ?? skill.description, onEdit: () => {
-                            setNotice(null);
-                            void face.readSkill(skill.name, skill.sourceId).then(value => {
-                                setEditing({
-                                    fromName: skill.name, fromSourceId: skill.sourceId,
-                                    name: skill.name, body: value.body, sourceId: skill.sourceId,
+                : (_jsx("div", { style: styles.grid, children: shown.map(skill => {
+                        const editingThis = editing !== undefined &&
+                            editing.fromName === skill.name &&
+                            editing.fromSourceId === skill.sourceId;
+                        if (editingThis) {
+                            return (_jsx(SkillEditor, { face: face, sources: sources, state: editing, onClose: closeEditor }, `${skill.sourceId}\u0000${skill.name}`));
+                        }
+                        return (_jsx(SkillCardView, { face: face, skill: skill, body: bodies.get(`${skill.sourceId}\u0000${skill.name}`) ?? skill.description, onEdit: () => {
+                                setNotice(null);
+                                void face.readSkill(skill.name, skill.sourceId).then(value => {
+                                    setEditing({
+                                        fromName: skill.name, fromSourceId: skill.sourceId,
+                                        name: skill.name, body: value.body, sourceId: skill.sourceId,
+                                    });
                                 });
-                            });
-                        }, onDelete: () => {
-                            if (!window.confirm(face.t('confirmDelete')))
-                                return;
-                            void face.deleteSkill(skill.name, skill.sourceId).then(refresh);
-                        } }, `${skill.sourceId}\u0000${skill.name}`))) }))] }));
+                            }, onDelete: () => {
+                                if (!window.confirm(face.t('confirmDelete')))
+                                    return;
+                                void face.deleteSkill(skill.name, skill.sourceId).then(refresh);
+                            } }, `${skill.sourceId}\u0000${skill.name}`));
+                    }) }))] }));
 }
 function SkillCardView(props) {
     const { face, skill, body, onEdit, onDelete } = props;

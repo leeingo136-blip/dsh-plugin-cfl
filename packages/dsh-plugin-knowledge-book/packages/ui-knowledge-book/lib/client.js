@@ -98,10 +98,10 @@ window.__ModuleLoader__.load({
 		//#endregion
 		//#region src/client/SkillsSection.tsx
 		/**
-		* 设置-技能：全部技能一卡一条。可编辑来源的卡片行内编辑（名称/正文/来源下拉），
-		* 插件与会话技能只读；顶部搜索按名称/来源/正文过滤（三个勾选框可多选）；
-		* 右上「新建」给出可编辑空卡，名称/正文/来源齐全才可保存，冲突由宿主按
-		* kebab-case 后缀规则自动重命名。
+		* 设置-技能：全部技能一卡一条。可编辑来源的卡片点「编辑」后原位变为编辑态
+		* （名称/正文/来源下拉），插件与会话技能只读；顶部搜索按名称/来源/正文过滤
+		* （三个勾选框可多选）；右上「新建」在顶部给出可编辑空卡，名称/正文/来源齐全
+		* 才可保存，冲突由宿主按 kebab-case 后缀规则自动重命名。
 		*/
 		const FILTERS = [
 			"name",
@@ -137,6 +137,11 @@ window.__ModuleLoader__.load({
 				face.listSources().then((value) => setSources(value.sources));
 			};
 			(0, react.useEffect)(refresh, [face]);
+			const closeEditor = (message, renamed) => {
+				setEditing(void 0);
+				if (message !== void 0) setNotice(renamed === true ? face.t("savedRenamed") : message);
+				refresh();
+			};
 			(0, react.useEffect)(() => {
 				if (!filters.has("body")) return;
 				for (const skill of skills) {
@@ -227,39 +232,43 @@ window.__ModuleLoader__.load({
 					style: styles$1.notice,
 					children: notice
 				}),
-				editing !== void 0 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(SkillEditor, {
+				editing !== void 0 && editing.fromName === void 0 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(SkillEditor, {
 					face,
 					sources,
 					state: editing,
-					onClose: (message, renamed) => {
-						setEditing(void 0);
-						if (message !== void 0) setNotice(renamed === true ? face.t("savedRenamed") : message);
-						refresh();
-					}
+					onClose: closeEditor
 				}),
 				shown.length === 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", { children: face.t("noResults") }) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 					style: styles$1.grid,
-					children: shown.map((skill) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)(SkillCardView, {
-						face,
-						skill,
-						body: bodies.get(`${skill.sourceId}\u0000${skill.name}`) ?? skill.description,
-						onEdit: () => {
-							setNotice(null);
-							face.readSkill(skill.name, skill.sourceId).then((value) => {
-								setEditing({
-									fromName: skill.name,
-									fromSourceId: skill.sourceId,
-									name: skill.name,
-									body: value.body,
-									sourceId: skill.sourceId
+					children: shown.map((skill) => {
+						if (editing !== void 0 && editing.fromName === skill.name && editing.fromSourceId === skill.sourceId) return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(SkillEditor, {
+							face,
+							sources,
+							state: editing,
+							onClose: closeEditor
+						}, `${skill.sourceId}\u0000${skill.name}`);
+						return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(SkillCardView, {
+							face,
+							skill,
+							body: bodies.get(`${skill.sourceId}\u0000${skill.name}`) ?? skill.description,
+							onEdit: () => {
+								setNotice(null);
+								face.readSkill(skill.name, skill.sourceId).then((value) => {
+									setEditing({
+										fromName: skill.name,
+										fromSourceId: skill.sourceId,
+										name: skill.name,
+										body: value.body,
+										sourceId: skill.sourceId
+									});
 								});
-							});
-						},
-						onDelete: () => {
-							if (!window.confirm(face.t("confirmDelete"))) return;
-							face.deleteSkill(skill.name, skill.sourceId).then(refresh);
-						}
-					}, `${skill.sourceId}\u0000${skill.name}`))
+							},
+							onDelete: () => {
+								if (!window.confirm(face.t("confirmDelete"))) return;
+								face.deleteSkill(skill.name, skill.sourceId).then(refresh);
+							}
+						}, `${skill.sourceId}\u0000${skill.name}`);
+					})
 				})
 			] });
 		}
