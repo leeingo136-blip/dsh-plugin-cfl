@@ -1,5 +1,6 @@
 {
   "name": "deep-seek-harness-plugin",
+  "version": "0.2.1-rc.2",
   "private": true,
   "devDependencies": {
     "lightningcss": "^1.33.0",

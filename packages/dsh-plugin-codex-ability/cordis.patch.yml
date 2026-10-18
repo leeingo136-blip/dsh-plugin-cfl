@@ -168,6 +168,10 @@
                 config:
                   subagentProvider: spawn
                   maxRounds: 64
+          - id: memory-recall-tools
+            name: '@dsh/memory-recall-tools'
+            inject: [tools]
+            config: {}
           - id: tool-ask-user
             name: '@deepseek-ai/dsh-tool-ask-user'
           - id: tool-todo

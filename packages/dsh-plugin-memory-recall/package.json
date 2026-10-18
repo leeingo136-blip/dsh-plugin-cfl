@@ -1,0 +1,12 @@
+{
+  "name": "dsh-plugin-memory-recall",
+  "description": "记忆回想容器：RAG 连接卡片 + 六工具投放（knowledge_*/memory_*/dream）",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
