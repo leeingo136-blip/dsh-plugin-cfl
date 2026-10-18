@@ -102,7 +102,8 @@ window.__ModuleLoader__.load({
 		//#region src/client/SkillsSection.tsx
 		/**
 		* 设置-技能：全部技能一卡一条。可编辑来源的卡片点「编辑」后原位变为编辑态
-		* （名称/正文/来源下拉），插件与会话技能只读；顶部搜索按名称/来源/正文过滤
+		* （名称/来源下拉/简介/正文），操作行在编辑态末行：删除靠左，保存/取消靠右，
+		* 新建态无删除；插件与会话技能只读；顶部搜索按名称/来源/正文过滤
 		* （三个勾选框可多选）；右上「新建」在顶部给出可编辑空卡，名称/正文/来源齐全
 		* 才可保存，冲突由宿主按 kebab-case 后缀规则自动重命名。
 		*/
@@ -268,10 +269,6 @@ window.__ModuleLoader__.load({
 										sourceId: skill.sourceId
 									});
 								});
-							},
-							onDelete: () => {
-								if (!window.confirm(face.t("confirmDelete"))) return;
-								face.deleteSkill(skill.name, skill.sourceId).then(refresh);
 							}
 						}, `${skill.sourceId}\u0000${skill.name}`);
 					})
@@ -279,7 +276,7 @@ window.__ModuleLoader__.load({
 			] });
 		}
 		function SkillCardView(props) {
-			const { face, skill, body, onEdit, onDelete } = props;
+			const { face, skill, body, onEdit } = props;
 			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 				style: styles$1.card,
 				children: [
@@ -295,18 +292,12 @@ window.__ModuleLoader__.load({
 								label: skill.sourceLabel,
 								t: face.t
 							}),
-							skill.editable && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+							skill.editable && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 								variant: "outline",
 								size: "sm",
 								onClick: onEdit,
 								children: face.t("edit")
-							}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
-								variant: "outline",
-								size: "sm",
-								style: styles$1.dangerButton,
-								onClick: onDelete,
-								children: face.t("delete")
-							})] })
+							})
 						]
 					}),
 					skill.description !== "" && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
@@ -338,29 +329,74 @@ window.__ModuleLoader__.load({
 				children: [
 					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						style: styles$1.cardHead,
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
+							style: {
+								...styles$1.input,
+								flex: 1
+							},
+							placeholder: face.t("namePlaceholder"),
+							value: name,
+							onChange: (event) => {
+								setName(event.target.value);
+							}
+						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("select", {
+							style: styles$1.input,
+							value: sourceId,
+							onChange: (event) => {
+								setSourceId(event.target.value);
+							},
+							children: sources.filter((one) => one.editable).map((one) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("option", {
+								value: one.id,
+								children: one.label
+							}, one.id))
+						})]
+					}),
+					error !== null && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("p", {
+						style: styles$1.error,
 						children: [
-							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
-								style: {
-									...styles$1.input,
-									flex: 1
+							face.t("saveFailed"),
+							" — ",
+							error
+						]
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
+						style: styles$1.input,
+						placeholder: face.t("descPlaceholder"),
+						value: description,
+						onChange: (event) => {
+							setDescription(event.target.value);
+						}
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("textarea", {
+						style: styles$1.textarea,
+						placeholder: face.t("bodyPlaceholder"),
+						value: body,
+						onChange: (event) => {
+							setBody(event.target.value);
+						},
+						rows: 12
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+						style: styles$1.editorFooter,
+						children: [
+							state.fromName !== void 0 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+								variant: "outline",
+								size: "sm",
+								style: styles$1.dangerButton,
+								disabled: busy,
+								onClick: () => {
+									if (!window.confirm(face.t("confirmDelete"))) return;
+									setBusy(true);
+									face.deleteSkill(state.fromName, state.fromSourceId).then(() => {
+										onClose(void 0);
+									}, (deleteError) => {
+										setBusy(false);
+										setError(deleteError instanceof Error ? deleteError.message : String(deleteError));
+									});
 								},
-								placeholder: face.t("namePlaceholder"),
-								value: name,
-								onChange: (event) => {
-									setName(event.target.value);
-								}
+								children: face.t("delete")
 							}),
-							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("select", {
-								style: styles$1.input,
-								value: sourceId,
-								onChange: (event) => {
-									setSourceId(event.target.value);
-								},
-								children: sources.filter((one) => one.editable).map((one) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("option", {
-									value: one.id,
-									children: one.label
-								}, one.id))
-							}),
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { style: { flex: 1 } }),
 							/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 								variant: "primary",
 								size: "sm",
@@ -394,31 +430,6 @@ window.__ModuleLoader__.load({
 								children: face.t("cancel")
 							})
 						]
-					}),
-					error !== null && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("p", {
-						style: styles$1.error,
-						children: [
-							face.t("saveFailed"),
-							" — ",
-							error
-						]
-					}),
-					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
-						style: styles$1.input,
-						placeholder: face.t("descPlaceholder"),
-						value: description,
-						onChange: (event) => {
-							setDescription(event.target.value);
-						}
-					}),
-					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("textarea", {
-						style: styles$1.textarea,
-						placeholder: face.t("bodyPlaceholder"),
-						value: body,
-						onChange: (event) => {
-							setBody(event.target.value);
-						},
-						rows: 12
 					})
 				]
 			});
@@ -499,6 +510,11 @@ window.__ModuleLoader__.load({
 				marginBottom: 12,
 				display: "flex",
 				flexDirection: "column",
+				gap: 8
+			},
+			editorFooter: {
+				display: "flex",
+				alignItems: "center",
 				gap: 8
 			},
 			input: {

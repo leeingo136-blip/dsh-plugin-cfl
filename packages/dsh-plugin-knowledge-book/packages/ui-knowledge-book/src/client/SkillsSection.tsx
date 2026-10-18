@@ -1,6 +1,7 @@
 /**
  * 设置-技能：全部技能一卡一条。可编辑来源的卡片点「编辑」后原位变为编辑态
- * （名称/正文/来源下拉），插件与会话技能只读；顶部搜索按名称/来源/正文过滤
+ * （名称/来源下拉/简介/正文），操作行在编辑态末行：删除靠左，保存/取消靠右，
+ * 新建态无删除；插件与会话技能只读；顶部搜索按名称/来源/正文过滤
  * （三个勾选框可多选）；右上「新建」在顶部给出可编辑空卡，名称/正文/来源齐全
  * 才可保存，冲突由宿主按 kebab-case 后缀规则自动重命名。
  */
@@ -205,10 +206,6 @@ function SkillsLoaded({ face }: { face: SkillsFace }): ReactNode {
                         })
                       })
                     }}
-                    onDelete={() => {
-                      if (!window.confirm(face.t('confirmDelete'))) return
-                      void face.deleteSkill(skill.name, skill.sourceId).then(refresh)
-                    }}
                   />
                 )
               })}
@@ -232,9 +229,8 @@ function SkillCardView(props: {
   skill: SkillCard
   body: string
   onEdit(): void
-  onDelete(): void
 }): ReactNode {
-  const { face, skill, body, onEdit, onDelete } = props
+  const { face, skill, body, onEdit } = props
   return (
     <div style={styles.card}>
       <div style={styles.cardHead}>
@@ -242,10 +238,7 @@ function SkillCardView(props: {
         <span style={{ flex: 1 }} />
         <SourceTag label={skill.sourceLabel} t={face.t} />
         {skill.editable && (
-          <>
-            <Button variant='outline' size='sm' onClick={onEdit}>{face.t('edit')}</Button>
-            <Button variant='outline' size='sm' style={styles.dangerButton} onClick={onDelete}>{face.t('delete')}</Button>
-          </>
+          <Button variant='outline' size='sm' onClick={onEdit}>{face.t('edit')}</Button>
         )}
       </div>
       {skill.description !== '' && <p style={styles.cardDescription}>{skill.description}</p>}
@@ -291,6 +284,44 @@ function SkillEditor(props: {
             <option key={one.id} value={one.id}>{one.label}</option>
           ))}
         </select>
+      </div>
+      {error !== null && <p style={styles.error}>{face.t('saveFailed')}{' — '}{error}</p>}
+      <input
+        style={styles.input}
+        placeholder={face.t('descPlaceholder')}
+        value={description}
+        onChange={event => { setDescription(event.target.value) }}
+      />
+      <textarea
+        style={styles.textarea}
+        placeholder={face.t('bodyPlaceholder')}
+        value={body}
+        onChange={event => { setBody(event.target.value) }}
+        rows={12}
+      />
+      <div style={styles.editorFooter}>
+        {state.fromName !== undefined && (
+          <Button
+            variant='outline'
+            size='sm'
+            style={styles.dangerButton}
+            disabled={busy}
+            onClick={() => {
+              if (!window.confirm(face.t('confirmDelete'))) return
+              setBusy(true)
+              void face.deleteSkill(state.fromName!, state.fromSourceId!).then(
+                () => { onClose(undefined) },
+                (deleteError: unknown) => {
+                  setBusy(false)
+                  setError(deleteError instanceof Error ? deleteError.message : String(deleteError))
+                },
+              )
+            }}
+          >
+            {face.t('delete')}
+          </Button>
+        )}
+        <span style={{ flex: 1 }} />
         <Button
           variant='primary'
           size='sm'
@@ -318,20 +349,6 @@ function SkillEditor(props: {
         </Button>
         <Button variant='outline' size='sm' onClick={() => { onClose(undefined) }}>{face.t('cancel')}</Button>
       </div>
-      {error !== null && <p style={styles.error}>{face.t('saveFailed')}{' — '}{error}</p>}
-      <input
-        style={styles.input}
-        placeholder={face.t('descPlaceholder')}
-        value={description}
-        onChange={event => { setDescription(event.target.value) }}
-      />
-      <textarea
-        style={styles.textarea}
-        placeholder={face.t('bodyPlaceholder')}
-        value={body}
-        onChange={event => { setBody(event.target.value) }}
-        rows={12}
-      />
     </div>
   )
 }
@@ -358,6 +375,7 @@ const styles = {
     border: '1px solid var(--dsh-border, #ccc)', borderRadius: 10,
     padding: '10px 14px', marginBottom: 12, display: 'flex', flexDirection: 'column' as const, gap: 8,
   },
+  editorFooter: { display: 'flex', alignItems: 'center', gap: 8 },
   input: { padding: '6px 10px', borderRadius: 8, border: '1px solid var(--dsh-border, #ccc)' },
   textarea: {
     width: '100%', boxSizing: 'border-box' as const, fontFamily: 'monospace', fontSize: 13,
