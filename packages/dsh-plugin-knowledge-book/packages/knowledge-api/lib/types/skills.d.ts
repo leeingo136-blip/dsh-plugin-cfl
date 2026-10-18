@@ -37,10 +37,15 @@ export declare function sanitizeSkillName(raw: string): string;
 export declare function resolveConflict(root: string, name: string, form: 'dir' | 'flat'): string;
 /** The workspace registry carries every registered workspace root. */
 export declare function skillSources(workspaces: WorkspaceLike): SkillSource[];
-/** Full listing: file-backed entries from the roots + runtime registrations. */
-export declare function listSkills(sources: SkillSource[], runtimeSkills: Array<{
+/** Full listing: file-backed entries from the roots + registry entries.
+ *  Registry entries split by provider: the reserved "runtime" provider is the
+ *  session layer; any other provider whose source is "bundled" is a
+ *  plugin-carried skill (read-only, labeled 插件：<provider>). File-backed
+ *  registry entries (project/user roots) are already covered by the scan. */
+export declare function listSkills(sources: SkillSource[], registrySkills: Array<{
     name: string;
     description: string;
+    provider?: string;
     source?: string;
 }>): SkillEntry[];
 /** Body of one skill: file-backed entries read from disk, runtime via the registry. */

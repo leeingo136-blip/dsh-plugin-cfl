@@ -85,8 +85,37 @@ export class KnowledgeController extends TypertRemoteService {
     return skillSources(this.workspaces())
   }
 
-  private entryFor(name: string, sourceId: string): SkillEntry {
-    const entry = listSkills(this.sources(), []).find(one => one.name === name && one.sourceId === sourceId)
+  /** Registry summaries (all providers), or empty when the stack is absent. */
+  private async registrySkills(): Promise<Array<{
+    name: string; description: string; provider?: string; source?: string
+  }>> {
+    const skills = this.svc<SkillsRegistry>('skills')
+    if (skills === undefined) return []
+    try {
+      const all = await skills.list({})
+      return all.map(one => {
+        const raw = one as {
+          name: string; description: string; provider?: unknown; source?: unknown
+        }
+        return {
+          name: raw.name,
+          description: raw.description,
+          provider: typeof raw.provider === 'string' && raw.provider !== '' ? raw.provider : 'runtime',
+          ...(typeof raw.source === 'string' && raw.source !== '' ? { source: raw.source } : {}),
+        }
+      })
+    } catch {
+      // Registry unavailable (no skill stack mounted): file listing still works.
+      return []
+    }
+  }
+
+  private async fullList(): Promise<SkillEntry[]> {
+    return listSkills(this.sources(), await this.registrySkills())
+  }
+
+  private async entryFor(name: string, sourceId: string): Promise<SkillEntry> {
+    const entry = (await this.fullList()).find(one => one.name === name && one.sourceId === sourceId)
     if (entry === undefined) throw new RemoteError('knowledge/skill-unknown', `技能不存在（${name}）`, {})
     return entry
   }
@@ -97,38 +126,17 @@ export class KnowledgeController extends TypertRemoteService {
     return asJson({ sources: this.sources() })
   }
 
-  /** Every skill across all sources (file-backed + runtime). */
+  /** Every skill across all sources (file-backed + registry: runtime/plugin). */
   @Remote
   async skillList(): Promise<JsonValue> {
-    const runtimeSkills: Array<{ name: string; description: string; source?: string }> = []
-    const skills = this.svc<SkillsRegistry>('skills')
-    if (skills !== undefined) {
-      try {
-        const all = await skills.list({})
-        for (const one of all) {
-          // Runtime skills carry the reserved provider "runtime"; their `source`
-          // string (when present) is the registering side's session identity.
-          const raw = one as { name: string; description: string; source?: unknown; provider?: unknown }
-          if (raw.provider === 'runtime') {
-            runtimeSkills.push({
-              name: raw.name,
-              description: raw.description,
-              ...(typeof raw.source === 'string' && raw.source !== '' ? { source: raw.source } : {}),
-            })
-          }
-        }
-      } catch {
-        // Registry unavailable (no skill stack mounted): file listing still works.
-      }
-    }
-    return asJson({ skills: listSkills(this.sources(), runtimeSkills) })
+    return asJson({ skills: await this.fullList() })
   }
 
-  /** Body of one skill (file-backed read from disk; runtime via the registry). */
+  /** Body of one skill (file-backed read from disk; runtime/plugin via the registry). */
   @Remote
   async skillRead(input: JsonValue): Promise<JsonValue> {
     const { name, sourceId } = input as { name: string; sourceId: string }
-    const entry = this.entryFor(name, sourceId)
+    const entry = await this.entryFor(name, sourceId)
     let body = readSkillBody(entry)
     if (body === '' && entry.form === 'runtime') {
       const skills = this.svc<SkillsRegistry>('skills')

@@ -178,29 +178,45 @@ export function skillSources(workspaces: WorkspaceLike): SkillSource[] {
   return sources
 }
 
-/** Full listing: file-backed entries from the roots + runtime registrations. */
+/** Full listing: file-backed entries from the roots + registry entries.
+ *  Registry entries split by provider: the reserved "runtime" provider is the
+ *  session layer; any other provider whose source is "bundled" is a
+ *  plugin-carried skill (read-only, labeled 插件：<provider>). File-backed
+ *  registry entries (project/user roots) are already covered by the scan. */
 export function listSkills(
   sources: SkillSource[],
-  runtimeSkills: Array<{ name: string; description: string; source?: string }>,
+  registrySkills: Array<{ name: string; description: string; provider?: string; source?: string }>,
 ): SkillEntry[] {
   const entries: SkillEntry[] = []
   for (const source of sources) {
     if (source.kind === 'runtime') continue
     entries.push(...scanRoot(source))
   }
-  const fileNames = new Set(entries.map(one => one.name))
-  for (const skill of runtimeSkills) {
-    if (fileNames.has(skill.name)) continue
-    entries.push({
-      name: skill.name,
-      description: skill.description,
-      sourceId: 'runtime',
-      sourceLabel: skill.source !== undefined && skill.source !== '' && skill.source !== 'runtime'
-        ? `会话：${skill.source}`
-        : '会话',
-      editable: false,
-      form: 'runtime',
-    })
+  const seen = new Set(entries.map(one => one.name))
+  for (const skill of registrySkills) {
+    if (seen.has(skill.name)) continue
+    seen.add(skill.name)
+    if (skill.provider === 'runtime' || skill.provider === undefined) {
+      entries.push({
+        name: skill.name,
+        description: skill.description,
+        sourceId: 'runtime',
+        sourceLabel: skill.source !== undefined && skill.source !== '' && skill.source !== 'runtime'
+          ? `会话：${skill.source}`
+          : '会话',
+        editable: false,
+        form: 'runtime',
+      })
+    } else if (skill.source === 'bundled') {
+      entries.push({
+        name: skill.name,
+        description: skill.description,
+        sourceId: 'plugin',
+        sourceLabel: `插件：${skill.provider}`,
+        editable: false,
+        form: 'runtime',
+      })
+    }
   }
   return entries.sort((left, right) =>
     left.sourceLabel.localeCompare(right.sourceLabel) || left.name.localeCompare(right.name))

@@ -34,12 +34,15 @@ export declare class KnowledgeController extends TypertRemoteService {
     private store;
     private workspaces;
     private sources;
+    /** Registry summaries (all providers), or empty when the stack is absent. */
+    private registrySkills;
+    private fullList;
     private entryFor;
     /** Every manageable source, for the source dropdowns. */
     skillSources(): Promise<JsonValue>;
-    /** Every skill across all sources (file-backed + runtime). */
+    /** Every skill across all sources (file-backed + registry: runtime/plugin). */
     skillList(): Promise<JsonValue>;
-    /** Body of one skill (file-backed read from disk; runtime via the registry). */
+    /** Body of one skill (file-backed read from disk; runtime/plugin via the registry). */
     skillRead(input: JsonValue): Promise<JsonValue>;
     /**
      * Create or update one skill; moving between editable sources rides the
