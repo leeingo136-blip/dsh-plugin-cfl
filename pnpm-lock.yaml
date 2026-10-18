@@ -202,7 +202,7 @@ importers:
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-settings':
         specifier: 0.2.0-rc.2
@@ -244,7 +244,7 @@ importers:
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
       '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-llm-pi-ai':
         specifier: 0.2.0-rc.2
@@ -303,10 +303,10 @@ importers:
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(b872d4d836bb263e5b3a50782f98c977)
       '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-tools':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(c6e351a6a6cfd1c2a664558bffcd410d)
     devDependencies:
       '@types/node':
@@ -322,7 +322,7 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.9)
       '@deepseek-ai/dsh-system-prompt':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))
       '@deepseek-ai/schemastery':
         specifier: ~3.18.4
@@ -346,7 +346,7 @@ importers:
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
       '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-llm-pi-ai':
         specifier: 0.2.0-rc.2
@@ -405,10 +405,10 @@ importers:
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(b872d4d836bb263e5b3a50782f98c977)
       '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-tools':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(c6e351a6a6cfd1c2a664558bffcd410d)
     devDependencies:
       '@types/node':
@@ -424,7 +424,7 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.9)
       '@deepseek-ai/dsh-system-prompt':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))
       '@deepseek-ai/schemastery':
         specifier: ~3.18.4
@@ -452,7 +452,7 @@ importers:
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-llm-deepseek':
         specifier: 0.2.0-rc.2
@@ -483,7 +483,7 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.9)
       '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-settings':
         specifier: 0.2.0-rc.2
@@ -571,7 +571,7 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.9)
       '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-util-values':
         specifier: 0.2.0-rc.2
@@ -604,7 +604,7 @@ importers:
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
       '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-llm-pi-ai':
         specifier: 0.2.0-rc.2
@@ -666,10 +666,10 @@ importers:
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(b872d4d836bb263e5b3a50782f98c977)
       '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-tools':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(c6e351a6a6cfd1c2a664558bffcd410d)
     devDependencies:
       '@types/node':
@@ -685,7 +685,7 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.9)
       '@deepseek-ai/dsh-system-prompt':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))
       '@deepseek-ai/schemastery':
         specifier: ~3.18.4
@@ -760,7 +760,7 @@ importers:
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
       '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-llm-pi-ai':
         specifier: 0.2.0-rc.2
@@ -815,7 +815,7 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.9)
       '@deepseek-ai/dsh-system-prompt':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))
       '@deepseek-ai/schemastery':
         specifier: ~3.18.4
@@ -830,7 +830,7 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.9)
       '@deepseek-ai/dsh-system-prompt':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))
       '@deepseek-ai/schemastery':
         specifier: ~3.18.4
@@ -845,10 +845,10 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.9)
       '@deepseek-ai/dsh-llm':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-tools':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(c6e351a6a6cfd1c2a664558bffcd410d)
       '@deepseek-ai/schemastery':
         specifier: ~3.18.4
@@ -863,7 +863,7 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5(@deepseek-ai/cordis@4.0.4)(node-addon-require-builtin@0.1.9)
       '@deepseek-ai/dsh-system-prompt':
-        specifier: 0.2.0-rc.2 || 0.2.1-rc.1
+        specifier: 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))
       '@deepseek-ai/schemastery':
         specifier: ~3.18.4

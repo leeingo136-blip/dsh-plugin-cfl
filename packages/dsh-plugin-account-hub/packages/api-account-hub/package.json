@@ -47,7 +47,7 @@
   "peerDependencies": {
     "@deepseek-ai/cordis": "~4.0.4",
     "@deepseek-ai/dsh-settings": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-typert-protocol": "0.2.0-rc.2 || 0.2.1-rc.2",
     "@deepseek-ai/dsh-util-values": "workspace:*",
     "zod": "^4.4.3"
   },
