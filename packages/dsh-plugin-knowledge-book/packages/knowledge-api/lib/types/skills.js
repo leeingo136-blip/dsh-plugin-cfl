@@ -48,12 +48,14 @@ function descriptionOf(body) {
 }
 /** Render one skill file: official frontmatter (name + description) + body.
  *  A body that already carries frontmatter is unwrapped; its description wins.
- *  An explicit `description` (the card's 简介 field) overrides both. */
+ *  An explicit `description` (the card's 简介 field) overrides both.
+ *  Both scalars are quoted: a bare numeric name (`name: 2`) would parse as a
+ *  YAML number and the official validator drops the whole entry. */
 function renderSkillFile(name, body, description) {
     const parsed = parseFrontmatter(body);
     const text = (description?.trim() || parsed.description || descriptionOf(parsed.body))
         .replaceAll('"', "'");
-    return `---\nname: ${name}\ndescription: "${text}"\n---\n\n${parsed.body.trimStart()}`;
+    return `---\nname: "${name}"\ndescription: "${text}"\n---\n\n${parsed.body.trimStart()}`;
 }
 /** Kebab-case any user-typed name; empty (e.g. pure CJK) yields a dated stem. */
 export function sanitizeSkillName(raw) {
