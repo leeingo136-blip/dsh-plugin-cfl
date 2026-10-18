@@ -58,6 +58,8 @@ export interface SaveRequest {
     targetSourceId: string;
     name: string;
     body: string;
+    /** Card 简介; empty/absent derives from the body's first meaningful line. */
+    description?: string;
 }
 export interface SaveResult {
     name: string;

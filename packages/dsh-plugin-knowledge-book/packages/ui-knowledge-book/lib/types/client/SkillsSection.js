@@ -85,7 +85,8 @@ function SkillsLoaded({ face }) {
                             setNotice(null);
                             setEditing({
                                 fromName: undefined, fromSourceId: undefined,
-                                name: '', body: '', sourceId: sources.find(one => one.editable)?.id ?? '',
+                                name: '', description: '', body: '',
+                                sourceId: sources.find(one => one.editable)?.id ?? '',
                             });
                         }, children: face.t('create') })] }), notice !== null && _jsx("p", { style: styles.notice, children: notice }), editing !== undefined && editing.fromName === undefined && (_jsx(SkillEditor, { face: face, sources: sources, state: editing, onClose: closeEditor })), shown.length === 0
                 ? _jsx("p", { children: face.t('noResults') })
@@ -101,7 +102,8 @@ function SkillsLoaded({ face }) {
                                 void face.readSkill(skill.name, skill.sourceId).then(value => {
                                     setEditing({
                                         fromName: skill.name, fromSourceId: skill.sourceId,
-                                        name: skill.name, body: value.body, sourceId: skill.sourceId,
+                                        name: skill.name, description: skill.description,
+                                        body: value.body, sourceId: skill.sourceId,
                                     });
                                 });
                             }, onDelete: () => {
@@ -122,6 +124,7 @@ function clip(text, maxLines) {
 function SkillEditor(props) {
     const { face, sources, state, onClose } = props;
     const [name, setName] = useState(state.fromName ?? '');
+    const [description, setDescription] = useState(state.description);
     const [body, setBody] = useState(state.body);
     const [sourceId, setSourceId] = useState(state.sourceId);
     const [busy, setBusy] = useState(false);
@@ -135,6 +138,7 @@ function SkillEditor(props) {
                                 fromSourceId: state.fromSourceId,
                                 targetSourceId: sourceId,
                                 name: name.trim(),
+                                description: description.trim(),
                                 body,
                             }).then(result => {
                                 setBusy(false);
@@ -143,7 +147,7 @@ function SkillEditor(props) {
                                 setBusy(false);
                                 setError(saveError instanceof Error ? saveError.message : String(saveError));
                             });
-                        }, children: face.t('save') }), _jsx("button", { style: styles.button, onClick: () => { onClose(undefined); }, children: face.t('cancel') })] }), error !== null && _jsxs("p", { style: styles.error, children: [face.t('saveFailed'), ' — ', error] }), _jsx("textarea", { style: styles.textarea, placeholder: face.t('bodyPlaceholder'), value: body, onChange: event => { setBody(event.target.value); }, rows: 12 })] }));
+                        }, children: face.t('save') }), _jsx("button", { style: styles.button, onClick: () => { onClose(undefined); }, children: face.t('cancel') })] }), error !== null && _jsxs("p", { style: styles.error, children: [face.t('saveFailed'), ' — ', error] }), _jsx("input", { style: styles.input, placeholder: face.t('descPlaceholder'), value: description, onChange: event => { setDescription(event.target.value); } }), _jsx("textarea", { style: styles.textarea, placeholder: face.t('bodyPlaceholder'), value: body, onChange: event => { setBody(event.target.value); }, rows: 12 })] }));
 }
 const styles = {
     toolbar: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 },

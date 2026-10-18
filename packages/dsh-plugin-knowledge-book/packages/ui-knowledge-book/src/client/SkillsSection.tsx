@@ -35,6 +35,7 @@ export interface SkillsFace {
     fromSourceId?: string
     targetSourceId: string
     name: string
+    description?: string
     body: string
   }): Promise<{ name: string; renamed: boolean; created: boolean }>
   deleteSkill(name: string, sourceId: string): Promise<void>
@@ -150,7 +151,8 @@ function SkillsLoaded({ face }: { face: SkillsFace }): ReactNode {
             setNotice(null)
             setEditing({
               fromName: undefined, fromSourceId: undefined,
-              name: '', body: '', sourceId: sources.find(one => one.editable)?.id ?? '',
+              name: '', description: '', body: '',
+              sourceId: sources.find(one => one.editable)?.id ?? '',
             })
           }}
         >
@@ -199,7 +201,8 @@ function SkillsLoaded({ face }: { face: SkillsFace }): ReactNode {
                       void face.readSkill(skill.name, skill.sourceId).then(value => {
                         setEditing({
                           fromName: skill.name, fromSourceId: skill.sourceId,
-                          name: skill.name, body: value.body, sourceId: skill.sourceId,
+                          name: skill.name, description: skill.description,
+                          body: value.body, sourceId: skill.sourceId,
                         })
                       })
                     }}
@@ -220,6 +223,7 @@ interface EditState {
   fromName: string | undefined
   fromSourceId: string | undefined
   name: string
+  description: string
   body: string
   sourceId: string
 }
@@ -264,6 +268,7 @@ function SkillEditor(props: {
 }): ReactNode {
   const { face, sources, state, onClose } = props
   const [name, setName] = useState(state.fromName ?? '')
+  const [description, setDescription] = useState(state.description)
   const [body, setBody] = useState(state.body)
   const [sourceId, setSourceId] = useState(state.sourceId)
   const [busy, setBusy] = useState(false)
@@ -298,6 +303,7 @@ function SkillEditor(props: {
               fromSourceId: state.fromSourceId,
               targetSourceId: sourceId,
               name: name.trim(),
+              description: description.trim(),
               body,
             }).then(result => {
               setBusy(false)
@@ -313,6 +319,12 @@ function SkillEditor(props: {
         <button style={styles.button} onClick={() => { onClose(undefined) }}>{face.t('cancel')}</button>
       </div>
       {error !== null && <p style={styles.error}>{face.t('saveFailed')}{' — '}{error}</p>}
+      <input
+        style={styles.input}
+        placeholder={face.t('descPlaceholder')}
+        value={description}
+        onChange={event => { setDescription(event.target.value) }}
+      />
       <textarea
         style={styles.textarea}
         placeholder={face.t('bodyPlaceholder')}

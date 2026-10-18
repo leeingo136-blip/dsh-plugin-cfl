@@ -47,10 +47,12 @@ function descriptionOf(body) {
     return text.length > 200 ? `${text.slice(0, 197)}…` : text;
 }
 /** Render one skill file: official frontmatter (name + description) + body.
- *  A body that already carries frontmatter is unwrapped; its description wins. */
-function renderSkillFile(name, body) {
+ *  A body that already carries frontmatter is unwrapped; its description wins.
+ *  An explicit `description` (the card's 简介 field) overrides both. */
+function renderSkillFile(name, body, description) {
     const parsed = parseFrontmatter(body);
-    const text = (parsed.description ?? descriptionOf(parsed.body)).replaceAll('"', "'");
+    const text = (description?.trim() || parsed.description || descriptionOf(parsed.body))
+        .replaceAll('"', "'");
     return `---\nname: ${name}\ndescription: "${text}"\n---\n\n${parsed.body.trimStart()}`;
 }
 /** Kebab-case any user-typed name; empty (e.g. pure CJK) yields a dated stem. */
@@ -224,7 +226,7 @@ export function saveSkill(sources, request) {
         finalName = resolveConflict(target.dir, safeName, 'dir');
         renamed = finalName !== safeName;
     }
-    const content = renderSkillFile(finalName, request.body);
+    const content = renderSkillFile(finalName, request.body, request.description);
     mkdirSync(target.dir, { recursive: true });
     const newPath = join(target.dir, finalName, 'SKILL.md');
     const oldDirForm = request.fromName !== undefined && request.fromSourceId !== undefined

@@ -31,6 +31,7 @@ export interface SkillsFace {
         fromSourceId?: string;
         targetSourceId: string;
         name: string;
+        description?: string;
         body: string;
     }): Promise<{
         name: string;

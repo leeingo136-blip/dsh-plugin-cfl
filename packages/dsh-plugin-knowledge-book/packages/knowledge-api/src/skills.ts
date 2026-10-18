@@ -76,10 +76,12 @@ function descriptionOf(body: string): string {
 }
 
 /** Render one skill file: official frontmatter (name + description) + body.
- *  A body that already carries frontmatter is unwrapped; its description wins. */
-function renderSkillFile(name: string, body: string): string {
+ *  A body that already carries frontmatter is unwrapped; its description wins.
+ *  An explicit `description` (the card's 简介 field) overrides both. */
+function renderSkillFile(name: string, body: string, description?: string): string {
   const parsed = parseFrontmatter(body)
-  const text = (parsed.description ?? descriptionOf(parsed.body)).replaceAll('"', "'")
+  const text = (description?.trim() || parsed.description || descriptionOf(parsed.body))
+    .replaceAll('"', "'")
   return `---\nname: ${name}\ndescription: "${text}"\n---\n\n${parsed.body.trimStart()}`
 }
 
@@ -238,6 +240,8 @@ export interface SaveRequest {
   targetSourceId: string
   name: string
   body: string
+  /** Card 简介; empty/absent derives from the body's first meaningful line. */
+  description?: string
 }
 
 export interface SaveResult {
@@ -271,7 +275,7 @@ export function saveSkill(sources: SkillSource[], request: SaveRequest): SaveRes
     finalName = resolveConflict(target.dir, safeName, 'dir')
     renamed = finalName !== safeName
   }
-  const content = renderSkillFile(finalName, request.body)
+  const content = renderSkillFile(finalName, request.body, request.description)
   mkdirSync(target.dir, { recursive: true })
   const newPath = join(target.dir, finalName, 'SKILL.md')
   const oldDirForm = request.fromName !== undefined && request.fromSourceId !== undefined

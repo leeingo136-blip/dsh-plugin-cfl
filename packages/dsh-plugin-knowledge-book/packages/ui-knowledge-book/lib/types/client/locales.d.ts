@@ -24,6 +24,7 @@ export interface KnowledgeKey {
     saved: string;
     noResults: string;
     namePlaceholder: string;
+    descPlaceholder: string;
     bodyPlaceholder: string;
     pickSource: string;
     ragCreateTitle: string;

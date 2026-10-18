@@ -32,6 +32,7 @@ window.__ModuleLoader__.load({
 			saved: "已保存",
 			noResults: "没有匹配的技能",
 			namePlaceholder: "技能名称（kebab-case）",
+			descPlaceholder: "简介（可选，留空取正文首行）",
 			bodyPlaceholder: "技能正文（Markdown 指令）",
 			pickSource: "选择来源",
 			ragCreateTitle: "新建知识库",
@@ -76,6 +77,7 @@ window.__ModuleLoader__.load({
 			saved: "Saved",
 			noResults: "No matching skills",
 			namePlaceholder: "Skill name (kebab-case)",
+			descPlaceholder: "Description (optional; falls back to first body line)",
 			bodyPlaceholder: "Skill body (Markdown instructions)",
 			pickSource: "Pick a source",
 			ragCreateTitle: "New knowledge base",
@@ -220,6 +222,7 @@ window.__ModuleLoader__.load({
 									fromName: void 0,
 									fromSourceId: void 0,
 									name: "",
+									description: "",
 									body: "",
 									sourceId: sources.find((one) => one.editable)?.id ?? ""
 								});
@@ -258,6 +261,7 @@ window.__ModuleLoader__.load({
 										fromName: skill.name,
 										fromSourceId: skill.sourceId,
 										name: skill.name,
+										description: skill.description,
 										body: value.body,
 										sourceId: skill.sourceId
 									});
@@ -318,6 +322,7 @@ window.__ModuleLoader__.load({
 		function SkillEditor(props) {
 			const { face, sources, state, onClose } = props;
 			const [name, setName] = (0, react.useState)(state.fromName ?? "");
+			const [description, setDescription] = (0, react.useState)(state.description);
 			const [body, setBody] = (0, react.useState)(state.body);
 			const [sourceId, setSourceId] = (0, react.useState)(state.sourceId);
 			const [busy, setBusy] = (0, react.useState)(false);
@@ -365,6 +370,7 @@ window.__ModuleLoader__.load({
 										fromSourceId: state.fromSourceId,
 										targetSourceId: sourceId,
 										name: name.trim(),
+										description: description.trim(),
 										body
 									}).then((result) => {
 										setBusy(false);
@@ -392,6 +398,14 @@ window.__ModuleLoader__.load({
 							" — ",
 							error
 						]
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
+						style: styles$1.input,
+						placeholder: face.t("descPlaceholder"),
+						value: description,
+						onChange: (event) => {
+							setDescription(event.target.value);
+						}
 					}),
 					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("textarea", {
 						style: styles$1.textarea,

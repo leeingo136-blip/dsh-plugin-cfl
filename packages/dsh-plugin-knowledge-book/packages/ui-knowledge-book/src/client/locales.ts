@@ -24,6 +24,7 @@ export interface KnowledgeKey {
   saved: string
   noResults: string
   namePlaceholder: string
+  descPlaceholder: string
   bodyPlaceholder: string
   pickSource: string
 
@@ -70,6 +71,7 @@ export const zh: KnowledgeKey = {
   saved: '已保存',
   noResults: '没有匹配的技能',
   namePlaceholder: '技能名称（kebab-case）',
+  descPlaceholder: '简介（可选，留空取正文首行）',
   bodyPlaceholder: '技能正文（Markdown 指令）',
   pickSource: '选择来源',
 
@@ -116,6 +118,7 @@ export const en: KnowledgeKey = {
   saved: 'Saved',
   noResults: 'No matching skills',
   namePlaceholder: 'Skill name (kebab-case)',
+  descPlaceholder: 'Description (optional; falls back to first body line)',
   bodyPlaceholder: 'Skill body (Markdown instructions)',
   pickSource: 'Pick a source',
 
