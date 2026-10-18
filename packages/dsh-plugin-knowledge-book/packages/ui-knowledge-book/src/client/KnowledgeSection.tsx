@@ -117,7 +117,7 @@ function DatabaseCard(props: { face: RagFace; database: RagDatabase; onChange():
           {database.model !== '' && <> · {face.t('ragModel')} {database.model}</>}
         </span>
         <Button
-          variant='ghost'
+          variant='outline'
           size='sm'
           style={styles.dangerButton}
           onClick={() => {
@@ -158,7 +158,7 @@ function DatabaseCard(props: { face: RagFace; database: RagDatabase; onChange():
           />
         </label>
         <Button
-          variant='ghost'
+          variant='outline'
           size='sm'
           onClick={() => {
             void face.query(database.id, query.trim(), topK).then(
@@ -180,7 +180,7 @@ function DatabaseCard(props: { face: RagFace; database: RagDatabase; onChange():
       />
       <div style={styles.row}>
         <Button
-          variant='ghost'
+          variant='outline'
           size='sm'
           disabled={ingestText.trim() === ''}
           onClick={() => {

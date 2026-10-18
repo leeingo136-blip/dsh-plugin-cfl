@@ -243,8 +243,8 @@ function SkillCardView(props: {
         <SourceTag label={skill.sourceLabel} t={face.t} />
         {skill.editable && (
           <>
-            <Button variant='ghost' size='sm' onClick={onEdit}>{face.t('edit')}</Button>
-            <Button variant='ghost' size='sm' style={styles.dangerButton} onClick={onDelete}>{face.t('delete')}</Button>
+            <Button variant='outline' size='sm' onClick={onEdit}>{face.t('edit')}</Button>
+            <Button variant='outline' size='sm' style={styles.dangerButton} onClick={onDelete}>{face.t('delete')}</Button>
           </>
         )}
       </div>

@@ -116,7 +116,7 @@ function SkillsLoaded({ face }) {
 }
 function SkillCardView(props) {
     const { face, skill, body, onEdit, onDelete } = props;
-    return (_jsxs("div", { style: styles.card, children: [_jsxs("div", { style: styles.cardHead, children: [_jsx("strong", { style: styles.cardName, children: skill.name }), _jsx("span", { style: { flex: 1 } }), _jsx(SourceTag, { label: skill.sourceLabel, t: face.t }), skill.editable && (_jsxs(_Fragment, { children: [_jsx(Button, { variant: 'ghost', size: 'sm', onClick: onEdit, children: face.t('edit') }), _jsx(Button, { variant: 'ghost', size: 'sm', style: styles.dangerButton, onClick: onDelete, children: face.t('delete') })] }))] }), skill.description !== '' && _jsx("p", { style: styles.cardDescription, children: skill.description }), body !== '' && body !== skill.description && _jsx("pre", { style: styles.cardBody, children: clip(body, 8) })] }));
+    return (_jsxs("div", { style: styles.card, children: [_jsxs("div", { style: styles.cardHead, children: [_jsx("strong", { style: styles.cardName, children: skill.name }), _jsx("span", { style: { flex: 1 } }), _jsx(SourceTag, { label: skill.sourceLabel, t: face.t }), skill.editable && (_jsxs(_Fragment, { children: [_jsx(Button, { variant: 'outline', size: 'sm', onClick: onEdit, children: face.t('edit') }), _jsx(Button, { variant: 'outline', size: 'sm', style: styles.dangerButton, onClick: onDelete, children: face.t('delete') })] }))] }), skill.description !== '' && _jsx("p", { style: styles.cardDescription, children: skill.description }), body !== '' && body !== skill.description && _jsx("pre", { style: styles.cardBody, children: clip(body, 8) })] }));
 }
 function clip(text, maxLines) {
     const lines = text.split('\n');

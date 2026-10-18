@@ -45,7 +45,7 @@ function DatabaseCard(props) {
     const [ingestText, setIngestText] = useState('');
     const [notice, setNotice] = useState(null);
     const [error, setError] = useState(null);
-    return (_jsxs("div", { style: styles.card, children: [_jsxs("div", { style: styles.cardHead, children: [_jsx("strong", { style: styles.cardName, children: database.name }), _jsx("span", { style: { flex: 1 } }), _jsxs("span", { style: styles.meta, children: [face.t('ragChunks'), " ", database.chunks, ' · ', face.t('ragDims'), " ", database.dimension, database.model !== '' && _jsxs(_Fragment, { children: [" \u00B7 ", face.t('ragModel'), " ", database.model] })] }), _jsx(Button, { variant: 'ghost', size: 'sm', style: styles.dangerButton, onClick: () => {
+    return (_jsxs("div", { style: styles.card, children: [_jsxs("div", { style: styles.cardHead, children: [_jsx("strong", { style: styles.cardName, children: database.name }), _jsx("span", { style: { flex: 1 } }), _jsxs("span", { style: styles.meta, children: [face.t('ragChunks'), " ", database.chunks, ' · ', face.t('ragDims'), " ", database.dimension, database.model !== '' && _jsxs(_Fragment, { children: [" \u00B7 ", face.t('ragModel'), " ", database.model] })] }), _jsx(Button, { variant: 'outline', size: 'sm', style: styles.dangerButton, onClick: () => {
                             if (!window.confirm(face.t('ragDeleteConfirm')))
                                 return;
                             void face.remove(database.id).then(onChange);
@@ -53,9 +53,9 @@ function DatabaseCard(props) {
                             if (event.key === 'Enter' && query.trim() !== '') {
                                 void face.query(database.id, query.trim(), topK).then(value => { setHits(value.results); setError(null); }, (error) => setError(error instanceof Error ? error.message : String(error)));
                             }
-                        } }), _jsxs("label", { style: styles.meta, children: [face.t('ragTopK'), ' ', _jsx("input", { type: 'number', min: 1, max: 50, value: topK, onChange: event => { setTopK(Number(event.target.value) || 5); }, style: { ...styles.input, width: 64 } })] }), _jsx(Button, { variant: 'ghost', size: 'sm', onClick: () => {
+                        } }), _jsxs("label", { style: styles.meta, children: [face.t('ragTopK'), ' ', _jsx("input", { type: 'number', min: 1, max: 50, value: topK, onChange: event => { setTopK(Number(event.target.value) || 5); }, style: { ...styles.input, width: 64 } })] }), _jsx(Button, { variant: 'outline', size: 'sm', onClick: () => {
                             void face.query(database.id, query.trim(), topK).then(value => { setHits(value.results); setError(null); }, (error) => setError(error instanceof Error ? error.message : String(error)));
-                        }, children: face.t('ragRun') })] }), _jsx("textarea", { style: styles.textarea, rows: 3, placeholder: face.t('ragIngestPlaceholder'), value: ingestText, onChange: event => { setIngestText(event.target.value); } }), _jsxs("div", { style: styles.row, children: [_jsx(Button, { variant: 'ghost', size: 'sm', disabled: ingestText.trim() === '', onClick: () => {
+                        }, children: face.t('ragRun') })] }), _jsx("textarea", { style: styles.textarea, rows: 3, placeholder: face.t('ragIngestPlaceholder'), value: ingestText, onChange: event => { setIngestText(event.target.value); } }), _jsxs("div", { style: styles.row, children: [_jsx(Button, { variant: 'outline', size: 'sm', disabled: ingestText.trim() === '', onClick: () => {
                             const texts = ingestText.split('\n').map(one => one.trim()).filter(one => one !== '');
                             void face.ingest(database.id, texts).then(value => {
                                 setIngestText('');

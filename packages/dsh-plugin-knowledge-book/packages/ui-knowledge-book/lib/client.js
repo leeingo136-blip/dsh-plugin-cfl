@@ -296,12 +296,12 @@ window.__ModuleLoader__.load({
 								t: face.t
 							}),
 							skill.editable && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
-								variant: "ghost",
+								variant: "outline",
 								size: "sm",
 								onClick: onEdit,
 								children: face.t("edit")
 							}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
-								variant: "ghost",
+								variant: "outline",
 								size: "sm",
 								style: styles$1.dangerButton,
 								onClick: onDelete,
@@ -644,7 +644,7 @@ window.__ModuleLoader__.load({
 								]
 							}),
 							/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
-								variant: "ghost",
+								variant: "outline",
 								size: "sm",
 								style: styles.dangerButton,
 								onClick: () => {
@@ -700,7 +700,7 @@ window.__ModuleLoader__.load({
 								]
 							}),
 							/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
-								variant: "ghost",
+								variant: "outline",
 								size: "sm",
 								onClick: () => {
 									face.query(database.id, query.trim(), topK).then((value) => {
@@ -725,7 +725,7 @@ window.__ModuleLoader__.load({
 						style: styles.row,
 						children: [
 							/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
-								variant: "ghost",
+								variant: "outline",
 								size: "sm",
 								disabled: ingestText.trim() === "",
 								onClick: () => {
