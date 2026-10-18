@@ -5,6 +5,7 @@ window.__ModuleLoader__.load({
 		var exports = module.exports;
 		Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 		let react = require("react");
+		let _deepseek_ai_dsh_client_ui_primitives = require("@deepseek-ai/dsh-client-ui-primitives");
 		let react_jsx_runtime = require("react/jsx-runtime");
 		//#region src/client/locales.ts
 		const zh = {
@@ -214,8 +215,9 @@ window.__ModuleLoader__.load({
 							}, filter))
 						}),
 						/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", { style: { flex: 1 } }),
-						/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
-							style: styles$1.primaryButton,
+						/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+							variant: "primary",
+							size: "sm",
 							onClick: () => {
 								setNotice(null);
 								setEditing({
@@ -293,11 +295,14 @@ window.__ModuleLoader__.load({
 								label: skill.sourceLabel,
 								t: face.t
 							}),
-							skill.editable && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
-								style: styles$1.button,
+							skill.editable && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+								variant: "ghost",
+								size: "sm",
 								onClick: onEdit,
 								children: face.t("edit")
-							}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+							}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+								variant: "ghost",
+								size: "sm",
 								style: styles$1.dangerButton,
 								onClick: onDelete,
 								children: face.t("delete")
@@ -356,11 +361,9 @@ window.__ModuleLoader__.load({
 									children: one.label
 								}, one.id))
 							}),
-							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
-								style: {
-									...styles$1.primaryButton,
-									opacity: complete && !busy ? 1 : .5
-								},
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+								variant: "primary",
+								size: "sm",
 								disabled: !complete || busy,
 								onClick: () => {
 									setBusy(true);
@@ -382,8 +385,9 @@ window.__ModuleLoader__.load({
 								},
 								children: face.t("save")
 							}),
-							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
-								style: styles$1.button,
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+								variant: "outline",
+								size: "sm",
 								onClick: () => {
 									onClose(void 0);
 								},
@@ -445,24 +449,7 @@ window.__ModuleLoader__.load({
 				fontSize: 13,
 				whiteSpace: "nowrap"
 			},
-			primaryButton: {
-				padding: "6px 14px",
-				borderRadius: 8,
-				border: "none",
-				cursor: "pointer",
-				fontWeight: 600
-			},
-			button: {
-				padding: "4px 12px",
-				borderRadius: 8,
-				cursor: "pointer"
-			},
-			dangerButton: {
-				padding: "4px 12px",
-				borderRadius: 8,
-				cursor: "pointer",
-				color: "#c0392b"
-			},
+			dangerButton: { color: "var(--dsw-alias-state-error-primary, #c0392b)" },
 			notice: {
 				color: "#2e7d32",
 				fontSize: 13
@@ -581,11 +568,9 @@ window.__ModuleLoader__.load({
 								setDescription(event.target.value);
 							}
 						}),
-						/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
-							style: {
-								...styles.primaryButton,
-								opacity: name.trim() !== "" && !busy ? 1 : .5
-							},
+						/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+							variant: "primary",
+							size: "sm",
 							disabled: name.trim() === "" || busy,
 							onClick: () => {
 								setBusy(true);
@@ -658,7 +643,9 @@ window.__ModuleLoader__.load({
 									] })
 								]
 							}),
-							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+								variant: "ghost",
+								size: "sm",
 								style: styles.dangerButton,
 								onClick: () => {
 									if (!window.confirm(face.t("ragDeleteConfirm"))) return;
@@ -712,8 +699,9 @@ window.__ModuleLoader__.load({
 									})
 								]
 							}),
-							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
-								style: styles.button,
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+								variant: "ghost",
+								size: "sm",
 								onClick: () => {
 									face.query(database.id, query.trim(), topK).then((value) => {
 										setHits(value.results);
@@ -736,8 +724,9 @@ window.__ModuleLoader__.load({
 					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						style: styles.row,
 						children: [
-							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
-								style: styles.button,
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+								variant: "ghost",
+								size: "sm",
 								disabled: ingestText.trim() === "",
 								onClick: () => {
 									const texts = ingestText.split("\n").map((one) => one.trim()).filter((one) => one !== "");
@@ -786,24 +775,7 @@ window.__ModuleLoader__.load({
 				borderRadius: 8,
 				border: "1px solid var(--dsh-border, #ccc)"
 			},
-			primaryButton: {
-				padding: "6px 14px",
-				borderRadius: 8,
-				border: "none",
-				cursor: "pointer",
-				fontWeight: 600
-			},
-			button: {
-				padding: "4px 12px",
-				borderRadius: 8,
-				cursor: "pointer"
-			},
-			dangerButton: {
-				padding: "4px 12px",
-				borderRadius: 8,
-				cursor: "pointer",
-				color: "#c0392b"
-			},
+			dangerButton: { color: "var(--dsw-alias-state-error-primary, #c0392b)" },
 			error: {
 				color: "#c0392b",
 				fontSize: 13

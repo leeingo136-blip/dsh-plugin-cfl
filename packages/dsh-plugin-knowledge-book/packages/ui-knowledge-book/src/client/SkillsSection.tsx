@@ -5,6 +5,7 @@
  * 才可保存，冲突由宿主按 kebab-case 后缀规则自动重命名。
  */
 import { useEffect, useMemo, useState } from 'react'
+import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { KnowledgeKey } from './locales.ts'
 
 export interface SkillCard {
@@ -145,9 +146,7 @@ function SkillsLoaded({ face }: { face: SkillsFace }): ReactNode {
           ))}
         </div>
         <div style={{ flex: 1 }} />
-        <button
-          style={styles.primaryButton}
-          onClick={() => {
+        <Button variant='primary' size='sm' onClick={() => {
             setNotice(null)
             setEditing({
               fromName: undefined, fromSourceId: undefined,
@@ -157,7 +156,7 @@ function SkillsLoaded({ face }: { face: SkillsFace }): ReactNode {
           }}
         >
           {face.t('create')}
-        </button>
+        </Button>
       </div>
 
       {notice !== null && <p style={styles.notice}>{notice}</p>}
@@ -244,8 +243,8 @@ function SkillCardView(props: {
         <SourceTag label={skill.sourceLabel} t={face.t} />
         {skill.editable && (
           <>
-            <button style={styles.button} onClick={onEdit}>{face.t('edit')}</button>
-            <button style={styles.dangerButton} onClick={onDelete}>{face.t('delete')}</button>
+            <Button variant='ghost' size='sm' onClick={onEdit}>{face.t('edit')}</Button>
+            <Button variant='ghost' size='sm' style={styles.dangerButton} onClick={onDelete}>{face.t('delete')}</Button>
           </>
         )}
       </div>
@@ -292,8 +291,9 @@ function SkillEditor(props: {
             <option key={one.id} value={one.id}>{one.label}</option>
           ))}
         </select>
-        <button
-          style={{ ...styles.primaryButton, opacity: complete && !busy ? 1 : 0.5 }}
+        <Button
+          variant='primary'
+          size='sm'
           disabled={!complete || busy}
           onClick={() => {
             setBusy(true)
@@ -315,8 +315,8 @@ function SkillEditor(props: {
           }}
         >
           {face.t('save')}
-        </button>
-        <button style={styles.button} onClick={() => { onClose(undefined) }}>{face.t('cancel')}</button>
+        </Button>
+        <Button variant='outline' size='sm' onClick={() => { onClose(undefined) }}>{face.t('cancel')}</Button>
       </div>
       {error !== null && <p style={styles.error}>{face.t('saveFailed')}{' — '}{error}</p>}
       <input
@@ -341,9 +341,7 @@ const styles = {
   search: { flex: 1, maxWidth: 320, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--dsh-border, #ccc)' },
   filters: { display: 'flex', gap: 12, marginLeft: 8 },
   filterLabel: { display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, whiteSpace: 'nowrap' as const },
-  primaryButton: { padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600 },
-  button: { padding: '4px 12px', borderRadius: 8, cursor: 'pointer' },
-  dangerButton: { padding: '4px 12px', borderRadius: 8, cursor: 'pointer', color: '#c0392b' },
+  dangerButton: { color: 'var(--dsw-alias-state-error-primary, #c0392b)' },
   notice: { color: '#2e7d32', fontSize: 13 },
   error: { color: '#c0392b', fontSize: 13 },
   grid: { display: 'flex', flexDirection: 'column' as const, gap: 8 },

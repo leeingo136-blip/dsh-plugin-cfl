@@ -32,7 +32,8 @@
     }
   },
   "dependencies": {
-    "@dsh/api-knowledge-book": "workspace:*"
+    "@dsh/api-knowledge-book": "workspace:*",
+    "@deepseek-ai/dsh-client-ui-primitives": "0.2.0-rc.2"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "~4.0.4"

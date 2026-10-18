@@ -4,6 +4,7 @@
  * 每张卡内嵌查询框与入库文本框。
  */
 import { useEffect, useState } from 'react'
+import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { KnowledgeKey } from './locales.ts'
 
 export interface RagDatabase {
@@ -65,8 +66,9 @@ function RagLoaded({ face }: { face: RagFace }): ReactNode {
           value={description}
           onChange={event => { setDescription(event.target.value) }}
         />
-        <button
-          style={{ ...styles.primaryButton, opacity: name.trim() !== '' && !busy ? 1 : 0.5 }}
+        <Button
+          variant='primary'
+          size='sm'
           disabled={name.trim() === '' || busy}
           onClick={() => {
             setBusy(true)
@@ -79,7 +81,7 @@ function RagLoaded({ face }: { face: RagFace }): ReactNode {
           }}
         >
           {face.t('ragAdd')}
-        </button>
+        </Button>
       </div>
       {failed !== null && <p style={styles.error}>{face.t('loadFailed')}{' — '}{failed}</p>}
       {databases.length === 0
@@ -114,7 +116,9 @@ function DatabaseCard(props: { face: RagFace; database: RagDatabase; onChange():
           {face.t('ragDims')} {database.dimension}
           {database.model !== '' && <> · {face.t('ragModel')} {database.model}</>}
         </span>
-        <button
+        <Button
+          variant='ghost'
+          size='sm'
           style={styles.dangerButton}
           onClick={() => {
             if (!window.confirm(face.t('ragDeleteConfirm'))) return
@@ -122,7 +126,7 @@ function DatabaseCard(props: { face: RagFace; database: RagDatabase; onChange():
           }}
         >
           {face.t('delete')}
-        </button>
+        </Button>
       </div>
       {database.description !== '' && <p style={styles.cardDescription}>{database.description}</p>}
 
@@ -153,8 +157,9 @@ function DatabaseCard(props: { face: RagFace; database: RagDatabase; onChange():
             style={{ ...styles.input, width: 64 }}
           />
         </label>
-        <button
-          style={styles.button}
+        <Button
+          variant='ghost'
+          size='sm'
           onClick={() => {
             void face.query(database.id, query.trim(), topK).then(
               value => { setHits(value.results); setError(null) },
@@ -163,7 +168,7 @@ function DatabaseCard(props: { face: RagFace; database: RagDatabase; onChange():
           }}
         >
           {face.t('ragRun')}
-        </button>
+        </Button>
       </div>
 
       <textarea
@@ -174,8 +179,9 @@ function DatabaseCard(props: { face: RagFace; database: RagDatabase; onChange():
         onChange={event => { setIngestText(event.target.value) }}
       />
       <div style={styles.row}>
-        <button
-          style={styles.button}
+        <Button
+          variant='ghost'
+          size='sm'
           disabled={ingestText.trim() === ''}
           onClick={() => {
             const texts = ingestText.split('\n').map(one => one.trim()).filter(one => one !== '')
@@ -187,7 +193,7 @@ function DatabaseCard(props: { face: RagFace; database: RagDatabase; onChange():
           }}
         >
           {face.t('ragIngest')}
-        </button>
+        </Button>
         {notice !== null && <span style={styles.notice}>{notice}</span>}
         {error !== null && <span style={styles.error}>{error}</span>}
       </div>
@@ -210,9 +216,7 @@ function DatabaseCard(props: { face: RagFace; database: RagDatabase; onChange():
 const styles = {
   createRow: { display: 'flex', gap: 8, marginBottom: 12 },
   input: { padding: '6px 10px', borderRadius: 8, border: '1px solid var(--dsh-border, #ccc)' },
-  primaryButton: { padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600 },
-  button: { padding: '4px 12px', borderRadius: 8, cursor: 'pointer' },
-  dangerButton: { padding: '4px 12px', borderRadius: 8, cursor: 'pointer', color: '#c0392b' },
+  dangerButton: { color: 'var(--dsw-alias-state-error-primary, #c0392b)' },
   error: { color: '#c0392b', fontSize: 13 },
   notice: { color: '#2e7d32', fontSize: 13 },
   grid: { display: 'flex', flexDirection: 'column' as const, gap: 8 },

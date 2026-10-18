@@ -5,6 +5,7 @@ import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-run
  * 每张卡内嵌查询框与入库文本框。
  */
 import { useEffect, useState } from 'react';
+import { Button } from '@deepseek-ai/dsh-client-ui-primitives';
 export function KnowledgeSection(props) {
     const { face } = props;
     if (face === undefined)
@@ -21,7 +22,7 @@ function RagLoaded({ face }) {
         void face.list().then(value => { setDatabases(value.databases); setFailed(null); }, (error) => setFailed(error instanceof Error ? error.message : String(error)));
     };
     useEffect(refresh, [face]);
-    return (_jsxs("div", { children: [_jsxs("div", { style: styles.createRow, children: [_jsx("input", { style: { ...styles.input, flex: 1 }, placeholder: face.t('ragName'), value: name, onChange: event => { setName(event.target.value); } }), _jsx("input", { style: { ...styles.input, flex: 2 }, placeholder: face.t('ragDescription'), value: description, onChange: event => { setDescription(event.target.value); } }), _jsx("button", { style: { ...styles.primaryButton, opacity: name.trim() !== '' && !busy ? 1 : 0.5 }, disabled: name.trim() === '' || busy, onClick: () => {
+    return (_jsxs("div", { children: [_jsxs("div", { style: styles.createRow, children: [_jsx("input", { style: { ...styles.input, flex: 1 }, placeholder: face.t('ragName'), value: name, onChange: event => { setName(event.target.value); } }), _jsx("input", { style: { ...styles.input, flex: 2 }, placeholder: face.t('ragDescription'), value: description, onChange: event => { setDescription(event.target.value); } }), _jsx(Button, { variant: 'primary', size: 'sm', disabled: name.trim() === '' || busy, onClick: () => {
                             setBusy(true);
                             void face.create(name.trim(), description.trim()).then(() => {
                                 setName('');
@@ -44,7 +45,7 @@ function DatabaseCard(props) {
     const [ingestText, setIngestText] = useState('');
     const [notice, setNotice] = useState(null);
     const [error, setError] = useState(null);
-    return (_jsxs("div", { style: styles.card, children: [_jsxs("div", { style: styles.cardHead, children: [_jsx("strong", { style: styles.cardName, children: database.name }), _jsx("span", { style: { flex: 1 } }), _jsxs("span", { style: styles.meta, children: [face.t('ragChunks'), " ", database.chunks, ' · ', face.t('ragDims'), " ", database.dimension, database.model !== '' && _jsxs(_Fragment, { children: [" \u00B7 ", face.t('ragModel'), " ", database.model] })] }), _jsx("button", { style: styles.dangerButton, onClick: () => {
+    return (_jsxs("div", { style: styles.card, children: [_jsxs("div", { style: styles.cardHead, children: [_jsx("strong", { style: styles.cardName, children: database.name }), _jsx("span", { style: { flex: 1 } }), _jsxs("span", { style: styles.meta, children: [face.t('ragChunks'), " ", database.chunks, ' · ', face.t('ragDims'), " ", database.dimension, database.model !== '' && _jsxs(_Fragment, { children: [" \u00B7 ", face.t('ragModel'), " ", database.model] })] }), _jsx(Button, { variant: 'ghost', size: 'sm', style: styles.dangerButton, onClick: () => {
                             if (!window.confirm(face.t('ragDeleteConfirm')))
                                 return;
                             void face.remove(database.id).then(onChange);
@@ -52,9 +53,9 @@ function DatabaseCard(props) {
                             if (event.key === 'Enter' && query.trim() !== '') {
                                 void face.query(database.id, query.trim(), topK).then(value => { setHits(value.results); setError(null); }, (error) => setError(error instanceof Error ? error.message : String(error)));
                             }
-                        } }), _jsxs("label", { style: styles.meta, children: [face.t('ragTopK'), ' ', _jsx("input", { type: 'number', min: 1, max: 50, value: topK, onChange: event => { setTopK(Number(event.target.value) || 5); }, style: { ...styles.input, width: 64 } })] }), _jsx("button", { style: styles.button, onClick: () => {
+                        } }), _jsxs("label", { style: styles.meta, children: [face.t('ragTopK'), ' ', _jsx("input", { type: 'number', min: 1, max: 50, value: topK, onChange: event => { setTopK(Number(event.target.value) || 5); }, style: { ...styles.input, width: 64 } })] }), _jsx(Button, { variant: 'ghost', size: 'sm', onClick: () => {
                             void face.query(database.id, query.trim(), topK).then(value => { setHits(value.results); setError(null); }, (error) => setError(error instanceof Error ? error.message : String(error)));
-                        }, children: face.t('ragRun') })] }), _jsx("textarea", { style: styles.textarea, rows: 3, placeholder: face.t('ragIngestPlaceholder'), value: ingestText, onChange: event => { setIngestText(event.target.value); } }), _jsxs("div", { style: styles.row, children: [_jsx("button", { style: styles.button, disabled: ingestText.trim() === '', onClick: () => {
+                        }, children: face.t('ragRun') })] }), _jsx("textarea", { style: styles.textarea, rows: 3, placeholder: face.t('ragIngestPlaceholder'), value: ingestText, onChange: event => { setIngestText(event.target.value); } }), _jsxs("div", { style: styles.row, children: [_jsx(Button, { variant: 'ghost', size: 'sm', disabled: ingestText.trim() === '', onClick: () => {
                             const texts = ingestText.split('\n').map(one => one.trim()).filter(one => one !== '');
                             void face.ingest(database.id, texts).then(value => {
                                 setIngestText('');
@@ -66,9 +67,7 @@ function DatabaseCard(props) {
 const styles = {
     createRow: { display: 'flex', gap: 8, marginBottom: 12 },
     input: { padding: '6px 10px', borderRadius: 8, border: '1px solid var(--dsh-border, #ccc)' },
-    primaryButton: { padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600 },
-    button: { padding: '4px 12px', borderRadius: 8, cursor: 'pointer' },
-    dangerButton: { padding: '4px 12px', borderRadius: 8, cursor: 'pointer', color: '#c0392b' },
+    dangerButton: { color: 'var(--dsw-alias-state-error-primary, #c0392b)' },
     error: { color: '#c0392b', fontSize: 13 },
     notice: { color: '#2e7d32', fontSize: 13 },
     grid: { display: 'flex', flexDirection: 'column', gap: 8 },

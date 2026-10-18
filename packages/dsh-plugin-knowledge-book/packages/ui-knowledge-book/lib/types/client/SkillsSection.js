@@ -6,6 +6,7 @@ import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-run
  * 才可保存，冲突由宿主按 kebab-case 后缀规则自动重命名。
  */
 import { useEffect, useMemo, useState } from 'react';
+import { Button } from '@deepseek-ai/dsh-client-ui-primitives';
 const FILTERS = ['name', 'source', 'body'];
 /** 卡片右侧的小字来源标签。 */
 function SourceTag({ label, t }) {
@@ -81,7 +82,7 @@ function SkillsLoaded({ face }) {
                                             }
                                             return next;
                                         });
-                                    } }), ' ', face.t(filter === 'name' ? 'byName' : filter === 'source' ? 'bySource' : 'byBody')] }, filter))) }), _jsx("div", { style: { flex: 1 } }), _jsx("button", { style: styles.primaryButton, onClick: () => {
+                                    } }), ' ', face.t(filter === 'name' ? 'byName' : filter === 'source' ? 'bySource' : 'byBody')] }, filter))) }), _jsx("div", { style: { flex: 1 } }), _jsx(Button, { variant: 'primary', size: 'sm', onClick: () => {
                             setNotice(null);
                             setEditing({
                                 fromName: undefined, fromSourceId: undefined,
@@ -115,7 +116,7 @@ function SkillsLoaded({ face }) {
 }
 function SkillCardView(props) {
     const { face, skill, body, onEdit, onDelete } = props;
-    return (_jsxs("div", { style: styles.card, children: [_jsxs("div", { style: styles.cardHead, children: [_jsx("strong", { style: styles.cardName, children: skill.name }), _jsx("span", { style: { flex: 1 } }), _jsx(SourceTag, { label: skill.sourceLabel, t: face.t }), skill.editable && (_jsxs(_Fragment, { children: [_jsx("button", { style: styles.button, onClick: onEdit, children: face.t('edit') }), _jsx("button", { style: styles.dangerButton, onClick: onDelete, children: face.t('delete') })] }))] }), skill.description !== '' && _jsx("p", { style: styles.cardDescription, children: skill.description }), body !== '' && body !== skill.description && _jsx("pre", { style: styles.cardBody, children: clip(body, 8) })] }));
+    return (_jsxs("div", { style: styles.card, children: [_jsxs("div", { style: styles.cardHead, children: [_jsx("strong", { style: styles.cardName, children: skill.name }), _jsx("span", { style: { flex: 1 } }), _jsx(SourceTag, { label: skill.sourceLabel, t: face.t }), skill.editable && (_jsxs(_Fragment, { children: [_jsx(Button, { variant: 'ghost', size: 'sm', onClick: onEdit, children: face.t('edit') }), _jsx(Button, { variant: 'ghost', size: 'sm', style: styles.dangerButton, onClick: onDelete, children: face.t('delete') })] }))] }), skill.description !== '' && _jsx("p", { style: styles.cardDescription, children: skill.description }), body !== '' && body !== skill.description && _jsx("pre", { style: styles.cardBody, children: clip(body, 8) })] }));
 }
 function clip(text, maxLines) {
     const lines = text.split('\n');
@@ -130,7 +131,7 @@ function SkillEditor(props) {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState(null);
     const complete = name.trim() !== '' && body.trim() !== '' && sourceId !== '';
-    return (_jsxs("div", { style: styles.editor, children: [_jsxs("div", { style: styles.cardHead, children: [_jsx("input", { style: { ...styles.input, flex: 1 }, placeholder: face.t('namePlaceholder'), value: name, onChange: event => { setName(event.target.value); } }), _jsx("select", { style: styles.input, value: sourceId, onChange: event => { setSourceId(event.target.value); }, children: sources.filter(one => one.editable).map(one => (_jsx("option", { value: one.id, children: one.label }, one.id))) }), _jsx("button", { style: { ...styles.primaryButton, opacity: complete && !busy ? 1 : 0.5 }, disabled: !complete || busy, onClick: () => {
+    return (_jsxs("div", { style: styles.editor, children: [_jsxs("div", { style: styles.cardHead, children: [_jsx("input", { style: { ...styles.input, flex: 1 }, placeholder: face.t('namePlaceholder'), value: name, onChange: event => { setName(event.target.value); } }), _jsx("select", { style: styles.input, value: sourceId, onChange: event => { setSourceId(event.target.value); }, children: sources.filter(one => one.editable).map(one => (_jsx("option", { value: one.id, children: one.label }, one.id))) }), _jsx(Button, { variant: 'primary', size: 'sm', disabled: !complete || busy, onClick: () => {
                             setBusy(true);
                             setError(null);
                             void face.saveSkill({
@@ -147,16 +148,14 @@ function SkillEditor(props) {
                                 setBusy(false);
                                 setError(saveError instanceof Error ? saveError.message : String(saveError));
                             });
-                        }, children: face.t('save') }), _jsx("button", { style: styles.button, onClick: () => { onClose(undefined); }, children: face.t('cancel') })] }), error !== null && _jsxs("p", { style: styles.error, children: [face.t('saveFailed'), ' — ', error] }), _jsx("input", { style: styles.input, placeholder: face.t('descPlaceholder'), value: description, onChange: event => { setDescription(event.target.value); } }), _jsx("textarea", { style: styles.textarea, placeholder: face.t('bodyPlaceholder'), value: body, onChange: event => { setBody(event.target.value); }, rows: 12 })] }));
+                        }, children: face.t('save') }), _jsx(Button, { variant: 'outline', size: 'sm', onClick: () => { onClose(undefined); }, children: face.t('cancel') })] }), error !== null && _jsxs("p", { style: styles.error, children: [face.t('saveFailed'), ' — ', error] }), _jsx("input", { style: styles.input, placeholder: face.t('descPlaceholder'), value: description, onChange: event => { setDescription(event.target.value); } }), _jsx("textarea", { style: styles.textarea, placeholder: face.t('bodyPlaceholder'), value: body, onChange: event => { setBody(event.target.value); }, rows: 12 })] }));
 }
 const styles = {
     toolbar: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 },
     search: { flex: 1, maxWidth: 320, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--dsh-border, #ccc)' },
     filters: { display: 'flex', gap: 12, marginLeft: 8 },
     filterLabel: { display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, whiteSpace: 'nowrap' },
-    primaryButton: { padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600 },
-    button: { padding: '4px 12px', borderRadius: 8, cursor: 'pointer' },
-    dangerButton: { padding: '4px 12px', borderRadius: 8, cursor: 'pointer', color: '#c0392b' },
+    dangerButton: { color: 'var(--dsw-alias-state-error-primary, #c0392b)' },
     notice: { color: '#2e7d32', fontSize: 13 },
     error: { color: '#c0392b', fontSize: 13 },
     grid: { display: 'flex', flexDirection: 'column', gap: 8 },
