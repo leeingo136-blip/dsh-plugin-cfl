@@ -8,19 +8,11 @@
       "DOM.Iterable",
       "ESNext.Disposable"
     ],
-    "baseUrl": ".",
-    "paths": {
-      "@deepseek-ai/dsh-typert-protocol": [
-        "packages/typert-protocol/lib/types/index.d.ts"
-      ]
-    }
+    "baseUrl": "."
   },
   "references": [
     {
       "path": "packages/api-account-hub"
-    },
-    {
-      "path": "packages/typert-protocol"
     }
   ]
 }
