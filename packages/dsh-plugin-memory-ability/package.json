@@ -1,0 +1,13 @@
+{
+  "name": "dsh-plugin-memory-ability",
+  "description": "记忆能力容器 for DeepSeek Harness. Holds no logic of its own: it carries the declarative patch that mounts the 记忆工坊 agent preset (dsh-plugin-memory-environment) with every memory-recall tool bound to a card.",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "license": "MIT"
+}
