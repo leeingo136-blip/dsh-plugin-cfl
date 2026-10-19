@@ -10,12 +10,12 @@
     "./locale/*": "./locale/*"
   },
   "dependencies": {
-    "@deepseek-ai/cordis-plugin-loader": "^1.0.5",
+    "@deepseek-ai/cordis-plugin-loader": "~1.0.6",
     "@deepseek-ai/dsh-agent-preset-registry": "0.2.0-rc.2",
     "@deepseek-ai/schemastery": "~3.18.4"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "~4.0.4"
+    "@deepseek-ai/cordis": "~4.0.5"
   },
   "devDependencies": {
     "@types/node": "^22"
