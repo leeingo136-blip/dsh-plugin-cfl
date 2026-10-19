@@ -47,7 +47,7 @@ import { emptyCredentialStore, resolveAnthropicProfile, staticAuthContext } from
 import {
   BIGMODEL_BIZ_ORIGIN, DEFAULT_BASE_URL, DEFAULT_BIGMODEL_BASE_URL, DEFAULT_BIGMODEL_ORIGIN,
   BIGMODEL_MONEY_ORIGIN, DEFAULT_ZAI_ORIGIN, DEFAULT_ZCODE_ORIGIN, ZAI_BIZ_ORIGIN,
-  desktopHandoffRedirect, handoffParam, pollCliFlow, profileOf, readModels, readMoneyBalance, readZaiBalance,
+  desktopHandoffRedirect, exchangeZaiBusinessToken, handoffParam, pollCliFlow, profileOf, readModels, readMoneyBalance, readZaiBalance,
   resolveBizApiKey, startCliFlow,
   type AccountProfile, type CliFlow, type OAuthProvider, type StoredGrant,
 } from './protocol.ts'
@@ -774,8 +774,19 @@ export default class ZaiAccountExternal extends Service {
 
       this.setPhase('committing')
       const issuer = provider === 'bigmodel' ? DEFAULT_BIGMODEL_ORIGIN : this.zaiOrigin
+      // ZCode's normalizePolledTokenSet contract: the Z.AI poll token is an
+      // OAuth grant, not what the business interfaces accept — exchange it
+      // here so the stored grant is the platform JWT from login on.
+      let credential = ready.token
+      let expiresAt: number | undefined
+      if (provider === 'zai') {
+        const business = await exchangeZaiBusinessToken({ token: ready.token, signal })
+        credential = business.token
+        expiresAt = business.expiresAt
+      }
       const stored: StoredGrant = {
-        version: 1, kind: 'oauth', provider, token: ready.token, issuer,
+        version: 1, kind: 'oauth', provider, token: credential, issuer,
+        ...(expiresAt === undefined ? {} : { expiresAt }),
         ...(ready.refreshToken === undefined ? {} : { refreshToken: ready.refreshToken }),
         ...(ready.zcodeJwt === undefined ? {} : { zcodeJwt: ready.zcodeJwt }),
       }

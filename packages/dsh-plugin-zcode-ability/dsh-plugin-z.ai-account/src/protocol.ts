@@ -7,14 +7,21 @@
  * service owns the credential records; this module answers "what does the
  * platform say" for a given token.
  *
- * The sign-in flow mirrors ZCode v3.14.3's desktop client
- * (`packages/services/src/oauth/oauthService.ts`): the platform issues the
- * authorize URL, the client rewrites its redirect to the official hand-off
- * page (the one desktop-shaped value registered for this OAuth client — a
- * self-built loopback URI is refused with "Redirect URI not registered"), and
- * the token comes back through server-side polling. No local HTTP listener and
- * no deep-link scheme are involved; polling is the reliable path even when the
- * hand-off page finds no app to open.
+ * The sign-in flow mirrors ZCode's desktop client
+ * (`packages/services/src/oauth/oauthService.ts`, Apache-2.0 open source): the
+ * platform issues the authorize URL, the client rewrites its redirect to the
+ * official hand-off page (the one desktop-shaped value registered for this
+ * OAuth client — a self-built loopback URI is refused with "Redirect URI not
+ * registered"), and the token comes back through server-side polling. No local
+ * HTTP listener and no deep-link scheme are involved; polling is the reliable
+ * path even when the hand-off page finds no app to open.
+ *
+ * One upstream contract this module also mirrors: the Z.AI OAuth access token
+ * returned by the poll is NOT the credential Z.ai's business interfaces
+ * accept. ZCode exchanges it at login (`POST /api/auth/z/login`, the
+ * business-token resolver in `zaiBusinessTokenResolver.ts`) and persists the
+ * resulting platform JWT — `exchangeZaiBusinessToken` below is that step, and
+ * the sign-in flow stores its answer instead of the raw OAuth token.
  */
 
 import { randomBytes } from 'node:crypto'
@@ -38,9 +45,10 @@ export const BIGMODEL_MONEY_ORIGIN = 'https://open.bigmodel.cn'
 const FLOW_PROVIDERS = { zai: 'zai', bigmodel: 'bigmodel' } as const
 const FLOW_INIT_PATH = '/api/v1/oauth/cli/init'
 const FLOW_POLL_PATH = '/api/v1/oauth/cli/poll'
-/** The app version the hand-off page keys its deep-link behaviour on; pinned
- *  to the ZCode release these wire facts were taken from. */
-const DESKTOP_APP_VERSION = '3.14.3'
+/** The app version the hand-off page keys its deep-link behaviour on; kept
+ *  at the current ZCode desktop release so the page and the version-gated
+ *  endpoints (plan balance) apply their present-day policy. */
+const DESKTOP_APP_VERSION = '3.15.3'
 
 /** One login the plugin stores. `issuer` is the origin that issued it. */
 export interface StoredGrant {
@@ -450,6 +458,68 @@ function normalizeAvatar(value: string): string {
   if (/^data:image\/[^;]+;base64,/i.test(value) || /^https?:\/\//i.test(value)) return value
   if (/^[A-Za-z0-9+/]+={0,2}$/.test(value) && value.length >= 16) return `data:image/png;base64,${value}`
   return value
+}
+
+// ---- business-token exchange (ZCode's normalizePolledTokenSet contract) ----
+
+const businessLoginResponse = z.object({
+  code: z.union([z.number(), z.string()]).optional(),
+  success: z.boolean().optional(),
+  msg: z.string().optional(),
+  data: z.object({
+    access_token: z.string().optional(),
+    accessToken: z.string().optional(),
+    expires_in: z.number().optional(),
+  }).optional().nullable(),
+})
+
+export interface BusinessToken {
+  token: string
+  /** Epoch ms when the exchanged JWT expires, when the platform says. */
+  expiresAt?: number
+}
+
+/**
+ * Exchange a Z.AI OAuth access token for the platform business JWT that
+ * Z.ai's business interfaces accept — the same `/api/auth/z/login` call
+ * ZCode's desktop client performs at login before persisting the credential
+ * (`zaiBusinessTokenResolver.ts`; the adapter comment is explicit that the
+ * raw OAuth token is not what business endpoints take). Success codes are
+ * 0/200 like every other biz envelope; a refusal surfaces as a transport
+ * error so the sign-in flow can fail loud instead of storing a token that
+ * only works until the first business read.
+ */
+export async function exchangeZaiBusinessToken(input: {
+  token: string
+  signal?: AbortSignal
+}): Promise<BusinessToken> {
+  const response = await fetch(`${ZAI_BIZ_ORIGIN}/api/auth/z/login`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify({ token: input.token.trim() }),
+    ...input.signal === undefined ? {} : { signal: input.signal },
+  })
+  if (!response.ok) {
+    await response.body?.cancel().catch(() => undefined)
+    throw new PlatformRequestError(`Z.ai 凭据交换失败：HTTP ${String(response.status)}`, response.status)
+  }
+  const payload = businessLoginResponse.safeParse(await response.json())
+  if (!payload.success) throw new PlatformRequestError('Z.ai 凭据交换失败：响应格式不正确。')
+  const { code, success, data } = payload.data
+  const refused = success === false
+    || (typeof code === 'number' && code !== 0 && code !== 200)
+    || (typeof code === 'string' && code !== '0' && code !== '200')
+  const token = (data?.access_token ?? data?.accessToken)?.trim()
+  if (refused || token === undefined || token === '') {
+    throw new PlatformRequestError(`Z.ai 凭据交换失败：${payload.data.msg?.trim() || '平台拒绝该凭据。'}`)
+  }
+  const expiresIn = data?.expires_in
+  return {
+    token,
+    ...(typeof expiresIn === 'number' && Number.isFinite(expiresIn) && expiresIn > 0
+      ? { expiresAt: Date.now() + expiresIn * 1_000 }
+      : {}),
+  }
 }
 
 // ---- inference-key provisioning (the account manages its own API key) ------

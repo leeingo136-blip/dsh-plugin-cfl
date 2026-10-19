@@ -70,7 +70,7 @@ const GLM_THINKING_LEVEL_MAP: ThinkingLevelMap = {
  *  model descriptors, so a request carries it exactly when it flows through
  *  this plugin's adapter — i.e. only when the conversation resolved to an
  *  API this account manages. */
-const ZCODE_VERSION = '3.14.3'
+const ZCODE_VERSION = '3.15.3'
 const ZCODE_IDENTITY_HEADERS: Record<string, string> = {
   'HTTP-Referer': 'https://zcode.z.ai',
   'User-Agent': `ZCode/${ZCODE_VERSION}`,
