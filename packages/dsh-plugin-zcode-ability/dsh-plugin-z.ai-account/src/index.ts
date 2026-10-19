@@ -465,11 +465,21 @@ export default class ZaiAccountExternal extends Service {
    *  plants one empty write — the row (and its card) stays reachable for
    *  the first adopt. An existing write (adoption, deliberate clearing) is
    *  never touched; the field is declared volatile, so the write goes
-   *  through the same official settings seam the models page itself uses. */
+   *  through the same official settings seam the models page itself uses.
+   *
+   *  Early-boot care: while the settings projection has not merged the user
+   *  patch layer yet, `describe()` finds no row for this namespace at all.
+   *  Writing then would clobber an adopted catalog persisted by a previous
+   *  session with an empty array (observed: a saved catalog was wiped on
+   *  every restart). A missing row means "projection not ready" — skip and
+   *  let the next publish retry; only a present row with no `models` key is
+   *  a confirmed first plant. */
   private async ensureModelsPageRow(): Promise<void> {
     if (this.modelsRowReady || !this.signedIn) return
     try {
-      const user = this.ctx.settings.describe().find(row => row.ns === this.settingsNs)?.user
+      const row = this.ctx.settings.describe().find(row => row.ns === this.settingsNs)
+      if (row === undefined) return
+      const user = row.user
       if (typeof user === 'object' && user !== null && 'models' in user) {
         this.modelsRowReady = true
         return

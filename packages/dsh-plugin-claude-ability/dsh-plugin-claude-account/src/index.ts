@@ -501,10 +501,19 @@ export default class ClaudeAccountExternal extends Service {
    * hide the card on both visibility signals (no live group, no user write)
    * and the user could never reach 「获取可用模型」. Idempotent: an existing
    * write (adopted rows or a deliberate clearing) is never overwritten.
+   *
+   * Early-boot care: while the settings projection has not merged the user
+   * patch layer yet, `describe()` finds no row for this namespace at all and
+   * `modelsAdopted()` reports false. Writing then would clobber an adopted
+   * catalog persisted by a previous session with an empty array. A missing
+   * row means "projection not ready" — skip; the next sign-in state change
+   * or config update retries.
    */
   private async ensureAdoptionMarker(): Promise<void> {
     if (!this.signedIn || this.modelsAdopted()) return
     try {
+      const row = this.ctx.settings.describe().find(row => row.ns === this.settingsNs)
+      if (row === undefined) return
       await this.ctx.settings.mutate(this.settingsNs, [{ op: 'set', path: ['models'], value: [] }])
     } catch (error: unknown) {
       console.info('[claude-account] adoption marker write failed', {
