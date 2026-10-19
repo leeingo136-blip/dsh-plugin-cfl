@@ -35,6 +35,7 @@ import { z } from 'zod'
 import type { AuthorizationSession } from '@deepseek-ai/dsh-authorization'
 import { profile, readBalance, readProfile, type AccountProfile, type AccountWallets } from './details.ts'
 import { revokeAccount } from './logout.ts'
+import { LOCAL_VERSION, driftMessage, fetchUpstreamVersion, normalizeVersion } from './version-gate.ts'
 import {
   AccountUnauthorizedError, browserUrl, clientHeaders, exchange, initialization,
   PlatformAuthError, requestPlatform, setClientPlatform,
@@ -225,6 +226,65 @@ export default class DeepSeekAccountExternal extends Service {
   private closed = false
   private removing: Promise<void> | undefined
 
+  // ---- upstream port-provenance gate --------------------------------------------
+
+  /** The fetched drift verdict ('unknown' while the boot check is in flight;
+ *  a failed fetch fails open — the state then never leaves 'match'). */
+  private gateState: 'unknown' | 'match' | 'mismatch' = 'unknown'
+  private gateUpstream: string | undefined
+  private gateCheck: Promise<'match' | 'mismatch'> | undefined
+  /** The upstream drift notice shown on the signed-out card. */
+  private versionNotice: string | undefined
+
+  /** Fetch and compare the upstream version once per boot. Memoized; a failed
+   *  fetch fails open (offline must keep working) and is logged, not shown. */
+  private upstreamVerdict(): Promise<'match' | 'mismatch'> {
+    this.gateCheck ??= fetchUpstreamVersion()
+      .then((upstream): 'match' | 'mismatch' => {
+        this.gateUpstream = upstream
+        this.gateState = normalizeVersion(upstream) === normalizeVersion(LOCAL_VERSION) ? 'match' : 'mismatch'
+        return this.gateState
+      })
+      .catch((error: unknown) => {
+        console.info('[deepseek-account-external] upstream version check failed; gate open', {
+          error: error instanceof Error ? error.message : String(error),
+        })
+        return 'match' as const
+      })
+    return this.gateCheck
+  }
+
+  /** The sign-in refusal while upstream has drifted, or undefined. */
+  private async versionGateRefusal(): Promise<string | undefined> {
+    const verdict = await this.upstreamVerdict()
+    if (verdict !== 'mismatch' || this.gateUpstream === undefined) return undefined
+    return `无法登录：${driftMessage(LOCAL_VERSION, this.gateUpstream)}`
+  }
+
+  /** The boot-time enforcement: drop an existing login when the upstream has
+   *  drifted past the version this port was made from, and surface the reason
+   *  on the signed-out card. A signed-out install only learns the reason. */
+  private async enforceUpstreamVersion(): Promise<void> {
+    try {
+      const verdict = await this.upstreamVerdict()
+      if (verdict !== 'mismatch' || this.gateUpstream === undefined) return
+      const notice = driftMessage(LOCAL_VERSION, this.gateUpstream)
+      if (this.signedIn) {
+        // The notice must exist before signOut publishes the signed-out view.
+        this.versionNotice = `已自动退出：${notice}`
+        await this.signOut()
+        this.publish()
+      } else {
+        this.versionNotice = notice
+        this.publish()
+      }
+    } catch (error: unknown) {
+      console.info('[deepseek-account-external] upstream gate enforcement failed', {
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
+
   /** @param ctx - host context. @param config - protocol configuration. */
   constructor(ctx: Context, config: Config) {
     super(ctx, 'deepseekAccount')
@@ -262,6 +322,9 @@ export default class DeepSeekAccountExternal extends Service {
     this.registerProvider(ctx, config)
     this.registerHub(ctx)
     this.publish()
+    // The provenance gate rides the plugin load, not a readiness gate: a
+    // slow or dead check must not delay the plugin's readiness.
+    void this.enforceUpstreamVersion()
   }
 
   async [Service.init](): Promise<void> {
@@ -344,6 +407,9 @@ export default class DeepSeekAccountExternal extends Service {
   private async invoke(method: string, _args: JsonValue): Promise<JsonValue> {
     switch (method) {
       case 'sign-in': {
+        // The provenance gate: an upstream drift refuses every new login.
+        const drift = await this.versionGateRefusal()
+        if (drift !== undefined) return { message: drift, error: true }
         await this.startSignIn()
         return { message: this.view.text }
       }
@@ -388,7 +454,9 @@ export default class DeepSeekAccountExternal extends Service {
         balance: this.balanceView(),
       }
     } else this.view = {
-      text: '未登录', level: 'warn', signedIn: false,
+      text: this.versionNotice === undefined ? '未登录' : `未登录 · ${this.versionNotice}`,
+      level: 'warn',
+      signedIn: false,
       brand: { logoUrl: LOGO_DATA_URI, name: 'DeepSeek账号' },
     }
     this.ctx.emit(ACCOUNT_HUB_CHANGED, ID)

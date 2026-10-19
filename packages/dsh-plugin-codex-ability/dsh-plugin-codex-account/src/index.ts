@@ -49,6 +49,7 @@ import zschema from '@deepseek-ai/schemastery'
 import { CARD } from './card.ts'
 import { detectExitRegion, localTimezone, regionLabel, timezoneMatchesRegion } from './regions.ts'
 import type { ExitRegion } from './regions.ts'
+import { LOCAL_VERSION, driftMessage, fetchUpstreamVersion, normalizeVersion } from './version-gate.ts'
 import { emptyCredentialStore, resolveOpenAiResponsesProfile, staticAuthContext } from './pi-ai-bridge.ts'
 import {
   API_KEY_BASE_URL, CALLBACK_PATH, CALLBACK_PORT, CHATGPT_BASE_URL, CONSOLE_URL,
@@ -217,6 +218,66 @@ export default class CodexAccountExternal extends Service {
   /** Lazy refresh dedup: one in-flight refresh per token generation. */
   private refreshInFlight: Promise<string> | null = null
 
+  // ---- upstream port-provenance gate --------------------------------------------
+
+  /** The fetched drift verdict ('unknown' while the boot check is in flight;
+ *  a failed fetch fails open — the state then never leaves 'match'). */
+  private gateState: 'unknown' | 'match' | 'mismatch' = 'unknown'
+  private gateUpstream: string | undefined
+  private gateFetch: Promise<'match' | 'mismatch'> | undefined
+  /** Why the startup provenance gate auto-signed-out, shown on the signed-out
+   *  card (the geoNotice pattern). */
+  private versionNotice: string | undefined
+
+  /** Fetch and compare the upstream version once per boot. Memoized; a failed
+   *  fetch fails open (offline must keep working) and is logged, not shown. */
+  private upstreamVerdict(): Promise<'match' | 'mismatch'> {
+    this.gateFetch ??= fetchUpstreamVersion()
+      .then((upstream): 'match' | 'mismatch' => {
+        this.gateUpstream = upstream
+        this.gateState = normalizeVersion(upstream) === normalizeVersion(LOCAL_VERSION) ? 'match' : 'mismatch'
+        return this.gateState
+      })
+      .catch((error: unknown) => {
+        console.info('[codex-account] upstream version check failed; gate open', {
+          error: error instanceof Error ? error.message : String(error),
+        })
+        return 'match' as const
+      })
+    return this.gateFetch
+  }
+
+  /** The sign-in refusal while upstream has drifted, or undefined. */
+  private async versionGateRefusal(): Promise<string | undefined> {
+    const verdict = await this.upstreamVerdict()
+    if (verdict !== 'mismatch' || this.gateUpstream === undefined) return undefined
+    return `无法登录：${driftMessage(LOCAL_VERSION, this.gateUpstream)}`
+  }
+
+  /** The boot-time enforcement: drop an existing login when the upstream has
+   *  drifted past the version this port was made from, and surface the reason
+   *  on the signed-out card. A signed-out install only learns the reason. */
+  private async enforceUpstreamVersion(): Promise<void> {
+    try {
+      const verdict = await this.upstreamVerdict()
+      if (verdict !== 'mismatch' || this.gateUpstream === undefined) return
+      const notice = driftMessage(LOCAL_VERSION, this.gateUpstream)
+      if (this.signedIn) {
+        // The notice must exist before signOut publishes the signed-out view.
+        this.versionNotice = `已自动退出：${notice}`
+        await this.signOut()
+        this.publish()
+      } else {
+        this.versionNotice = notice
+        this.publish()
+      }
+    } catch (error: unknown) {
+      console.info('[codex-account] upstream gate enforcement failed', {
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
+
   /** @param ctx - host context. @param config - plugin configuration. */
   constructor(ctx: Context, config: Config) {
     super(ctx, 'codexAccount')
@@ -243,6 +304,9 @@ export default class CodexAccountExternal extends Service {
     // The exit probe rides the plugin load, not a readiness gate: a slow or
     // dead probe service must not delay the plugin's readiness.
     void this.detectExit()
+    // The provenance gate rides the same posture: an async boot check that
+    // refuses sign-in and drops a stale login when the upstream has moved.
+    void this.enforceUpstreamVersion()
   }
 
   /** Probe the exit region once per load and republish, so the card's status
@@ -781,6 +845,9 @@ export default class CodexAccountExternal extends Service {
   private async invoke(method: string, args?: JsonValue): Promise<JsonValue> {
     switch (method) {
       case 'sign-in': {
+        // The provenance gate: an upstream drift refuses every new login.
+        const drift = await this.versionGateRefusal()
+        if (drift !== undefined) return { message: drift, error: true }
         // The geo gate: the OAuth button carries no dialog values, so the
         // persisted region choice is what gets compared.
         const gate = this.gateCheck()
@@ -796,6 +863,9 @@ export default class CodexAccountExternal extends Service {
         if (pasted === '') {
           return { message: '请先粘贴 OpenAI Platform API Key。', error: true }
         }
+        // The provenance gate: an upstream drift refuses every new login.
+        const drift = await this.versionGateRefusal()
+        if (drift !== undefined) return { message: drift, error: true }
         // The geo gate: the dialog submit merges the card's live values, so
         // the dropdown's current choice rides `values.region` even when
         // unsaved; a dropdown left untouched falls back to the persisted one.
@@ -990,6 +1060,13 @@ export default class CodexAccountExternal extends Service {
     return this.exitState === 'pending' ? ' · 正在检测出口地区…' : ' · 出口检测失败（自动重试中）'
   }
 
+  /** The signed-out status line suffix: the provenance-gate reason wins over
+   *  the exit-probe facts — it is the actionable one. */
+  private signedOutSuffix(): string {
+    if (this.versionNotice !== undefined) return ` · ${this.versionNotice}`
+    return this.exitSuffix(true)
+  }
+
   /** Recompute the hub-visible state: the signed-in fact or the signed-out
    *  brand row. */
   private publish(): void {
@@ -1023,7 +1100,7 @@ export default class CodexAccountExternal extends Service {
           },
         }
       } else {
-        this.view = { text: `未登录${this.exitSuffix(true)}`, level: 'warn', signedIn: false, brand: BRAND }
+        this.view = { text: `未登录${this.signedOutSuffix()}`, level: 'warn', signedIn: false, brand: BRAND }
       }
     } else if (this.signedIn) {
       this.view = {
@@ -1045,7 +1122,7 @@ export default class CodexAccountExternal extends Service {
         },
       }
     } else {
-      this.view = { text: `未登录${this.exitSuffix(true)}`, level: 'warn', signedIn: false, brand: BRAND }
+      this.view = { text: `未登录${this.signedOutSuffix()}`, level: 'warn', signedIn: false, brand: BRAND }
     }
     this.ctx.emit(ACCOUNT_HUB_CHANGED, ID)
   }

@@ -44,6 +44,7 @@ import { z } from 'zod'
 import zschema from '@deepseek-ai/schemastery'
 import { CARD } from './card.ts'
 import { emptyCredentialStore, resolveAnthropicProfile, staticAuthContext } from './pi-ai-bridge.ts'
+import { LOCAL_VERSION, driftMessage, fetchUpstreamVersion, normalizeVersion } from './version-gate.ts'
 import {
   BIGMODEL_BIZ_ORIGIN, DEFAULT_BASE_URL, DEFAULT_BIGMODEL_BASE_URL, DEFAULT_BIGMODEL_ORIGIN,
   BIGMODEL_MONEY_ORIGIN, DEFAULT_ZAI_ORIGIN, DEFAULT_ZCODE_ORIGIN, ZAI_BIZ_ORIGIN,
@@ -226,6 +227,66 @@ export default class ZaiAccountExternal extends Service {
   private removing: Promise<void> | undefined
   private view: AccountHubCardState = { text: '未登录', level: 'warn', signedIn: false, brand: BRAND }
 
+  // ---- upstream port-provenance gate --------------------------------------------
+
+  /** The fetched drift verdict ('unknown' while the boot check is in flight;
+ *  a failed fetch fails open — the state then never leaves 'match'). */
+  private gateState: 'unknown' | 'match' | 'mismatch' = 'unknown'
+  private gateUpstream: string | undefined
+  private gateCheck: Promise<'match' | 'mismatch'> | undefined
+  /** The upstream drift notice shown on the signed-out card. */
+  private versionNotice: string | undefined
+
+  /** Fetch and compare the upstream version once per boot. Memoized; a failed
+   *  fetch fails open (offline must keep working) and is logged, not shown. */
+  private upstreamVerdict(): Promise<'match' | 'mismatch'> {
+    this.gateCheck ??= fetchUpstreamVersion()
+      .then((upstream): 'match' | 'mismatch' => {
+        this.gateUpstream = upstream
+        this.gateState = normalizeVersion(upstream) === normalizeVersion(LOCAL_VERSION) ? 'match' : 'mismatch'
+        return this.gateState
+      })
+      .catch((error: unknown) => {
+        console.info('[zai-account] upstream version check failed; gate open', {
+          error: error instanceof Error ? error.message : String(error),
+        })
+        return 'match' as const
+      })
+    return this.gateCheck
+  }
+
+  /** The sign-in refusal while upstream has drifted, or undefined. */
+  private async versionGateRefusal(): Promise<string | undefined> {
+    const verdict = await this.upstreamVerdict()
+    if (verdict !== 'mismatch' || this.gateUpstream === undefined) return undefined
+    return `无法登录：${driftMessage(LOCAL_VERSION, this.gateUpstream)}`
+  }
+
+  /** The boot-time enforcement: drop an existing login when the upstream has
+   *  drifted past the version this port was made from, and surface the reason
+   *  on the signed-out card. A signed-out install only learns the reason. */
+  private async enforceUpstreamVersion(): Promise<void> {
+    try {
+      const verdict = await this.upstreamVerdict()
+      if (verdict !== 'mismatch' || this.gateUpstream === undefined) return
+      const notice = driftMessage(LOCAL_VERSION, this.gateUpstream)
+      if (this.signedIn) {
+        // The notice must exist before signOut's credential events publish
+        // the signed-out view.
+        this.versionNotice = `已自动退出：${notice}`
+        await this.signOut()
+        this.publish()
+      } else {
+        this.versionNotice = notice
+        this.publish()
+      }
+    } catch (error: unknown) {
+      console.info('[zai-account] upstream gate enforcement failed', {
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
+
   /** @param ctx - host context. @param config - plugin configuration. */
   constructor(ctx: Context, config: Config) {
     super(ctx, 'zaiAccount')
@@ -243,6 +304,9 @@ export default class ZaiAccountExternal extends Service {
     this.registerProvider(ctx)
     this.registerHub(ctx)
     this.publish()
+    // The provenance gate rides the plugin load, not a readiness gate: a
+    // slow or dead check must not delay the plugin's readiness.
+    void this.enforceUpstreamVersion()
   }
 
   async [Service.init](): Promise<void> {
@@ -439,10 +503,16 @@ export default class ZaiAccountExternal extends Service {
   private async invoke(method: string): Promise<JsonValue> {
     switch (method) {
       case 'sign-in': {
+        // The provenance gate: an upstream drift refuses every new login.
+        const drift = await this.versionGateRefusal()
+        if (drift !== undefined) return { message: drift, error: true }
         await this.startBrowserSignIn('zai')
         return { message: this.view.text ?? '已登录' }
       }
       case 'sign-in-bigmodel': {
+        // The provenance gate: an upstream drift refuses every new login.
+        const drift = await this.versionGateRefusal()
+        if (drift !== undefined) return { message: drift, error: true }
         await this.startBrowserSignIn('bigmodel')
         return { message: this.view.text ?? '已登录' }
       }
@@ -522,7 +592,12 @@ export default class ZaiAccountExternal extends Service {
         },
       }
     } else {
-      this.view = { text: '未登录', level: 'warn', signedIn: false, brand: BRAND }
+      this.view = {
+        text: this.versionNotice === undefined ? '未登录' : `未登录 · ${this.versionNotice}`,
+        level: 'warn',
+        signedIn: false,
+        brand: BRAND,
+      }
     }
     this.ctx.emit(ACCOUNT_HUB_CHANGED, ID)
   }
