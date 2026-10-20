@@ -14,3 +14,9 @@ models/
 *.tsbuildinfo
 
 .DS_Store
+
+# Local-only plugin: reads the WorkBuddy desktop app's credential vault (via a
+# borrowed at-rest key) — must never be committed or pushed. Its history lives
+# on the local-only branch `local-workbuddy-main`; pushes touching it are
+# rejected by scripts/hooks/pre-push.
+packages/dsh-connect-workbuddy/

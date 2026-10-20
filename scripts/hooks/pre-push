@@ -38,6 +38,18 @@ while read -r _local_ref local_oid _remote_ref remote_oid; do
 
   hits=$(git show --name-only --pretty='format:' $leaves 2>/dev/null \
     | grep -E "$FORBIDDEN" || true)
+  # Content leak vector: a local `pnpm install` re-adds the plugin's importer
+  # to pnpm-lock.yaml (the workspace glob picks the ignored dir back up). A
+  # later "add everything" commit would then push the plugin's dependency
+  # graph — and break fresh-clone installs to boot. Only the lockfile is
+  # content-checked, so this hook's own source (which names the path) never
+  # trips the guard.
+  for c in $leaves; do
+    if git show --name-only --pretty='format:' "$c" 2>/dev/null | grep -q '^pnpm-lock.yaml$' \
+      && git show "$c" -- pnpm-lock.yaml 2>/dev/null | grep -q 'packages/dsh-connect-workbuddy'; then
+      hits="$hits pnpm-lock.yaml"
+    fi
+  done
   if [ -n "$hits" ]; then
     blocked=1
     echo "PUSH BLOCKED: packages/dsh-connect-workbuddy must never be pushed (local-only plugin)." >&2
