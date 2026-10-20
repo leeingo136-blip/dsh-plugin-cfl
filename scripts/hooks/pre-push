@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+#
+# Push guard (user directive, 2026-10-20): packages/dsh-connect-workbuddy is a
+# LOCAL-ONLY plugin. It borrows the WorkBuddy desktop app's at-rest decryption
+# key via ELECTRON_RUN_AS_NODE and reads the app's own credential vault — it
+# must never leave this machine, to ANY remote (gitee origin, github, or one
+# added later).
+#
+# Git runs this hook on every `git push` (force pushes included) with one
+# "<local-ref> <local-oid> <remote-ref> <remote-oid>" line per ref. We resolve
+# every commit that would leave the machine — anything not already on SOME
+# remote — and refuse the push if any of them touches the forbidden path.
+#
+# Bypass (deliberate, never accidental): `git push --no-verify`.
+
+set -u
+
+FORBIDDEN='^packages/dsh-connect-workbuddy/'
+
+ZERO_MATCH='^0+$'
+
+blocked=0
+
+while read -r _local_ref local_oid _remote_ref remote_oid; do
+  # The ref is being DELETED remotely — nothing leaves the machine.
+  if echo "$local_oid" | grep -qE "$ZERO_MATCH"; then
+    continue
+  fi
+
+  # Commits leaving the machine = reachable from the pushed tip but present on
+  # NO remote. This covers new branches (remote_oid all-zeros), normal
+  # fast-forwards, and force pushes alike, and it is conservative in the right
+  # direction: an over-broad range only re-checks commits we already have.
+  leaves=$(git rev-list "$local_oid" --not --remotes 2>/dev/null)
+  if [ -z "$leaves" ]; then
+    continue
+  fi
+
+  hits=$(git show --name-only --pretty='format:' $leaves 2>/dev/null \
+    | grep -E "$FORBIDDEN" || true)
+  if [ -n "$hits" ]; then
+    blocked=1
+    echo "PUSH BLOCKED: packages/dsh-connect-workbuddy must never be pushed (local-only plugin)." >&2
+    echo "  Offending commits:" >&2
+    for c in $leaves; do
+      touched=$(git show --name-only --pretty='format:' "$c" 2>/dev/null | grep -E "$FORBIDDEN" || true)
+      if [ -n "$touched" ]; then
+        echo "    $(git rev-parse --short "$c") $(git log -1 --format=%s "$c")" >&2
+      fi
+    done
+    echo "  The plugin reads the WorkBuddy app's credential vault via a borrowed" >&2
+    echo "  decryption key — publishing it is forbidden by the 2026-10-20 directive." >&2
+  fi
+done
+
+if [ "$blocked" -eq 1 ]; then
+  exit 1
+fi
+
+exit 0
