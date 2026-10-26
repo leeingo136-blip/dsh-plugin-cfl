@@ -1,0 +1,6 @@
+.wide { width: min(720px, 100%); max-height: min(80vh, 100%); }
+.body { overflow-y: auto; min-height: 160px; }
+
+/* 关系/记忆弹窗：列多时需要更宽 */
+.xwide { width: max-content; min-width: min(720px, 100%); max-width: 96vw; max-height: min(88vh, 100%); }
+.body { overflow: auto; }

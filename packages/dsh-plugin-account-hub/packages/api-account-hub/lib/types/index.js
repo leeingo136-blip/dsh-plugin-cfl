@@ -44,11 +44,10 @@ var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, 
  */
 import { Service } from '@deepseek-ai/cordis';
 import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol';
+import { ACCOUNT_HUB_TYPES } from "./types.js";
+export { ACCOUNT_HUB_TYPES };
 /** Cordis event an account plugin emits after its published state changes. */
 export const ACCOUNT_HUB_CHANGED = 'account-hub/changed';
-
-/** Every type value the hub accepts; anything else fails registration. */
-export const ACCOUNT_HUB_TYPES = ['chat', 'embedding', 'tts', 'asr'];
 /**
  * Registry of installed account plugins. Plugins register during their own
  * `apply` and dispose with their fiber; the browser only ever talks to this
@@ -115,6 +114,7 @@ export class AccountHub extends Service {
  * hub is the single browser-facing seam of every account plugin: listing and
  * watching goes through here, operations forward by account id, and provider
  * parameters land in the namespace the plugin declared at registration.
+ * @typert service accountHubController
  */
 let AccountHubController = (() => {
     let _classSuper = TypertRemoteService;

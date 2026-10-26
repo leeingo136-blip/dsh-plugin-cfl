@@ -66,7 +66,7 @@ export async function removeProviderProfile(operations, controller, target) {
 export function needsSetup(row, anyUsable) {
     // Account-backed routes draw their card inside the opened editor through
     // the provider-card seat; a bare key editor is meaningless for them.
-    if (anyUsable || row.entry.accountProvider === true)
+    if (anyUsable || row.entry.provider === 'deepseek-account')
         return false;
     if (row.entry.settingsPath.length > 0)
         return false;
@@ -288,6 +288,7 @@ function Loaded({ injected, renderSlot }) {
                                     t,
                                     readOnly: !state.writable,
                                     onClose: (changed) => { closeSetup(changed, target); },
+                                    ...(row.entry.provider === 'deepseek-account' ? { liveModels: row.liveModels } : {}),
                                 }), renderSlot('settings.models.provider-card', { provider: row.entry, configured: row.configured, keyConfigured: keyConfiguredOf(row) }, { entryKey: row.entry.settingsNs })] }, row.entry.provider));
                     }
                     const open = !addOpen && editing?.provider === row.entry.provider;
@@ -323,6 +324,7 @@ function Loaded({ injected, renderSlot }) {
                                     t,
                                     readOnly: !state.writable,
                                     onClose: (changed) => { closeEditor(changed, target); },
+                                    ...(row.entry.provider === 'deepseek-account' ? { liveModels: row.liveModels } : {}),
                                     // The provider-card seat is dispatched inside the opened
                                     // editor with draft access: a registrant's card renders
                                     // there and may bind controls to the draft, riding this
@@ -354,7 +356,10 @@ function Loaded({ injected, renderSlot }) {
                                                 setAddMode(next);
                                                 setVisited(previous => new Set([...previous, next]));
                                             } }))
-                                        : (_jsx("div", { className: styles['editorHeader'], children: _jsx("span", { className: styles['editorTitle'], children: t(mode === 'catalog' ? 'addCatalog' : 'addCustom') }) })), _jsx("p", { className: styles['advancedHint'], children: t(mode === 'catalog' ? 'addCatalogHint' : 'addCustomHint') })] }), mounted('catalog') && draft !== undefined
+                                        : (
+                                        // One mode alone has no switch to name it, so the card
+                                        // carries the mode as its title instead.
+                                        _jsx("div", { className: styles['editorHeader'], children: _jsx("span", { className: styles['editorTitle'], children: t(mode === 'catalog' ? 'addCatalog' : 'addCustom') }) })), _jsx("p", { className: styles['advancedHint'], children: t(mode === 'catalog' ? 'addCatalogHint' : 'addCustomHint') })] }), mounted('catalog') && draft !== undefined
                                 ? (_jsxs("div", { id: `${addId}-catalog-panel`, ...bothOffered ? { role: 'tabpanel', 'aria-labelledby': `${addId}-catalog` } : {}, hidden: mode !== 'catalog', className: styles['addPanel'], children: [_jsxs("div", { className: styles['field'], children: [_jsx("span", { className: styles['fieldLabel'], children: t('provider') }), _jsx("select", { className: `${styles['input']} ${styles['selectInput']}`, value: draft.target.provider, "aria-label": t('provider'), disabled: catalogBusy, onChange: (event) => {
                                                         const picked = addable.find(candidate => candidate.row.entry.provider === event.target.value);
                                                         /* v8 ignore next -- the select only lists addable rows */
@@ -372,7 +377,10 @@ function Loaded({ injected, renderSlot }) {
                                         }, onBusyChange: setCustomBusy }) }))
                                 : null] }))
                     : catalogOffered || customOffered
-                        ? (_jsx("div", { className: styles['addActions'], children: _jsxs("button", { type: "button", className: styles['addButton'], disabled: !state.writable || (!catalogEnabled && !customEnabled), onClick: () => {
+                        ? (
+                        // One entry for both ways to gain a provider; the card behind it
+                        // splits them. Full width, so it lines up with the rows above.
+                        _jsx("div", { className: styles['addActions'], children: _jsxs("button", { type: "button", className: styles['addButton'], disabled: !state.writable || (!catalogEnabled && !customEnabled), onClick: () => {
                                     const first = addable[0];
                                     const initial = catalogEnabled ? 'catalog' : 'custom';
                                     setSavedTarget(undefined);

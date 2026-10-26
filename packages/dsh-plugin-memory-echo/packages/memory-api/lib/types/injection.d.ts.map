@@ -1,0 +1,1 @@
+{"version":3,"file":"injection.d.ts","sourceRoot":"","sources":["../../src/injection.ts"],"names":[],"mappings":"AAGA,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,qBAAqB,CAAA;AAGlD,eAAO,MAAM,OAAO,aAAa,CAAA;AAgBjC,kBAAkB;AAClB,wBAAgB,WAAW,CAAC,IAAI,EAAE,MAAM,GAAG,OAAO,CAAwC;AAE1F,wBAAgB,cAAc,CAAC,GAAG,EAAE,OAAO,GAAG,MAAM,IAAI,CAuCvD"}

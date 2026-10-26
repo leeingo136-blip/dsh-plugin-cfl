@@ -1,0 +1,26 @@
+{
+  "armed": false,
+  "fireAt": null,
+  "remainingSeconds": 0,
+  "idleSeconds": 300,
+  "buffers": {
+    "user": 868,
+    "reasoning": 606,
+    "answer": 112
+  },
+  "lastEvent": "skipped",
+  "lastEventAt": "2026-10-24T07:02:50.054Z",
+  "lastSkip": "retrieval-failed",
+  "lastDreamAt": null,
+  "lastRoute": null,
+  "lastError": null,
+  "lastSeedWords": [
+    "说话",
+    "不用",
+    "漂在",
+    "我也",
+    "话说",
+    "我不"
+  ],
+  "dreaming": false
+}

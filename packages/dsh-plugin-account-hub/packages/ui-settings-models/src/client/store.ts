@@ -30,7 +30,6 @@ export interface ProviderDirectoryEntry {
   readonly settingsPath: readonly string[]
   readonly active: boolean
   readonly declared?: boolean
-  readonly accountProvider?: boolean
   readonly error?: string
 }
 
@@ -41,7 +40,7 @@ const PINNED_ACCOUNT_ROUTE = 'deepseek-account'
  *  ordinary routes last. Ties keep declaration order (stable sort). */
 function rowRank(entry: ProviderDirectoryEntry): number {
   if (entry.provider === PINNED_ACCOUNT_ROUTE) return 0
-  return entry.accountProvider === true ? 1 : 2
+  return entry.provider === 'deepseek-account' ? 0 : entry.provider === 'deepseek-official' ? 1 : 2
 }
 
 /**
@@ -64,7 +63,6 @@ export function joinProviderDirectory(
     settingsPath: [...entry.settingsPath],
     active: active.has(entry.provider),
     ...entry.declared === undefined ? {} : { declared: entry.declared },
-    ...entry.accountProvider === undefined ? {} : { accountProvider: entry.accountProvider },
     ...entry.error === undefined ? {} : { error: entry.error },
   }))
   for (const provider of registered) {
@@ -229,10 +227,31 @@ export class ModelsSettingsStore {
         entry,
         configured,
         removable,
-        apiKeyEnv: entry.accountProvider === true ? undefined : apiKeyEnvOf(namespace, entry.settingsPath, this.schema),
+        apiKeyEnv: entry.provider === 'deepseek-account' ? undefined : apiKeyEnvOf(namespace, entry.settingsPath, this.schema),
         credential: undefined,
       }
     })
+    // 真实登录态：官方账号 getState + hub 账号 state.signedIn。
+    // 未登录的账号 provider 不显示模型卡片；本地模型插件用 signedIn 表示“已加载”，
+    // 行本身只在加载后发布，因此不会被误隐藏。
+    let officialSignedIn = false
+    const hubSignedIn = new Map<string, boolean>()
+    try {
+      const remote = this.ctx.remote as unknown as {
+        account?: { getState(): Promise<{ ok: boolean, value?: { status?: string } }> }
+        accountHub?: { list(): Promise<{ ok: boolean, value?: Array<{ settingsNs?: string, state?: { signedIn?: boolean } }> }> }
+      }
+      const official = await remote.account?.getState()
+      officialSignedIn = official?.ok === true && official.value?.status === 'credential-stored'
+      const hubs = await remote.accountHub?.list()
+      if (hubs?.ok === true) {
+        for (const view of hubs.value ?? []) {
+          if (typeof view.settingsNs === 'string' && typeof view.state?.signedIn === 'boolean') {
+            hubSignedIn.set(view.settingsNs, view.state.signedIn)
+          }
+        }
+      }
+    } catch { /* 读取失败时按未登录处理 */ }
     // Account-backed routes ride a sign-in, not a stored key: their row is
     // visible while the live catalog still advertises their models, OR while
     // the namespace carries an explicit `models` value the user has managed —
@@ -240,12 +259,13 @@ export class ModelsSettingsStore {
     // groups from the session catalog, so catalog presence alone would hide
     // a group the user deliberately cleared). A signed-out account whose
     // catalog was never touched lists neither, so it stays hidden.
-    if (rows.some(row => row.entry.accountProvider === true)) {
+    if (rows.some(row => /^deepseek/i.test(row.entry.provider))) {
       const catalog = await this.ctx.remote.session.modelCatalog()
       for (const row of rows) {
-        if (row.entry.accountProvider !== true) continue
+        if (!/^deepseek/i.test(row.entry.provider)) continue
         const liveGroup = catalog.ok
-          ? catalog.value.groups.find(group => group.id === row.entry.provider)
+          ? catalog.value.groups.find((group: { id: string, models: unknown[] }) =>
+              group.id === row.entry.provider || group.id === 'deepseek-account')
           : undefined
         const live = liveGroup !== undefined && liveGroup.models.length > 0
         if (live) {
@@ -253,24 +273,18 @@ export class ModelsSettingsStore {
           // The live rows ride along for the editor's inherited fallback:
           // only id/name survive the host catalog projection, so inherited
           // rows lose per-model caps until the user adopts or edits them.
-          row.liveModels = liveGroup.models.map(model => ({
+          row.liveModels = liveGroup.models.map((model: { id: string, name?: string }) => ({
             id: model.id,
             ...(typeof model.name === 'string' && model.name.length > 0 ? { name: model.name } : {}),
           }))
           continue
         }
-        const namespace = namespaces.get(row.entry.settingsNs)
-        // The `user` layer, not `value`: schemastery materializes schema
-        // defaults into the mounted fiber config, so `value.models` is an
-        // empty array even when the user never wrote the field — reading
-        // `value` here would pin every account card visible forever. The
-        // user layer only carries genuine writes (adoption, deliberate
-        // clearing, or the pre-cleanup orphans).
-        row.accountAvailable = namespace !== undefined
-          && this.schema.getPath(namespace.user, [...row.entry.settingsPath, 'models']) !== undefined
+        // 未登录时 catalog 不提供该账号的模型组：卡片不应继续显示。
+        // 不再用本地 `models` 配置兜底，否则退出登录后卡片仍会残留。
+        row.accountAvailable = false
       }
     }
-    const credentialRows = rows.filter(row => row.entry.accountProvider !== true)
+    const credentialRows = rows.filter(row => row.entry.provider !== 'deepseek-account')
     const refs = [...new Set(credentialRows.map(row => row.apiKeyEnv ?? deriveKeyRef(row.entry.provider)))]
     let credentials: Record<string, CredentialInfo> = {}
     let credentialError: string | null = null
@@ -288,8 +302,11 @@ export class ModelsSettingsStore {
       s.error = null
       s.credentialError = credentialError
       s.writable = writable
-      s.rows = rows.filter(row => row.entry.accountProvider !== true || row.accountAvailable === true).map((row) => {
-        if (row.entry.accountProvider === true) return row
+      s.rows = rows
+        .filter(row => !/^deepseek/i.test(row.entry.provider) || (officialSignedIn && row.accountAvailable === true))
+        .filter(row => hubSignedIn.get(row.entry.settingsNs) !== false)
+        .map((row) => {
+        if (row.entry.provider === 'deepseek-account') return row
         const named = row.apiKeyEnv === undefined ? undefined : credentials[row.apiKeyEnv]
         const derived = row.apiKeyEnv !== undefined ? undefined : credentials[deriveKeyRef(row.entry.provider)]
         return {
@@ -326,7 +343,7 @@ export function providerUsable(row: ProviderRow): boolean {
   if (!row.entry.active) return false
   // An account-backed route authenticates through its sign-in, not a stored
   // key: usable exactly while its catalog group is live.
-  if (row.entry.accountProvider === true) return row.accountAvailable === true
+  if (row.entry.provider === 'deepseek-account') return row.accountAvailable === true
   if (row.apiKeyEnv === undefined) return true
   return row.credential?.configured === true
 }

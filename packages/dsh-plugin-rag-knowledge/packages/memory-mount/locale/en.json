@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Knowledge Mount",
+    "description": "Client-side remote mount: publishes the knowledge namespace before the settings UI activates."
+  }
+}

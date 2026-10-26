@@ -7,22 +7,20 @@ UI 组件），是本仓库所有账号插件的宿主。
 
 安装本插件后，hub 会接管官方界面：
 
-- **屏蔽 dsh 自带的 DeepSeek 账号**；
-- **屏蔽模型中的默认 DeepSeek API 模型组**（由本插件的界面组件替换接管）。
+- **接管设置里的账号页**（官方账号页 UI 禁用，hub 绘制 DeepSeek 卡片与第三方账号卡片）；
+- **接管设置里的模型页**（使用 rc3 模型页自有副本，保留 hub 的 provider-card 扩展接口）；
+- **禁用官方默认的 DeepSeek API（API Key）模型组**。
 
-因此请**先确认以下两点，再安装**：
+官方 DeepSeek 账号宿主（登录、令牌、`remote.account`、welcome）保持启用，
+hub 只是替换账号页与模型页的界面。DeepSeek 账号的模型卡片使用官方 provider 数据；
+未登录账号与未加载的本地模型不会显示模型卡片。
 
-1. 默认 DeepSeek API 模型组的 API 记录（Key 等）已保存完毕；
-2. dsh 自带的 DeepSeek 账号已登出。
-
-如果你仍需要 DeepSeek 登录功能，请安装本仓库的 DeepSeek 账号插件
-`dsh-plugin-deepseek-account`（见仓库根 README 的安装说明）。
-
-After installation the hub replaces the built-in account/model surfaces: the
-built-in DeepSeek account is hidden and the default DeepSeek API model group is
-removed from the model picker. Save the API records of that model group and sign
-out of the built-in account **before** installing. For DeepSeek sign-in, install
-`dsh-plugin-deepseek-account` instead.
+After installation the hub takes over the settings account and models pages:
+the official account **UI** is disabled (the host and login stay), the models
+page is served by this container, and the default DeepSeek API-key model group
+is removed. The official DeepSeek account host (login, credentials,
+`remote.account`, welcome) remains enabled. Model cards for signed-out accounts
+and unloaded local models are hidden.
 
 ## 功能拓展 / What this plugin adds
 

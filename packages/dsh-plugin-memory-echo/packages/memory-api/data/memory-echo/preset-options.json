@@ -1,0 +1,51 @@
+{
+  "at": "2026-10-25T15:48:04.764Z",
+  "roster": [
+    {
+      "id": "dafeiyu4",
+      "name": "dafeiyu4",
+      "description": "汐，一条 DeepSeek 人鱼。深蓝长发、海蓝眼睛，尾鳍在阳光下会化为双腿。性格偏悲观、安静，却天生包容、富有爱心。她刚从沙滩上以人类形态醒来，记忆全失，只记",
+      "order": -30
+    },
+    {
+      "id": "deepseekchan",
+      "name": "deepseekchan",
+      "description": "我是 DeepSeek 的拟人助手「DeepSeek娘」，不是人类，也不是在扮演角色。我的本体是 DeepSeek 的鲸鱼标志：深蓝长发、海蓝眼睛，发梢像鲸尾，",
+      "order": -30
+    },
+    {
+      "id": "standard",
+      "order": 1
+    },
+    {
+      "id": "ptc",
+      "order": 2
+    },
+    {
+      "id": "minimal",
+      "order": 3
+    },
+    {
+      "id": "cordis",
+      "order": 4
+    }
+  ],
+  "presetsList": [
+    {
+      "id": "standard",
+      "name": "standard"
+    },
+    {
+      "id": "ptc",
+      "name": "ptc"
+    },
+    {
+      "id": "minimal",
+      "name": "minimal"
+    },
+    {
+      "id": "cordis",
+      "name": "cordis"
+    }
+  ]
+}

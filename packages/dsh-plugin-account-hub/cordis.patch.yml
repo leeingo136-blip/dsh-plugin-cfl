@@ -1,86 +1,34 @@
-# External account-hub container. The three rows keep the ids and package
-# names the harness web patch used before the extraction, so account plugins,
-# the settings shell, and the client module table resolve them unchanged.
+# Unified account hub（保留官方账号宿主版）。
 #
-# The official account UI (`@deepseek-ai/dsh-client-ui-settings-account`)
-# registers every built-in DeepSeek account surface in one apply() — the
-# `settings.section[id=account]` column, the settings launcher menu, the
-# models-page sign-in seat, the quota notice, and the desktop onboarding
-# overlays. This container's `ui-account-hub` registers the same
-# `settings.section[id=account]` seat (order -10), so the official plugin is
-# disabled wholesale: slots can only be appended, never removed, and letting
-# the declarer not load is the clean removal semantics the loader already
-# supports. Consequence: DeepSeek sign-in/out UI, the quota notice, and the
-# onboarding overlays all disappear with it (the host-side account provider
-# route is unaffected). Re-enable it by removing this row.
+# 与旧版的关键区别：
+# - 不再禁用官方 DeepSeek 账号插件（ui-settings-account / deepseek-account /
+#   account-controller / llm-deepseek / llm-deepseek-account 全部保持启用）；
+#   官方继续负责登录、令牌、remote.account 与 welcome 判断。
+# - 不再插入 account-desktop-shim 伪装登录态，主页欢迎界面由官方真实状态决定。
+# - 模型页由本容器接管：@dsh/ui-settings-models 为旧 hub 模型页移植到 rc3，
+#   保留我们给其他插件新增的模型位接口（provider-card owner / editor / zone /
+#   footer）；DeepSeek 账号模型卡片继续由官方账号 provider 数据驱动。
+# - 账号页由 hub 接管：官方账号页 UI 禁用，hub 绘制 DeepSeek 官方账号卡片
+#   （数据来自 remote.account）与第三方账号卡片。
+# 只禁用官方账号页 UI：官方宿主（deepseek-account / account-controller /
+# llm-deepseek）保持启用，welcome 与登录令牌仍走官方；账号页由 hub 绘制。
 - id: ui-settings-account
   disabled: true
 
-# On the official app this row exists (the stock models page is built in);
-# disable it there so only this container's copy mounts — otherwise the
-# insert below duplicates the id and both pages mount side by side. On the
-# private harness (where the package was extracted away) the row is absent
-# and the loader warns and skips this retarget.
 - id: ui-settings-models
   disabled: true
 
-# The stock DeepSeek account product rows. The private harness deleted these
-# four rows from the dsh-base / web-app patches (补13/补15), so on this host
-# they are simply absent and each retarget below is a harmless skip. On the
-# official app they still exist and must be disabled for two hard reasons:
-#
-# 1. `deepseek-account` (platform) provides the named service
-#    `deepseekAccount`; cordis throws `service "deepseekAccount" has been
-#    registered at <deepseek-account>` when the external DeepSeek account
-#    plugin then tries `super(ctx, 'deepseekAccount')` — which is why the
-#    external plugin silently never constructed under the stock host. Its
-#    consumer `account-controller` hard-injects the same name and would pend
-#    forever once the platform row is disabled, so it goes too (the private
-#    harness dropped both; web-search-deepseek and product-analytics only
-#    soft-get the service and stay safe).
-#    BUT the stock desktop shell's boot calls the `account` Remote namespace
-#    (welcome-backend read(): `account.getState()` decides whether the native
-#    welcome/sign-in window opens); with account-controller gone that RPC 404s
-#    and the app crashes with "desktop welcome: Web request failed". The
-#    inserted `account-desktop-shim` row re-provides the namespace as a static
-#    signed-in stub, so the boot RPC answers and `needsWelcome` stays false —
-#    the same observable outcome as the private harness, which deleted the
-#    welcome window outright: boot goes straight into the workspace.
-# 2. `llm-deepseek` is the default "DeepSeek API" api-key group on the models
-#    page, and `llm-deepseek-account` registers the inference provider id
-#    `deepseek-account` — the exact id the external plugin registers — so
-#    leaving either up keeps the stock rows (and would collide on provider
-#    registration once the external plugin constructs).
-- id: deepseek-account
-  disabled: true
-- id: account-controller
-  disabled: true
+# 删除官方默认的「DeepSeek API」（API Key）模型卡片；账号卡片
+# （llm-deepseek-account / deepseek-official）保留。
 - id: llm-deepseek
   disabled: true
-- id: llm-deepseek-account
-  disabled: true
 
-# The four component rows ride an explicit `insert:` — a bare `- id:` entry
-# only retargets an existing row and is silently ignored for a new one. The
-# mount row precedes the column row: it parks on the bare remote carrier and
-# mounts the hub's remote contribution, so `ui-account-hub` (which injects
-# `remote.accountHub`) unparks only once the namespace methods exist — the
-# same shape as the stock app, where the remotes assembly mounts every
-# namespace ahead of the consuming UI plugins.
 - insert:
     - id: account-hub
       name: '@dsh/api-account-hub'
-    - id: account-desktop-shim
-      name: '@dsh/account-desktop-shim'
     - id: account-hub-mount
       name: '@dsh/account-hub-mount'
     - id: ui-account-hub
       name: '@dsh/ui-account-hub'
-    # The id must differ from the stock row's: the plugin manager addresses a
-    # component by finding exactly one patch row with its id — the retarget
-    # row above plus an insert of the same id would leave two candidates and
-    # the row renders read-only ("patch cannot address this one uniquely").
-    # Nothing references the entry id (the settings section registers the
-    # hardcoded id 'models'), so the rename is cosmetic to the manager only.
     - id: ui-settings-models-ext
       name: '@dsh/ui-settings-models'

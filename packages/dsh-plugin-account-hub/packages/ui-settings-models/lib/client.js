@@ -4,11 +4,11 @@ window.__ModuleLoader__.load({
 		var module = { exports: {} };
 		var exports = module.exports;
 		Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
-		let react_jsx_runtime = require("react/jsx-runtime");
 		let react = require("react");
 		let _deepseek_ai_dsh_client_ui_primitives = require("@deepseek-ai/dsh-client-ui-primitives");
+		let react_jsx_runtime = require("react/jsx-runtime");
 		let _deepseek_ai_dsh_client_store = require("@deepseek-ai/dsh-client-store");
-		//#region lib/types/client/apiKey.js
+		//#region src/client/apiKey.ts
 		/**
 		* Browser-side judgement of a typed API key.
 		* @module @dsh/ui-settings-models/apiKey
@@ -54,8 +54,8 @@ window.__ModuleLoader__.load({
 			if (!LEGAL_API_KEY.test(value)) return "keyIllegalCharacters";
 		}
 		//#endregion
-		//#region \0dsh-css:/Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/deep-seek-harness-plugin/dsh-plugin-account-hub/packages/ui-settings-models/src/client/ModelsSection.module.css.mjs
-		const css$2 = "._65lT0G_section{max-width:720px;color:var(--dsw-alias-label-primary);flex-direction:column;gap:12px;display:flex}._65lT0G_title{color:var(--dsw-alias-label-primary);margin:0;font-size:16px;font-weight:500;line-height:24px}._65lT0G_intro{color:var(--dsw-alias-label-tertiary);margin:0;font-size:14px;line-height:22px}._65lT0G_notice{color:var(--dsw-alias-state-warn-label);margin:0;font-size:12px;line-height:18px}._65lT0G_savedNotice{color:var(--dsw-alias-state-success-primary);margin:0;font-size:12px;line-height:18px}._65lT0G_rows{flex-direction:column;gap:8px;margin:12px 0 0;padding:0;list-style:none;display:flex}._65lT0G_rowCard{border:.5px solid var(--dsw-alias-settings-card-stroke);background:var(--dsw-alias-settings-card-fill);border-radius:var(--dsw-radius-xl);flex-direction:column;gap:12px;padding:12px 14px;display:flex}._65lT0G_rowHead{align-items:center;gap:10px;display:flex}._65lT0G_rowIdentity{align-items:center;gap:6px;min-width:0;display:inline-flex}._65lT0G_rowName{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:500;line-height:22px}._65lT0G_rowTag{border:.5px solid var(--dsw-alias-border-l3);border-radius:var(--dsw-radius-xs);color:var(--dsw-alias-label-secondary);flex:none;padding:1px 6px;font-size:11px;line-height:16px}._65lT0G_credentialDot{box-sizing:border-box;corner-shape:round;border-radius:50%;flex:none;width:8px;height:8px;display:inline-block}._65lT0G_credentialDotConfigured{background:var(--dsw-alias-state-success-primary)}._65lT0G_credentialDotMissing{background:var(--dsw-alias-state-error-primary)}._65lT0G_rowActions{align-items:center;gap:4px;margin-left:auto;display:inline-flex}._65lT0G_primaryButton,._65lT0G_secondaryButton,._65lT0G_addButton{box-sizing:border-box;border-radius:var(--dsw-radius-md);height:36px;font:inherit;cursor:pointer;border:none;justify-content:center;align-items:center;gap:4px;padding:0 14px;font-size:14px;line-height:22px;display:inline-flex}._65lT0G_primaryButton{background:var(--dsw-alias-button-primary-fill);color:var(--dsw-alias-label-primary-foreground)}._65lT0G_primaryButton:hover:not(:disabled){background:var(--dsw-alias-button-primary-hover)}._65lT0G_secondaryButton,._65lT0G_addButton{border:.5px solid var(--dsw-alias-border-l3);color:var(--dsw-alias-label-primary);background:0 0}._65lT0G_secondaryButton:hover:not(:disabled),._65lT0G_addButton:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}._65lT0G_secondaryButton:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-solid)}._65lT0G_dangerButton{box-sizing:border-box;border-radius:var(--dsw-radius-md);height:36px;color:var(--dsw-alias-state-error-primary);font:inherit;cursor:pointer;background:0 0;border:none;justify-content:center;align-items:center;padding:0 14px;font-size:14px;line-height:22px;display:inline-flex}._65lT0G_dangerButton:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-danger)}._65lT0G_rowActions ._65lT0G_secondaryButton,._65lT0G_rowActions ._65lT0G_dangerButton{border-radius:var(--dsw-radius-sm);height:28px;padding:0 10px;font-size:12px;line-height:18px}._65lT0G_primaryButton:disabled,._65lT0G_secondaryButton:disabled,._65lT0G_dangerButton:disabled,._65lT0G_addButton:disabled,._65lT0G_linkButton:disabled,._65lT0G_addModelButton:disabled{opacity:.4;cursor:default}._65lT0G_primaryButton:focus-visible,._65lT0G_secondaryButton:focus-visible,._65lT0G_dangerButton:focus-visible,._65lT0G_addButton:focus-visible,._65lT0G_linkButton:focus-visible,._65lT0G_addModelButton:focus-visible,._65lT0G_iconButton:focus-visible,._65lT0G_customizedSummary:focus-visible{box-shadow:0 0 0 2px var(--dsw-focus-ring-color,var(--dsw-alias-state-business-primary));outline:none}._65lT0G_editor{border-radius:var(--dsw-radius-lg);background:var(--dsw-alias-bg-module-platform);flex-direction:column;gap:14px;padding:14px 16px;display:flex}._65lT0G_editorHeader{align-items:baseline;gap:8px;display:flex}._65lT0G_editorTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:500;line-height:22px}._65lT0G_editorRoute{color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:18px}._65lT0G_field{flex-direction:column;gap:6px;display:flex}._65lT0G_fieldLabel{color:var(--dsw-alias-label-secondary);align-items:center;gap:10px;font-size:12px;font-weight:500;line-height:18px;display:inline-flex}._65lT0G_linkButton{box-sizing:border-box;border-radius:var(--dsw-radius-sm);height:28px;color:var(--dsw-alias-label-tertiary);font:inherit;cursor:pointer;background:0 0;border:none;align-items:center;padding:0 10px;font-size:12px;line-height:18px;display:inline-flex}._65lT0G_linkButton:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-secondary)}._65lT0G_advancedHint{color:var(--dsw-alias-label-tertiary);margin:0;font-size:12px;line-height:18px}._65lT0G_editorActions{justify-content:flex-end;gap:8px;display:flex}._65lT0G_addBlock{flex-direction:column;gap:12px;display:flex}._65lT0G_addActions{display:flex}._65lT0G_addButton{border:1px dashed var(--dsw-alias-border-l3);border-radius:var(--dsw-radius-lg);flex:1 1 0;gap:6px;min-width:180px;height:44px}._65lT0G_addModes{flex-direction:column;align-items:flex-start;gap:8px;display:flex}._65lT0G_addPanel{flex-direction:column;gap:14px;display:flex}._65lT0G_addPanel[hidden]{display:none}._65lT0G_addCard,._65lT0G_setupCard{border-radius:var(--dsw-radius-lg);background:var(--dsw-alias-bg-module-platform);flex-direction:column;gap:14px;padding:14px 16px;list-style:none;display:flex}._65lT0G_addCard ._65lT0G_editor,._65lT0G_setupCard ._65lT0G_editor{background:0 0;padding:0}._65lT0G_customized{border-top:.5px solid var(--dsw-alias-border-l2);padding-top:10px}._65lT0G_customizedSummary{border-radius:var(--dsw-radius-sm);cursor:pointer;width:fit-content;color:var(--dsw-alias-label-secondary);align-items:center;gap:6px;margin-left:-4px;padding:2px 4px;font-size:12px;font-weight:500;line-height:18px;list-style:none;display:flex}._65lT0G_customizedSummary::-webkit-details-marker{display:none}._65lT0G_customizedSummary:before{content:\"\";border-bottom:1.5px solid;border-right:1.5px solid;width:5px;height:5px;transition:transform .12s;transform:rotate(-45deg)translate(-1px,-1px)}._65lT0G_customized[open]>._65lT0G_customizedSummary:before{transform:rotate(45deg)translate(-1px,-1px)}._65lT0G_customizedSummary:hover{color:var(--dsw-alias-label-primary)}._65lT0G_customizedBody{flex-direction:column;gap:12px;padding-top:12px;display:flex}._65lT0G_modelCatalog{border-top:.5px solid var(--dsw-alias-border-l2);flex-direction:column;gap:10px;padding-top:12px;display:flex}._65lT0G_modelCatalogHeading{flex-direction:column;gap:2px;display:flex}._65lT0G_modelCatalogTitle{color:var(--dsw-alias-label-secondary);font-size:12px;font-weight:500;line-height:18px}._65lT0G_modelCatalogMeta,._65lT0G_modelEmpty{color:var(--dsw-alias-label-tertiary);margin:0;font-size:12px;line-height:18px}._65lT0G_modelList{flex-direction:column;gap:8px;display:flex}._65lT0G_modelListHead{justify-content:space-between;align-items:flex-start;gap:12px;display:flex}._65lT0G_modelEntry{border:.5px solid var(--dsw-alias-border-l4);border-radius:var(--dsw-radius-lg);padding:6px}._65lT0G_modelRow{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto auto;align-items:center;gap:6px;display:grid}._65lT0G_iconButton{box-sizing:border-box;border-radius:var(--dsw-radius-sm);width:28px;height:28px;color:var(--dsw-alias-label-tertiary);cursor:pointer;background:0 0;border:none;justify-content:center;align-items:center;display:inline-flex}._65lT0G_iconButton:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._65lT0G_iconButton:disabled{cursor:default;opacity:.4}._65lT0G_iconButtonDanger:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}._65lT0G_modelAdvanced{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:8px 4px 2px;display:grid}._65lT0G_modelField{flex-direction:column;gap:4px;min-width:0;display:flex}._65lT0G_modelInputTypes{border:none;grid-column:1/-1;min-width:0;margin:0;padding:0}._65lT0G_modelInputTypes legend{margin-bottom:4px;padding:0}._65lT0G_modelInputChoices{flex-wrap:wrap;align-items:center;gap:16px;min-height:32px;display:flex}._65lT0G_modelFieldLabel{color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:18px}._65lT0G_modelEmpty{border:1px dashed var(--dsw-alias-border-l3);border-radius:var(--dsw-radius-lg);text-align:center;padding:12px}._65lT0G_addModelButton{box-sizing:border-box;border:.5px solid var(--dsw-alias-border-l3);border-radius:var(--dsw-radius-sm);height:28px;color:var(--dsw-alias-label-primary);font:inherit;cursor:pointer;background:0 0;align-self:flex-start;align-items:center;gap:4px;padding:0 10px;font-size:12px;line-height:18px;display:inline-flex}._65lT0G_addModelButton:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}._65lT0G_input{box-sizing:border-box;border:.5px solid var(--dsw-alias-border-l4);border-radius:var(--dsw-radius-md);width:100%;height:32px;font:inherit;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);padding:0 10px;font-size:14px;line-height:22px}select._65lT0G_input{cursor:pointer;max-width:240px}._65lT0G_input:focus{border-color:var(--dsw-alias-state-business-primary);outline:none}._65lT0G_input::placeholder{color:var(--dsw-alias-label-dimmed)}._65lT0G_input:disabled{opacity:.6;cursor:default}._65lT0G_selectInput{appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%2381858C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\");background-position:right 12px center;background-repeat:no-repeat;background-size:12px 12px;padding-right:32px}._65lT0G_error{color:var(--dsw-alias-state-error-primary);margin:0;font-size:12px;line-height:18px}._65lT0G_deleteDialog{width:min(480px,100%)}._65lT0G_deleteConfirm:not(:disabled){border-color:var(--dsw-alias-state-error-primary);color:var(--dsw-alias-state-error-primary)}._65lT0G_deleteConfirm:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-danger)}._65lT0G_hiddenLabel{clip:rect(0 0 0 0);white-space:nowrap;width:1px;height:1px;position:absolute;overflow:hidden}@media (prefers-reduced-motion:reduce){._65lT0G_customizedSummary:before,._65lT0G_switchThumb{transition:none}}._65lT0G_fetchDialog{--dsh-scrollbar-thumb:var(--dsw-alias-scrollbar-bg-l2);--dsh-scrollbar-thumb-hover:var(--dsw-alias-scrollbar-hover-l2);max-width:520px}._65lT0G_candidateToolbar{align-items:center;gap:8px;margin-bottom:6px;display:flex}._65lT0G_candidateSearch{flex:240px;min-width:0}._65lT0G_candidateList{flex-direction:column;gap:2px;max-height:320px;margin:0;padding:0;list-style:none;display:flex;overflow-y:auto}._65lT0G_candidate{border-radius:var(--dsw-radius-md)}._65lT0G_candidateLabel{cursor:pointer;align-items:center;gap:8px;padding:6px 8px;display:flex}._65lT0G_candidateId{min-width:0;font-family:var(--ds-font-family-code);text-overflow:ellipsis;white-space:nowrap;flex:auto;font-size:13px;overflow:hidden}._65lT0G_candidateEmpty{color:var(--dsw-alias-label-secondary);text-align:center;margin:24px 0;font-size:13px;line-height:20px}";
+		//#region \0dsh-css:/Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/deep-seek-harness-plugin/packages/dsh-plugin-account-hub/packages/ui-settings-models/src/client/ModelsSection.module.css.mjs
+		const css$2 = ".-G9EfW_section{max-width:720px;color:var(--dsw-alias-label-primary);flex-direction:column;gap:12px;display:flex}.-G9EfW_title{color:var(--dsw-alias-label-primary);margin:0;font-size:16px;font-weight:500;line-height:24px}.-G9EfW_intro{color:var(--dsw-alias-label-tertiary);margin:0;font-size:14px;line-height:22px}.-G9EfW_notice{color:var(--dsw-alias-state-warn-label);margin:0;font-size:12px;line-height:18px}.-G9EfW_savedNotice{color:var(--dsw-alias-state-success-primary);margin:0;font-size:12px;line-height:18px}.-G9EfW_rows{flex-direction:column;gap:8px;margin:12px 0 0;padding:0;list-style:none;display:flex}.-G9EfW_rowCard{border:.5px solid var(--dsw-alias-settings-card-stroke);background:var(--dsw-alias-settings-card-fill);border-radius:var(--dsw-radius-xl);flex-direction:column;gap:12px;padding:12px 14px;display:flex}.-G9EfW_rowHead{align-items:center;gap:10px;display:flex}.-G9EfW_rowIdentity{align-items:center;gap:6px;min-width:0;display:inline-flex}.-G9EfW_rowName{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:500;line-height:22px}.-G9EfW_rowTag{border:.5px solid var(--dsw-alias-border-l3);border-radius:var(--dsw-radius-xs);color:var(--dsw-alias-label-secondary);flex:none;padding:1px 6px;font-size:11px;line-height:16px}.-G9EfW_credentialDot{box-sizing:border-box;corner-shape:round;border-radius:50%;flex:none;width:8px;height:8px;display:inline-block}.-G9EfW_credentialDotConfigured{background:var(--dsw-alias-state-success-primary)}.-G9EfW_credentialDotMissing{background:var(--dsw-alias-state-error-primary)}.-G9EfW_rowActions{align-items:center;gap:4px;margin-left:auto;display:inline-flex}.-G9EfW_primaryButton,.-G9EfW_secondaryButton,.-G9EfW_addButton{box-sizing:border-box;border-radius:var(--dsw-radius-md);height:36px;font:inherit;cursor:pointer;border:none;justify-content:center;align-items:center;gap:4px;padding:0 14px;font-size:14px;line-height:22px;display:inline-flex}.-G9EfW_primaryButton{background:var(--dsw-alias-button-primary-fill);color:var(--dsw-alias-label-primary-foreground)}.-G9EfW_primaryButton:hover:not(:disabled){background:var(--dsw-alias-button-primary-hover)}.-G9EfW_secondaryButton,.-G9EfW_addButton{border:.5px solid var(--dsw-alias-border-l3);color:var(--dsw-alias-label-primary);background:0 0}.-G9EfW_secondaryButton:hover:not(:disabled),.-G9EfW_addButton:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}.-G9EfW_secondaryButton:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-solid)}.-G9EfW_dangerButton{box-sizing:border-box;border-radius:var(--dsw-radius-md);height:36px;color:var(--dsw-alias-state-error-primary);font:inherit;cursor:pointer;background:0 0;border:none;justify-content:center;align-items:center;padding:0 14px;font-size:14px;line-height:22px;display:inline-flex}.-G9EfW_dangerButton:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-danger)}.-G9EfW_rowActions .-G9EfW_secondaryButton,.-G9EfW_rowActions .-G9EfW_dangerButton{border-radius:var(--dsw-radius-sm);height:28px;padding:0 10px;font-size:12px;line-height:18px}.-G9EfW_primaryButton:disabled,.-G9EfW_secondaryButton:disabled,.-G9EfW_dangerButton:disabled,.-G9EfW_addButton:disabled,.-G9EfW_linkButton:disabled,.-G9EfW_addModelButton:disabled{opacity:.4;cursor:default}.-G9EfW_primaryButton:focus-visible,.-G9EfW_secondaryButton:focus-visible,.-G9EfW_dangerButton:focus-visible,.-G9EfW_addButton:focus-visible,.-G9EfW_linkButton:focus-visible,.-G9EfW_addModelButton:focus-visible,.-G9EfW_iconButton:focus-visible,.-G9EfW_customizedSummary:focus-visible{box-shadow:0 0 0 2px var(--dsw-focus-ring-color,var(--dsw-alias-state-business-primary));outline:none}.-G9EfW_editor{border-radius:var(--dsw-radius-lg);background:var(--dsw-alias-bg-module-platform);flex-direction:column;gap:14px;padding:14px 16px;display:flex}.-G9EfW_editorHeader{align-items:baseline;gap:8px;display:flex}.-G9EfW_editorTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:500;line-height:22px}.-G9EfW_editorRoute{color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:18px}.-G9EfW_field{flex-direction:column;gap:6px;display:flex}.-G9EfW_fieldLabel{color:var(--dsw-alias-label-secondary);align-items:center;gap:10px;font-size:12px;font-weight:500;line-height:18px;display:inline-flex}.-G9EfW_linkButton{box-sizing:border-box;border-radius:var(--dsw-radius-sm);height:28px;color:var(--dsw-alias-label-tertiary);font:inherit;cursor:pointer;background:0 0;border:none;align-items:center;padding:0 10px;font-size:12px;line-height:18px;display:inline-flex}.-G9EfW_linkButton:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-secondary)}.-G9EfW_advancedHint{color:var(--dsw-alias-label-tertiary);margin:0;font-size:12px;line-height:18px}.-G9EfW_editorActions{justify-content:flex-end;gap:8px;display:flex}.-G9EfW_addBlock{flex-direction:column;gap:12px;display:flex}.-G9EfW_addActions{display:flex}.-G9EfW_addButton{border:1px dashed var(--dsw-alias-border-l3);border-radius:var(--dsw-radius-lg);flex:1 1 0;gap:6px;min-width:180px;height:44px}.-G9EfW_addModes{flex-direction:column;align-items:flex-start;gap:8px;display:flex}.-G9EfW_addPanel{flex-direction:column;gap:14px;display:flex}.-G9EfW_addPanel[hidden]{display:none}.-G9EfW_addCard,.-G9EfW_setupCard{border-radius:var(--dsw-radius-lg);background:var(--dsw-alias-bg-module-platform);flex-direction:column;gap:14px;padding:14px 16px;list-style:none;display:flex}.-G9EfW_addCard .-G9EfW_editor,.-G9EfW_setupCard .-G9EfW_editor{background:0 0;padding:0}.-G9EfW_customized{border-top:.5px solid var(--dsw-alias-border-l2);padding-top:10px}.-G9EfW_customizedSummary{border-radius:var(--dsw-radius-sm);cursor:pointer;width:fit-content;color:var(--dsw-alias-label-secondary);align-items:center;gap:6px;margin-left:-4px;padding:2px 4px;font-size:12px;font-weight:500;line-height:18px;list-style:none;display:flex}.-G9EfW_customizedSummary::-webkit-details-marker{display:none}.-G9EfW_customizedSummary:before{content:\"\";border-bottom:1.5px solid;border-right:1.5px solid;width:5px;height:5px;transition:transform .12s;transform:rotate(-45deg)translate(-1px,-1px)}.-G9EfW_customized[open]>.-G9EfW_customizedSummary:before{transform:rotate(45deg)translate(-1px,-1px)}.-G9EfW_customizedSummary:hover{color:var(--dsw-alias-label-primary)}.-G9EfW_customizedBody{flex-direction:column;gap:12px;padding-top:12px;display:flex}.-G9EfW_modelCatalog{border-top:.5px solid var(--dsw-alias-border-l2);flex-direction:column;gap:10px;padding-top:12px;display:flex}.-G9EfW_modelCatalogHeading{flex-direction:column;gap:2px;display:flex}.-G9EfW_modelCatalogTitle{color:var(--dsw-alias-label-secondary);font-size:12px;font-weight:500;line-height:18px}.-G9EfW_modelCatalogMeta,.-G9EfW_modelEmpty{color:var(--dsw-alias-label-tertiary);margin:0;font-size:12px;line-height:18px}.-G9EfW_modelList{flex-direction:column;gap:8px;display:flex}.-G9EfW_modelListHead{justify-content:space-between;align-items:flex-start;gap:12px;display:flex}.-G9EfW_modelEntry{border:.5px solid var(--dsw-alias-border-l4);border-radius:var(--dsw-radius-lg);padding:6px}.-G9EfW_modelRow{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto auto;align-items:center;gap:6px;display:grid}.-G9EfW_iconButton{box-sizing:border-box;border-radius:var(--dsw-radius-sm);width:28px;height:28px;color:var(--dsw-alias-label-tertiary);cursor:pointer;background:0 0;border:none;justify-content:center;align-items:center;display:inline-flex}.-G9EfW_iconButton:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}.-G9EfW_iconButton:disabled{cursor:default;opacity:.4}.-G9EfW_iconButtonDanger:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}.-G9EfW_modelAdvanced{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:8px 4px 2px;display:grid}.-G9EfW_modelField{flex-direction:column;gap:4px;min-width:0;display:flex}.-G9EfW_modelInputTypes{border:none;grid-column:1/-1;min-width:0;margin:0;padding:0}.-G9EfW_modelInputTypes legend{margin-bottom:4px;padding:0}.-G9EfW_modelInputChoices{flex-wrap:wrap;align-items:center;gap:16px;min-height:32px;display:flex}.-G9EfW_modelFieldLabel{color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:18px}.-G9EfW_modelEmpty{border:1px dashed var(--dsw-alias-border-l3);border-radius:var(--dsw-radius-lg);text-align:center;padding:12px}.-G9EfW_addModelButton{box-sizing:border-box;border:.5px solid var(--dsw-alias-border-l3);border-radius:var(--dsw-radius-sm);height:28px;color:var(--dsw-alias-label-primary);font:inherit;cursor:pointer;background:0 0;align-self:flex-start;align-items:center;gap:4px;padding:0 10px;font-size:12px;line-height:18px;display:inline-flex}.-G9EfW_addModelButton:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}.-G9EfW_input{box-sizing:border-box;border:.5px solid var(--dsw-alias-border-l4);border-radius:var(--dsw-radius-md);width:100%;height:32px;font:inherit;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);padding:0 10px;font-size:14px;line-height:22px}select.-G9EfW_input{cursor:pointer;max-width:240px}.-G9EfW_input:focus{border-color:var(--dsw-alias-state-business-primary);outline:none}.-G9EfW_input::placeholder{color:var(--dsw-alias-label-dimmed)}.-G9EfW_input:disabled{opacity:.6;cursor:default}.-G9EfW_selectInput{appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%2381858C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\");background-position:right 12px center;background-repeat:no-repeat;background-size:12px 12px;padding-right:32px}.-G9EfW_error{color:var(--dsw-alias-state-error-primary);margin:0;font-size:12px;line-height:18px}.-G9EfW_deleteDialog{width:min(480px,100%)}.-G9EfW_deleteConfirm:not(:disabled){border-color:var(--dsw-alias-state-error-primary);color:var(--dsw-alias-state-error-primary)}.-G9EfW_deleteConfirm:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-danger)}.-G9EfW_hiddenLabel{clip:rect(0 0 0 0);white-space:nowrap;width:1px;height:1px;position:absolute;overflow:hidden}@media (prefers-reduced-motion:reduce){.-G9EfW_customizedSummary:before,.-G9EfW_switchThumb{transition:none}}.-G9EfW_fetchDialog{--dsh-scrollbar-thumb:var(--dsw-alias-scrollbar-bg-l2);--dsh-scrollbar-thumb-hover:var(--dsw-alias-scrollbar-hover-l2);max-width:520px}.-G9EfW_candidateToolbar{align-items:center;gap:8px;margin-bottom:6px;display:flex}.-G9EfW_candidateSearch{flex:240px;min-width:0}.-G9EfW_candidateList{flex-direction:column;gap:2px;max-height:320px;margin:0;padding:0;list-style:none;display:flex;overflow-y:auto}.-G9EfW_candidate{border-radius:var(--dsw-radius-md)}.-G9EfW_candidateLabel{cursor:pointer;align-items:center;gap:8px;padding:6px 8px;display:flex}.-G9EfW_candidateId{min-width:0;font-family:var(--ds-font-family-code);text-overflow:ellipsis;white-space:nowrap;flex:auto;font-size:13px;overflow:hidden}.-G9EfW_candidateEmpty{color:var(--dsw-alias-label-secondary);text-align:center;margin:24px 0;font-size:13px;line-height:20px}";
 		const tagId$2 = "@dsh/ui-settings-models/ModelsSection.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$2) + "]") === null) {
 			const tag = document.createElement("style");
@@ -65,78 +65,78 @@ window.__ModuleLoader__.load({
 			document.head.appendChild(tag);
 		}
 		var ModelsSection_module_css_default = {
-			"addActions": "_65lT0G_addActions",
-			"addBlock": "_65lT0G_addBlock",
-			"addButton": "_65lT0G_addButton",
-			"addCard": "_65lT0G_addCard",
-			"addModelButton": "_65lT0G_addModelButton",
-			"addModes": "_65lT0G_addModes",
-			"addPanel": "_65lT0G_addPanel",
-			"advancedHint": "_65lT0G_advancedHint",
-			"candidate": "_65lT0G_candidate",
-			"candidateEmpty": "_65lT0G_candidateEmpty",
-			"candidateId": "_65lT0G_candidateId",
-			"candidateLabel": "_65lT0G_candidateLabel",
-			"candidateList": "_65lT0G_candidateList",
-			"candidateSearch": "_65lT0G_candidateSearch",
-			"candidateToolbar": "_65lT0G_candidateToolbar",
-			"credentialDot": "_65lT0G_credentialDot",
-			"credentialDotConfigured": "_65lT0G_credentialDotConfigured",
-			"credentialDotMissing": "_65lT0G_credentialDotMissing",
-			"customized": "_65lT0G_customized",
-			"customizedBody": "_65lT0G_customizedBody",
-			"customizedSummary": "_65lT0G_customizedSummary",
-			"dangerButton": "_65lT0G_dangerButton",
-			"deleteConfirm": "_65lT0G_deleteConfirm",
-			"deleteDialog": "_65lT0G_deleteDialog",
-			"editor": "_65lT0G_editor",
-			"editorActions": "_65lT0G_editorActions",
-			"editorHeader": "_65lT0G_editorHeader",
-			"editorRoute": "_65lT0G_editorRoute",
-			"editorTitle": "_65lT0G_editorTitle",
-			"error": "_65lT0G_error",
-			"fetchDialog": "_65lT0G_fetchDialog",
-			"field": "_65lT0G_field",
-			"fieldLabel": "_65lT0G_fieldLabel",
-			"hiddenLabel": "_65lT0G_hiddenLabel",
-			"iconButton": "_65lT0G_iconButton",
-			"iconButtonDanger": "_65lT0G_iconButtonDanger",
-			"input": "_65lT0G_input",
-			"intro": "_65lT0G_intro",
-			"linkButton": "_65lT0G_linkButton",
-			"modelAdvanced": "_65lT0G_modelAdvanced",
-			"modelCatalog": "_65lT0G_modelCatalog",
-			"modelCatalogHeading": "_65lT0G_modelCatalogHeading",
-			"modelCatalogMeta": "_65lT0G_modelCatalogMeta",
-			"modelCatalogTitle": "_65lT0G_modelCatalogTitle",
-			"modelEmpty": "_65lT0G_modelEmpty",
-			"modelEntry": "_65lT0G_modelEntry",
-			"modelField": "_65lT0G_modelField",
-			"modelFieldLabel": "_65lT0G_modelFieldLabel",
-			"modelInputChoices": "_65lT0G_modelInputChoices",
-			"modelInputTypes": "_65lT0G_modelInputTypes",
-			"modelList": "_65lT0G_modelList",
-			"modelListHead": "_65lT0G_modelListHead",
-			"modelRow": "_65lT0G_modelRow",
-			"notice": "_65lT0G_notice",
-			"primaryButton": "_65lT0G_primaryButton",
-			"rowActions": "_65lT0G_rowActions",
-			"rowCard": "_65lT0G_rowCard",
-			"rowHead": "_65lT0G_rowHead",
-			"rowIdentity": "_65lT0G_rowIdentity",
-			"rowName": "_65lT0G_rowName",
-			"rowTag": "_65lT0G_rowTag",
-			"rows": "_65lT0G_rows",
-			"savedNotice": "_65lT0G_savedNotice",
-			"secondaryButton": "_65lT0G_secondaryButton",
-			"section": "_65lT0G_section",
-			"selectInput": "_65lT0G_selectInput",
-			"setupCard": "_65lT0G_setupCard",
-			"switchThumb": "_65lT0G_switchThumb",
-			"title": "_65lT0G_title"
+			"addActions": "-G9EfW_addActions",
+			"addBlock": "-G9EfW_addBlock",
+			"addButton": "-G9EfW_addButton",
+			"addCard": "-G9EfW_addCard",
+			"addModelButton": "-G9EfW_addModelButton",
+			"addModes": "-G9EfW_addModes",
+			"addPanel": "-G9EfW_addPanel",
+			"advancedHint": "-G9EfW_advancedHint",
+			"candidate": "-G9EfW_candidate",
+			"candidateEmpty": "-G9EfW_candidateEmpty",
+			"candidateId": "-G9EfW_candidateId",
+			"candidateLabel": "-G9EfW_candidateLabel",
+			"candidateList": "-G9EfW_candidateList",
+			"candidateSearch": "-G9EfW_candidateSearch",
+			"candidateToolbar": "-G9EfW_candidateToolbar",
+			"credentialDot": "-G9EfW_credentialDot",
+			"credentialDotConfigured": "-G9EfW_credentialDotConfigured",
+			"credentialDotMissing": "-G9EfW_credentialDotMissing",
+			"customized": "-G9EfW_customized",
+			"customizedBody": "-G9EfW_customizedBody",
+			"customizedSummary": "-G9EfW_customizedSummary",
+			"dangerButton": "-G9EfW_dangerButton",
+			"deleteConfirm": "-G9EfW_deleteConfirm",
+			"deleteDialog": "-G9EfW_deleteDialog",
+			"editor": "-G9EfW_editor",
+			"editorActions": "-G9EfW_editorActions",
+			"editorHeader": "-G9EfW_editorHeader",
+			"editorRoute": "-G9EfW_editorRoute",
+			"editorTitle": "-G9EfW_editorTitle",
+			"error": "-G9EfW_error",
+			"fetchDialog": "-G9EfW_fetchDialog",
+			"field": "-G9EfW_field",
+			"fieldLabel": "-G9EfW_fieldLabel",
+			"hiddenLabel": "-G9EfW_hiddenLabel",
+			"iconButton": "-G9EfW_iconButton",
+			"iconButtonDanger": "-G9EfW_iconButtonDanger",
+			"input": "-G9EfW_input",
+			"intro": "-G9EfW_intro",
+			"linkButton": "-G9EfW_linkButton",
+			"modelAdvanced": "-G9EfW_modelAdvanced",
+			"modelCatalog": "-G9EfW_modelCatalog",
+			"modelCatalogHeading": "-G9EfW_modelCatalogHeading",
+			"modelCatalogMeta": "-G9EfW_modelCatalogMeta",
+			"modelCatalogTitle": "-G9EfW_modelCatalogTitle",
+			"modelEmpty": "-G9EfW_modelEmpty",
+			"modelEntry": "-G9EfW_modelEntry",
+			"modelField": "-G9EfW_modelField",
+			"modelFieldLabel": "-G9EfW_modelFieldLabel",
+			"modelInputChoices": "-G9EfW_modelInputChoices",
+			"modelInputTypes": "-G9EfW_modelInputTypes",
+			"modelList": "-G9EfW_modelList",
+			"modelListHead": "-G9EfW_modelListHead",
+			"modelRow": "-G9EfW_modelRow",
+			"notice": "-G9EfW_notice",
+			"primaryButton": "-G9EfW_primaryButton",
+			"rowActions": "-G9EfW_rowActions",
+			"rowCard": "-G9EfW_rowCard",
+			"rowHead": "-G9EfW_rowHead",
+			"rowIdentity": "-G9EfW_rowIdentity",
+			"rowName": "-G9EfW_rowName",
+			"rowTag": "-G9EfW_rowTag",
+			"rows": "-G9EfW_rows",
+			"savedNotice": "-G9EfW_savedNotice",
+			"secondaryButton": "-G9EfW_secondaryButton",
+			"section": "-G9EfW_section",
+			"selectInput": "-G9EfW_selectInput",
+			"setupCard": "-G9EfW_setupCard",
+			"switchThumb": "-G9EfW_switchThumb",
+			"title": "-G9EfW_title"
 		};
 		//#endregion
-		//#region lib/types/client/EditorFooter.js
+		//#region src/client/EditorFooter.tsx
 		/**
 		* Render one provider card's action row.
 		* @param props - the labels, commit gating, and handlers the owning card supplies.
@@ -144,15 +144,15 @@ window.__ModuleLoader__.load({
 		*/
 		function EditorFooter(props) {
 			const { t } = props;
-			return (0, react_jsx_runtime.jsxs)("div", {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 				className: ModelsSection_module_css_default["editorActions"],
-				children: [(0, react_jsx_runtime.jsx)("button", {
+				children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 					type: "button",
 					className: ModelsSection_module_css_default["secondaryButton"],
 					disabled: props.busy,
 					onClick: props.onCancel,
 					children: t(props.cancelLabelKey ?? "cancel")
-				}), (0, react_jsx_runtime.jsx)("button", {
+				}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 					type: "button",
 					className: ModelsSection_module_css_default["primaryButton"],
 					disabled: props.submitDisabled,
@@ -162,7 +162,7 @@ window.__ModuleLoader__.load({
 			});
 		}
 		//#endregion
-		//#region lib/types/client/ModelInputTypes.js
+		//#region src/client/ModelInputTypes.tsx
 		/**
 		* Edit a nonempty set of input types, displaying inherited types before an override exists.
 		* @param props - model declaration and row replacement action.
@@ -171,15 +171,15 @@ window.__ModuleLoader__.load({
 		function ModelInputTypes({ model, field, position, disabled, fallback, t, onChange }) {
 			const modalities = model[field];
 			const selected = Array.isArray(modalities) && modalities.length > 0 ? modalities : fallback ?? ["text"];
-			return (0, react_jsx_runtime.jsxs)("fieldset", {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("fieldset", {
 				className: ModelsSection_module_css_default["modelInputTypes"],
 				"aria-label": `${t("modelInputTypes")} ${String(position)}`,
-				children: [(0, react_jsx_runtime.jsx)("legend", {
+				children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("legend", {
 					className: ModelsSection_module_css_default["modelFieldLabel"],
 					children: t("modelInputTypes")
-				}), (0, react_jsx_runtime.jsx)("div", {
+				}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 					className: ModelsSection_module_css_default["modelInputChoices"],
-					children: ["text", "image"].map((modality) => (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Checkbox, {
+					children: ["text", "image"].map((modality) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Checkbox, {
 						label: t(modality === "text" ? "modelInputText" : "modelInputImage"),
 						checked: selected.includes(modality),
 						disabled: disabled || selected.length === 1 && selected.includes(modality),
@@ -200,7 +200,7 @@ window.__ModuleLoader__.load({
 			});
 		}
 		//#endregion
-		//#region lib/types/client/ModelRow.js
+		//#region src/client/ModelRow.tsx
 		/**
 		* Render consistent model identity, capacity, and input-type controls.
 		* @param props - drafted fields and their owning editor's actions.
@@ -208,12 +208,12 @@ window.__ModuleLoader__.load({
 		*/
 		function ModelRow(props) {
 			const { model, position, t, disabled } = props;
-			return (0, react_jsx_runtime.jsxs)("div", {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 				className: ModelsSection_module_css_default["modelEntry"],
-				children: [(0, react_jsx_runtime.jsxs)("div", {
+				children: [/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 					className: ModelsSection_module_css_default["modelRow"],
 					children: [
-						["id", "name"].map((field) => (0, react_jsx_runtime.jsx)("input", {
+						["id", "name"].map((field) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
 							className: ModelsSection_module_css_default["input"],
 							type: "text",
 							value: typeof model[field] === "string" ? model[field] : "",
@@ -226,33 +226,33 @@ window.__ModuleLoader__.load({
 							},
 							onBlur: field === "id" ? (event) => props.onIdBlur?.(event.target.value) : void 0
 						}, field)),
-						(0, react_jsx_runtime.jsx)("button", {
+						/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 							type: "button",
 							className: ModelsSection_module_css_default["iconButton"],
 							"aria-label": `${t("modelAdvanced")} ${String(position)}`,
 							"aria-expanded": props.expanded,
 							title: t("modelAdvanced"),
 							onClick: props.onToggle,
-							children: props.expanded ? (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconChevronDownOutlineRegular, {}) : (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconChevronRightOutlineRegular, {})
+							children: props.expanded ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconChevronDownOutlineRegular, {}) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconChevronRightOutlineRegular, {})
 						}),
-						(0, react_jsx_runtime.jsx)("button", {
+						/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 							type: "button",
 							className: `${ModelsSection_module_css_default["iconButton"]} ${ModelsSection_module_css_default["iconButtonDanger"]}`,
 							"aria-label": `${t("removeModel")} ${String(position)}`,
 							title: t("removeModel"),
 							disabled,
 							onClick: props.onRemove,
-							children: (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconTrashOutlineRegular, { size: 14 })
+							children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconTrashOutlineRegular, { size: 14 })
 						})
 					]
-				}), props.expanded ? (0, react_jsx_runtime.jsxs)("div", {
+				}), props.expanded ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 					className: ModelsSection_module_css_default["modelAdvanced"],
-					children: [["contextWindow", "maxTokens"].map((field) => (0, react_jsx_runtime.jsxs)("label", {
+					children: [["contextWindow", "maxTokens"].map((field) => /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("label", {
 						className: ModelsSection_module_css_default["modelField"],
-						children: [(0, react_jsx_runtime.jsx)("span", {
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: ModelsSection_module_css_default["modelFieldLabel"],
 							children: t(field)
-						}), (0, react_jsx_runtime.jsx)("input", {
+						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
 							className: ModelsSection_module_css_default["input"],
 							type: "text",
 							inputMode: "numeric",
@@ -265,7 +265,7 @@ window.__ModuleLoader__.load({
 							},
 							onBlur: props[field].onBlur
 						})]
-					}, field)), (0, react_jsx_runtime.jsx)(ModelInputTypes, {
+					}, field)), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(ModelInputTypes, {
 						model,
 						field: props.inputField,
 						position,
@@ -278,7 +278,7 @@ window.__ModuleLoader__.load({
 			});
 		}
 		//#endregion
-		//#region lib/types/client/DeepSeekModelsEditor.js
+		//#region src/client/DeepSeekModelsEditor.tsx
 		/**
 		* Curated editor for the direct DeepSeek adapter's advisory model catalog.
 		* The settings layer replaces `models` as one array, so the parent supplies
@@ -451,22 +451,22 @@ window.__ModuleLoader__.load({
 					settleCapacity(index, field);
 				}
 			});
-			return (0, react_jsx_runtime.jsxs)("section", {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("section", {
 				className: ModelsSection_module_css_default["modelCatalog"],
 				"aria-label": props.t("models"),
 				children: [
-					(0, react_jsx_runtime.jsxs)("div", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: ModelsSection_module_css_default["modelListHead"],
-						children: [(0, react_jsx_runtime.jsxs)("div", {
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 							className: ModelsSection_module_css_default["modelCatalogHeading"],
-							children: [(0, react_jsx_runtime.jsx)("span", {
+							children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 								className: ModelsSection_module_css_default["modelCatalogTitle"],
 								children: props.t("models")
-							}), (0, react_jsx_runtime.jsx)("span", {
+							}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 								className: ModelsSection_module_css_default["modelCatalogMeta"],
 								children: props.overridden ? props.t("modelsCustomized") : props.t("modelsInherited")
 							})]
-						}), props.overridden ? (0, react_jsx_runtime.jsx)("button", {
+						}), props.overridden ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 							type: "button",
 							className: ModelsSection_module_css_default["linkButton"],
 							disabled: props.disabled,
@@ -474,12 +474,12 @@ window.__ModuleLoader__.load({
 							children: props.t("resetModels")
 						}) : null]
 					}),
-					props.models.length === 0 ? (0, react_jsx_runtime.jsx)("p", {
+					props.models.length === 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["modelEmpty"],
 						children: props.t("modelsEmpty")
-					}) : (0, react_jsx_runtime.jsx)("div", {
+					}) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 						className: ModelsSection_module_css_default["modelList"],
-						children: props.models.map((model, index) => (0, react_jsx_runtime.jsx)(ModelRow, {
+						children: props.models.map((model, index) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)(ModelRow, {
 							model,
 							position: index + 1,
 							inputField: "inputModalities",
@@ -506,20 +506,20 @@ window.__ModuleLoader__.load({
 							}
 						}, index))
 					}),
-					(0, react_jsx_runtime.jsxs)("button", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("button", {
 						type: "button",
 						className: ModelsSection_module_css_default["addModelButton"],
 						disabled: props.disabled,
 						onClick: () => {
 							props.onChange([...props.models.map((model) => ({ ...model })), { id: "" }]);
 						},
-						children: [(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconPlusOutlineRegular, { size: 14 }), props.t("addModel")]
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconPlusOutlineRegular, { size: 14 }), props.t("addModel")]
 					})
 				]
 			});
 		}
 		//#endregion
-		//#region lib/types/client/ModelListEditor.js
+		//#region src/client/ModelListEditor.tsx
 		/**
 		* The model list of one pi-ai provider profile, plus the action that asks the
 		* provider what it serves.
@@ -722,32 +722,32 @@ window.__ModuleLoader__.load({
 				});
 			};
 			const askable = probe.provider !== void 0 || probe.baseURL !== void 0 && probe.baseURL.length > 0;
-			return (0, react_jsx_runtime.jsxs)("section", {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("section", {
 				className: ModelsSection_module_css_default["modelCatalog"],
 				"aria-label": t("models"),
 				children: [
 					props.prologue,
-					(0, react_jsx_runtime.jsxs)("div", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: ModelsSection_module_css_default["modelListHead"],
 						children: [
-							(0, react_jsx_runtime.jsxs)("div", {
+							/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 								className: ModelsSection_module_css_default["modelCatalogHeading"],
-								children: [(0, react_jsx_runtime.jsx)("span", {
+								children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 									className: ModelsSection_module_css_default["modelCatalogTitle"],
 									children: t("models")
-								}), props.overridden === void 0 ? null : (0, react_jsx_runtime.jsx)("span", {
+								}), props.overridden === void 0 ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 									className: ModelsSection_module_css_default["modelCatalogMeta"],
 									children: props.overridden ? t("modelsCustomized") : t("modelsInherited")
 								})]
 							}),
-							props.overridden === true && props.onReset !== void 0 ? (0, react_jsx_runtime.jsx)("button", {
+							props.overridden === true && props.onReset !== void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 								type: "button",
 								className: ModelsSection_module_css_default["linkButton"],
 								disabled,
 								onClick: props.onReset,
 								children: t("resetModels")
 							}) : null,
-							(0, react_jsx_runtime.jsx)("button", {
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 								type: "button",
 								className: ModelsSection_module_css_default["linkButton"],
 								disabled: disabled || busy || !askable || props.probeBlocked !== void 0,
@@ -759,13 +759,13 @@ window.__ModuleLoader__.load({
 							})
 						]
 					}),
-					models.length === 0 ? (0, react_jsx_runtime.jsx)("p", {
+					models.length === 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["modelEmpty"],
 						children: t("modelsEmpty")
 					}) : null,
-					(0, react_jsx_runtime.jsx)("div", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 						className: ModelsSection_module_css_default["modelList"],
-						children: models.map((model, index) => (0, react_jsx_runtime.jsx)(ModelRow, {
+						children: models.map((model, index) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)(ModelRow, {
 							model,
 							position: index + 1,
 							inputField: "input",
@@ -809,38 +809,38 @@ window.__ModuleLoader__.load({
 							}
 						}, index))
 					}),
-					(0, react_jsx_runtime.jsxs)("button", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("button", {
 						type: "button",
 						className: ModelsSection_module_css_default["addModelButton"],
 						disabled,
 						onClick: () => {
 							onChange([...models, { id: "" }]);
 						},
-						children: [(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconPlusOutlineRegular, { size: 14 }), t("addModel")]
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconPlusOutlineRegular, { size: 14 }), t("addModel")]
 					}),
-					failure !== void 0 ? (0, react_jsx_runtime.jsx)("p", {
+					failure !== void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["error"],
 						children: failure
 					}) : null,
-					(0, react_jsx_runtime.jsxs)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
 						open: candidates !== void 0,
 						onClose: closePicker,
 						title: t("fetchTitle"),
 						closeLabel: t("close"),
 						description: t("fetchDescription"),
 						className: ModelsSection_module_css_default["fetchDialog"],
-						footer: (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+						footer: /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 							variant: "outline",
 							onClick: closePicker,
 							children: t("cancel")
-						}), (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 							variant: "outline",
 							onClick: adoptPicked,
 							children: t("fetchAdopt")
 						})] }),
-						children: [(0, react_jsx_runtime.jsxs)("div", {
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 							className: ModelsSection_module_css_default["candidateToolbar"],
-							children: [(0, react_jsx_runtime.jsx)("input", {
+							children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
 								className: `${ModelsSection_module_css_default["input"]} ${ModelsSection_module_css_default["candidateSearch"]}`,
 								type: "search",
 								value: candidateQuery,
@@ -849,30 +849,30 @@ window.__ModuleLoader__.load({
 								onChange: (event) => {
 									setCandidateQuery(event.target.value);
 								}
-							}), (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+							}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 								variant: "ghost",
 								size: "sm",
 								disabled: visibleCandidates.length === 0,
 								onClick: toggleVisibleCandidates,
 								children: t(allVisibleCandidatesPicked ? "fetchDeselectAll" : "fetchSelectAll")
 							})]
-						}), visibleCandidates.length === 0 ? (0, react_jsx_runtime.jsx)("p", {
+						}), visibleCandidates.length === 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 							className: ModelsSection_module_css_default["candidateEmpty"],
 							role: "status",
 							children: t("fetchNoMatches")
-						}) : (0, react_jsx_runtime.jsx)("ul", {
+						}) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("ul", {
 							className: ModelsSection_module_css_default["candidateList"],
-							children: visibleCandidates.map((candidate) => (0, react_jsx_runtime.jsx)("li", {
+							children: visibleCandidates.map((candidate) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("li", {
 								className: ModelsSection_module_css_default["candidate"],
-								children: (0, react_jsx_runtime.jsxs)("label", {
+								children: /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("label", {
 									className: ModelsSection_module_css_default["candidateLabel"],
-									children: [(0, react_jsx_runtime.jsx)("input", {
+									children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
 										type: "checkbox",
 										checked: picked.has(candidate.id),
 										onChange: () => {
 											toggle(candidate.id);
 										}
-									}), (0, react_jsx_runtime.jsx)("span", {
+									}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 										className: ModelsSection_module_css_default["candidateId"],
 										title: candidate.name ?? candidate.id,
 										children: candidate.id
@@ -885,15 +885,7 @@ window.__ModuleLoader__.load({
 			});
 		}
 		//#endregion
-		//#region lib/types/client/store.js
-		/**
-		* Models settings page store: one snapshot joining the configurable-provider
-		* directory (`llm/listProviders` joined with `llm/listConfigurableProviders`),
-		* the settings namespaces (shared settings mirror),
-		* and the referenced credentials (`credentials/describe`). The host stays the
-		* single fact source — every mutation writes through the wire and the page
-		* re-renders from the next describe, pushed or refetched.
-		*/
+		//#region src/client/store.ts
 		/**
 		* Any route key walks a dict schema to the same profile node, so the lookup
 		* names one that cannot collide with a configured route.
@@ -905,7 +897,7 @@ window.__ModuleLoader__.load({
 		*  ordinary routes last. Ties keep declaration order (stable sort). */
 		function rowRank(entry) {
 			if (entry.provider === PINNED_ACCOUNT_ROUTE) return 0;
-			return entry.accountProvider === true ? 1 : 2;
+			return entry.provider === "deepseek-account" ? 0 : entry.provider === "deepseek-official" ? 1 : 2;
 		}
 		/**
 		* Join declared configurable providers with the currently registered routes.
@@ -924,7 +916,6 @@ window.__ModuleLoader__.load({
 				settingsPath: [...entry.settingsPath],
 				active: active.has(entry.provider),
 				...entry.declared === void 0 ? {} : { declared: entry.declared },
-				...entry.accountProvider === void 0 ? {} : { accountProvider: entry.accountProvider },
 				...entry.error === void 0 ? {} : { error: entry.error }
 			}));
 			for (const provider of registered) {
@@ -1045,29 +1036,38 @@ window.__ModuleLoader__.load({
 						entry,
 						configured: namespace !== void 0 && (entry.settingsPath.length === 0 || this.schema.getPath(namespace.value, entry.settingsPath) !== void 0),
 						removable: namespace !== void 0 && entry.settingsPath.length > 0 && this.schema.hasPath(namespace.user, entry.settingsPath) && !this.schema.hasPath(namespace.base, entry.settingsPath),
-						apiKeyEnv: entry.accountProvider === true ? void 0 : apiKeyEnvOf(namespace, entry.settingsPath, this.schema),
+						apiKeyEnv: entry.provider === "deepseek-account" ? void 0 : apiKeyEnvOf(namespace, entry.settingsPath, this.schema),
 						credential: void 0
 					};
 				});
-				if (rows.some((row) => row.entry.accountProvider === true)) {
+				let officialSignedIn = false;
+				const hubSignedIn = /* @__PURE__ */ new Map();
+				try {
+					const remote = this.ctx.remote;
+					const official = await remote.account?.getState();
+					officialSignedIn = official?.ok === true && official.value?.status === "credential-stored";
+					const hubs = await remote.accountHub?.list();
+					if (hubs?.ok === true) {
+						for (const view of hubs.value ?? []) if (typeof view.settingsNs === "string" && typeof view.state?.signedIn === "boolean") hubSignedIn.set(view.settingsNs, view.state.signedIn);
+					}
+				} catch {}
+				if (rows.some((row) => /^deepseek/i.test(row.entry.provider))) {
 					const catalog = await this.ctx.remote.session.modelCatalog();
 					for (const row of rows) {
-						if (row.entry.accountProvider !== true) continue;
-						const liveGroup = catalog.ok ? catalog.value.groups.find((group) => group.id === row.entry.provider) : void 0;
-						const live = liveGroup !== void 0 && liveGroup.models.length > 0;
-						if (live) {
+						if (!/^deepseek/i.test(row.entry.provider)) continue;
+						const liveGroup = catalog.ok ? catalog.value.groups.find((group) => group.id === row.entry.provider || group.id === "deepseek-account") : void 0;
+						if (liveGroup !== void 0 && liveGroup.models.length > 0) {
 							row.accountAvailable = true;
 							row.liveModels = liveGroup.models.map((model) => ({
 								id: model.id,
-								...(typeof model.name === "string" && model.name.length > 0 ? { name: model.name } : {})
+								...typeof model.name === "string" && model.name.length > 0 ? { name: model.name } : {}
 							}));
 							continue;
 						}
-						const namespace = namespaces.get(row.entry.settingsNs);
-						row.accountAvailable = namespace !== undefined && this.schema.getPath(namespace.user, [...row.entry.settingsPath, 'models']) !== undefined;
+						row.accountAvailable = false;
 					}
 				}
-				const credentialRows = rows.filter((row) => row.entry.accountProvider !== true);
+				const credentialRows = rows.filter((row) => row.entry.provider !== "deepseek-account");
 				const refs = [...new Set(credentialRows.map((row) => row.apiKeyEnv ?? deriveKeyRef(row.entry.provider)))];
 				let credentials = {};
 				let credentialError = null;
@@ -1082,8 +1082,8 @@ window.__ModuleLoader__.load({
 					s.error = null;
 					s.credentialError = credentialError;
 					s.writable = writable;
-					s.rows = rows.filter((row) => row.entry.accountProvider !== true || row.accountAvailable === true).map((row) => {
-						if (row.entry.accountProvider === true) return row;
+					s.rows = rows.filter((row) => !/^deepseek/i.test(row.entry.provider) || officialSignedIn && row.accountAvailable === true).filter((row) => hubSignedIn.get(row.entry.settingsNs) !== false).map((row) => {
+						if (row.entry.provider === "deepseek-account") return row;
 						const named = row.apiKeyEnv === void 0 ? void 0 : credentials[row.apiKeyEnv];
 						const derived = row.apiKeyEnv !== void 0 ? void 0 : credentials[deriveKeyRef(row.entry.provider)];
 						return {
@@ -1116,17 +1116,12 @@ window.__ModuleLoader__.load({
 		*/
 		function providerUsable(row) {
 			if (!row.entry.active) return false;
-			if (row.entry.accountProvider === true) return row.accountAvailable === true;
+			if (row.entry.provider === "deepseek-account") return row.accountAvailable === true;
 			if (row.apiKeyEnv === void 0) return true;
 			return row.credential?.configured === true;
 		}
 		//#endregion
-		//#region lib/types/client/protocol-label.js
-		/**
-		* Product names for the wire protocols a pi-ai route may speak. The pickers
-		* show these instead of the schema identifiers (`openai-completions`), which
-		* are what `settings.yaml` carries and what the option values stay.
-		*/
+		//#region src/client/protocol-label.ts
 		/** The protocols this page names, keyed by their schema identifier. */
 		const PROTOCOL_LABEL_KEYS = {
 			"openai-completions": "protocolOpenAiCompletions",
@@ -1146,7 +1141,7 @@ window.__ModuleLoader__.load({
 			return key === void 0 ? protocol : t(key);
 		}
 		//#endregion
-		//#region lib/types/client/CustomProviderCard.js
+		//#region src/client/CustomProviderCard.tsx
 		/**
 		* The card that declares a provider pi-ai does not ship — an OpenAI-compatible
 		* gateway, a self-hosted server, or a provider newer than the installed
@@ -1272,15 +1267,15 @@ window.__ModuleLoader__.load({
 					setBusy(false);
 				}
 			};
-			return (0, react_jsx_runtime.jsxs)("div", {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 				className: ModelsSection_module_css_default["editor"],
 				children: [
-					(0, react_jsx_runtime.jsxs)("div", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: ModelsSection_module_css_default["field"],
-						children: [(0, react_jsx_runtime.jsx)("span", {
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: ModelsSection_module_css_default["fieldLabel"],
 							children: t("customRoute")
-						}), (0, react_jsx_runtime.jsx)("input", {
+						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
 							className: ModelsSection_module_css_default["input"],
 							type: "text",
 							value: route,
@@ -1292,19 +1287,19 @@ window.__ModuleLoader__.load({
 							}
 						})]
 					}),
-					routeInvalid || routeTaken ? (0, react_jsx_runtime.jsx)("p", {
+					routeInvalid || routeTaken ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["error"],
 						children: t(routeInvalid ? "customRouteInvalid" : "customRouteTaken")
-					}) : (0, react_jsx_runtime.jsx)("p", {
+					}) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["advancedHint"],
 						children: t("customRouteHint")
 					}),
-					(0, react_jsx_runtime.jsxs)("div", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: ModelsSection_module_css_default["field"],
-						children: [(0, react_jsx_runtime.jsx)("span", {
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: ModelsSection_module_css_default["fieldLabel"],
 							children: t("customDisplayName")
-						}), (0, react_jsx_runtime.jsx)("input", {
+						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
 							className: ModelsSection_module_css_default["input"],
 							type: "text",
 							value: displayName,
@@ -1316,12 +1311,12 @@ window.__ModuleLoader__.load({
 							}
 						})]
 					}),
-					(0, react_jsx_runtime.jsxs)("div", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: ModelsSection_module_css_default["field"],
-						children: [(0, react_jsx_runtime.jsx)("span", {
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: ModelsSection_module_css_default["fieldLabel"],
 							children: t("baseUrl")
-						}), (0, react_jsx_runtime.jsx)("input", {
+						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
 							className: ModelsSection_module_css_default["input"],
 							type: "text",
 							value: baseURL,
@@ -1334,16 +1329,16 @@ window.__ModuleLoader__.load({
 							}
 						})]
 					}),
-					baseUrlInvalid ? (0, react_jsx_runtime.jsx)("p", {
+					baseUrlInvalid ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["error"],
 						children: t("customBaseUrlInvalid")
 					}) : null,
-					(0, react_jsx_runtime.jsxs)("div", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: ModelsSection_module_css_default["field"],
-						children: [(0, react_jsx_runtime.jsx)("span", {
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: ModelsSection_module_css_default["fieldLabel"],
 							children: t("customApi")
-						}), (0, react_jsx_runtime.jsx)("select", {
+						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("select", {
 							className: `${ModelsSection_module_css_default["input"]} ${ModelsSection_module_css_default["selectInput"]}`,
 							value: protocol,
 							"aria-label": t("customApi"),
@@ -1351,20 +1346,20 @@ window.__ModuleLoader__.load({
 							onChange: (event) => {
 								setProtocol(event.target.value);
 							},
-							children: protocols.map((choice) => (0, react_jsx_runtime.jsx)("option", {
+							children: protocols.map((choice) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("option", {
 								value: choice,
 								children: protocolLabel(t, choice)
 							}, choice))
 						})]
 					}),
-					(0, react_jsx_runtime.jsxs)("div", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: ModelsSection_module_css_default["field"],
 						children: [
-							(0, react_jsx_runtime.jsx)("span", {
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 								className: ModelsSection_module_css_default["fieldLabel"],
 								children: t("keyInput")
 							}),
-							(0, react_jsx_runtime.jsx)("input", {
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
 								className: ModelsSection_module_css_default["input"],
 								type: "password",
 								autoComplete: "new-password",
@@ -1376,13 +1371,13 @@ window.__ModuleLoader__.load({
 									setKeyDraft(event.target.value);
 								}
 							}),
-							keyFailure === void 0 ? null : (0, react_jsx_runtime.jsx)("p", {
+							keyFailure === void 0 ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 								className: ModelsSection_module_css_default["error"],
 								children: t(keyFailure === "keyBlank" ? "keyBlankNew" : keyFailure)
 							})
 						]
 					}),
-					(0, react_jsx_runtime.jsx)(ModelListEditor, {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)(ModelListEditor, {
 						models,
 						onChange: setModels,
 						probe: {
@@ -1397,15 +1392,15 @@ window.__ModuleLoader__.load({
 						disabled: profileDisabled,
 						onBusyChange: setListBusy
 					}),
-					failure !== void 0 ? (0, react_jsx_runtime.jsx)("p", {
+					failure !== void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["error"],
 						children: failure
 					}) : null,
-					hint === void 0 ? null : (0, react_jsx_runtime.jsx)("p", {
+					hint === void 0 ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["advancedHint"],
 						children: hint
 					}),
-					(0, react_jsx_runtime.jsx)(EditorFooter, {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)(EditorFooter, {
 						t,
 						busy,
 						submitDisabled: disabled || !ready,
@@ -1422,7 +1417,7 @@ window.__ModuleLoader__.load({
 			});
 		}
 		//#endregion
-		//#region lib/types/client/ProviderEditor.js
+		//#region src/client/ProviderEditor.tsx
 		/**
 		* One provider's editor card, hand-written per adapter family: the primary
 		* field is a single write-only **API key** input (the page never asks for an
@@ -1618,7 +1613,7 @@ window.__ModuleLoader__.load({
 					setBusy(false);
 				}
 			};
-			if (node === void 0) return (0, react_jsx_runtime.jsxs)("p", {
+			if (node === void 0) return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("p", {
 				className: ModelsSection_module_css_default["error"],
 				children: [
 					props.provider,
@@ -1641,7 +1636,7 @@ window.__ModuleLoader__.load({
 				if (declared !== void 0) return declared;
 				return props.liveModels?.map((model) => ({
 					id: model.id,
-					...(typeof model.name === "string" && model.name.length > 0 ? { name: model.name } : {})
+					...typeof model.name === "string" && model.name.length > 0 ? { name: model.name } : {}
 				}));
 			};
 			/** Whether the route's schema declares a model catalog at `models`: the
@@ -1682,19 +1677,19 @@ window.__ModuleLoader__.load({
 				const defaultContextWindow = schema.getPath(fallback, ["defaultContextWindow"]);
 				const defaultMaxTokens = schema.getPath(fallback, ["maxTokens"]);
 				const defaultInput = schema.getPath(fallback, ["defaultInput"]);
-				if (accountProvider) return (0, react_jsx_runtime.jsx)(DeepSeekModelsEditor, {
+				if (accountProvider) return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(DeepSeekModelsEditor, {
 					...catalogProps,
 					defaultContextWindow: typeof defaultContextWindow === "number" ? defaultContextWindow : void 0,
 					defaultMaxTokens: typeof defaultMaxTokens === "number" ? defaultMaxTokens : void 0
 				});
-				return (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [(0, react_jsx_runtime.jsxs)("div", {
+				return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 					className: ModelsSection_module_css_default["field"],
 					children: [
-						(0, react_jsx_runtime.jsx)("span", {
+						/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: ModelsSection_module_css_default["fieldLabel"],
 							children: t("keyInput")
 						}),
-						(0, react_jsx_runtime.jsx)("input", {
+						/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
 							className: ModelsSection_module_css_default["input"],
 							type: "password",
 							autoComplete: "new-password",
@@ -1709,25 +1704,25 @@ window.__ModuleLoader__.load({
 								setKeyDraft(event.target.value);
 							}
 						}),
-						shownKeyFailure === void 0 ? null : (0, react_jsx_runtime.jsx)("p", {
+						shownKeyFailure === void 0 ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 							className: ModelsSection_module_css_default["error"],
 							children: t(shownKeyFailure)
 						})
 					]
-				}), props.credentialOnly === true ? null : (0, react_jsx_runtime.jsxs)("details", {
+				}), props.credentialOnly === true ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("details", {
 					className: ModelsSection_module_css_default["customized"],
-					children: [(0, react_jsx_runtime.jsx)("summary", {
+					children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("summary", {
 						className: ModelsSection_module_css_default["customizedSummary"],
 						children: t("customized")
-					}), (0, react_jsx_runtime.jsxs)("div", {
+					}), /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: ModelsSection_module_css_default["customizedBody"],
 						children: [
-							ownsIdentity ? (0, react_jsx_runtime.jsxs)("div", {
+							ownsIdentity ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 								className: ModelsSection_module_css_default["field"],
-								children: [(0, react_jsx_runtime.jsx)("span", {
+								children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 									className: ModelsSection_module_css_default["fieldLabel"],
 									children: t("customDisplayName")
-								}), (0, react_jsx_runtime.jsx)("input", {
+								}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
 									className: ModelsSection_module_css_default["input"],
 									type: "text",
 									value: stringAt(draft, "displayName") ?? "",
@@ -1739,14 +1734,14 @@ window.__ModuleLoader__.load({
 									}
 								})]
 							}) : null,
-							(0, react_jsx_runtime.jsxs)("div", {
+							/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 								className: ModelsSection_module_css_default["field"],
 								children: [
-									(0, react_jsx_runtime.jsx)("span", {
+									/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 										className: ModelsSection_module_css_default["fieldLabel"],
 										children: t("baseUrl")
 									}),
-									(0, react_jsx_runtime.jsx)("input", {
+									/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
 										className: ModelsSection_module_css_default["input"],
 										type: "text",
 										value: stringAt(draft, "baseURL") ?? "",
@@ -1758,19 +1753,19 @@ window.__ModuleLoader__.load({
 											setField("baseURL", event.target.value === "" ? void 0 : event.target.value);
 										}
 									}),
-									family === "deepseek" ? (0, react_jsx_runtime.jsx)("span", {
+									family === "deepseek" ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 										id: `${props.provider}-endpoint-hint`,
 										className: ModelsSection_module_css_default["advancedHint"],
 										children: t("deepSeekEndpointHint")
 									}) : null
 								]
 							}),
-							ownsIdentity ? (0, react_jsx_runtime.jsxs)("div", {
+							ownsIdentity ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 								className: ModelsSection_module_css_default["field"],
-								children: [(0, react_jsx_runtime.jsx)("span", {
+								children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 									className: ModelsSection_module_css_default["fieldLabel"],
 									children: t("customApi")
-								}), (0, react_jsx_runtime.jsxs)("select", {
+								}), /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("select", {
 									className: `${ModelsSection_module_css_default["input"]} ${ModelsSection_module_css_default["selectInput"]}`,
 									value: probeApi ?? "",
 									"aria-label": t("customApi"),
@@ -1778,20 +1773,20 @@ window.__ModuleLoader__.load({
 									onChange: (event) => {
 										setField("api", event.target.value);
 									},
-									children: [probeApi === void 0 ? (0, react_jsx_runtime.jsx)("option", {
+									children: [probeApi === void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("option", {
 										value: "",
 										children: t("customApiUnset")
-									}) : null, protocols.map((choice) => (0, react_jsx_runtime.jsx)("option", {
+									}) : null, protocols.map((choice) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("option", {
 										value: choice,
 										children: protocolLabel(t, choice)
 									}, choice))]
 								})]
 							}) : null,
-							family === "deepseek" ? (0, react_jsx_runtime.jsx)(DeepSeekModelsEditor, {
+							family === "deepseek" ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(DeepSeekModelsEditor, {
 								...catalogProps,
 								defaultContextWindow: typeof defaultContextWindow === "number" ? defaultContextWindow : void 0,
 								defaultMaxTokens: typeof defaultMaxTokens === "number" ? defaultMaxTokens : void 0
-							}) : (0, react_jsx_runtime.jsx)(ModelListEditor, {
+							}) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)(ModelListEditor, {
 								...catalogProps,
 								catalogProvider: props.declared === true ? void 0 : props.provider,
 								defaultInput: Array.isArray(defaultInput) ? defaultInput : void 0,
@@ -1804,27 +1799,27 @@ window.__ModuleLoader__.load({
 					})]
 				})] });
 			};
-			return (0, react_jsx_runtime.jsxs)("div", {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 				className: props.credentialOnly === true ? ModelsSection_module_css_default["addBlock"] : ModelsSection_module_css_default["editor"],
 				children: [
-					props.hideTitle === true ? null : (0, react_jsx_runtime.jsxs)("div", {
+					props.hideTitle === true ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: ModelsSection_module_css_default["editorHeader"],
-						children: [(0, react_jsx_runtime.jsx)("span", {
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: ModelsSection_module_css_default["editorTitle"],
 							children: props.displayName
-						}), props.provider !== props.displayName ? (0, react_jsx_runtime.jsx)("span", {
+						}), props.provider !== props.displayName ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: ModelsSection_module_css_default["editorRoute"],
 							children: props.provider
 						}) : null]
 					}),
-					layout === "unknown" ? props.cardOwner !== void 0 && props.renderCardSlot !== void 0 || hasCatalogField ? (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [props.cardOwner !== void 0 && props.renderCardSlot !== void 0 ? props.renderCardSlot({
+					layout === "unknown" ? props.cardOwner !== void 0 && props.renderCardSlot !== void 0 || hasCatalogField ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [props.cardOwner !== void 0 && props.renderCardSlot !== void 0 ? props.renderCardSlot({
 						...props.cardOwner,
 						editor: editorAccess,
 						zone: "editor"
-					}, hasCatalogField ? null : (0, react_jsx_runtime.jsx)("p", {
+					}, hasCatalogField ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["advancedHint"],
 						children: `${t("advancedHint")} (${namespace.ns})`
-					})) : null, hasCatalogField && (0, react_jsx_runtime.jsx)(ModelListEditor, {
+					})) : null, hasCatalogField && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(ModelListEditor, {
 						...catalogProps,
 						probe,
 						operations,
@@ -1834,19 +1829,19 @@ window.__ModuleLoader__.load({
 							editor: editorAccess,
 							zone: "catalog"
 						}, null) : void 0
-					})] }) : (0, react_jsx_runtime.jsx)("p", {
+					})] }) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["advancedHint"],
 						children: `${t("advancedHint")} (${namespace.ns})`
 					}) : curatedFields(layout),
-					failure !== void 0 ? (0, react_jsx_runtime.jsx)("p", {
+					failure !== void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["error"],
 						children: failure
 					}) : null,
-					props.credentialOnly === true || modelFailure === void 0 ? null : (0, react_jsx_runtime.jsx)("p", {
+					props.credentialOnly === true || modelFailure === void 0 ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["advancedHint"],
 						children: `${t("model")} ${String(modelFailure.index + 1)}: ${t(modelFailure.key)}`
 					}),
-					(0, react_jsx_runtime.jsx)(EditorFooter, {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)(EditorFooter, {
 						t,
 						busy,
 						submitDisabled: disabled || layout === "unknown" && !hasCatalogField || props.credentialOnly !== true && modelFailure !== void 0 || shownKeyFailure !== void 0 || props.credentialRequired === true && keyValue.length === 0,
@@ -1865,7 +1860,7 @@ window.__ModuleLoader__.load({
 			});
 		}
 		//#endregion
-		//#region lib/types/client/ModelsSection.js
+		//#region src/client/ModelsSection.tsx
 		/**
 		* Models settings section: the provider rows joined from the configurable
 		* directory, settings namespaces, and credential states, with one editor
@@ -1890,7 +1885,7 @@ window.__ModuleLoader__.load({
 		*/
 		/** Render an editor for either the setup posture or an expanded provider row. */
 		function renderProviderEditor({ target, ...props }) {
-			return (0, react_jsx_runtime.jsx)(ProviderEditor, {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(ProviderEditor, {
 				provider: target.provider,
 				displayName: target.displayName,
 				settingsPath: target.settingsPath,
@@ -1931,7 +1926,7 @@ window.__ModuleLoader__.load({
 		* @returns whether to render the setup card.
 		*/
 		function needsSetup(row, anyUsable) {
-			if (anyUsable || row.entry.accountProvider === true) return false;
+			if (anyUsable || row.entry.provider === "deepseek-account") return false;
 			if (row.entry.settingsPath.length > 0) return false;
 			return row.credential?.configured !== true;
 		}
@@ -1973,7 +1968,7 @@ window.__ModuleLoader__.load({
 		function ModelsSection(props) {
 			const { controller, useSnapshot, operations, schema, t, renderSlot } = props;
 			if (controller === void 0 || useSnapshot === void 0 || operations === void 0 || schema === void 0 || t === void 0) return null;
-			return (0, react_jsx_runtime.jsx)(Loaded, {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(Loaded, {
 				injected: {
 					controller,
 					useSnapshot,
@@ -2042,7 +2037,7 @@ window.__ModuleLoader__.load({
 			* and reopens through Edit.
 			*/
 			const closeSetup = (changed, target) => {
-				setDismissedSetup((previous) => new Set([...previous, target.provider]));
+				setDismissedSetup((previous) => /* @__PURE__ */ new Set([...previous, target.provider]));
 				if (changed) announceSaved(target);
 			};
 			const closeDelete = () => {
@@ -2069,12 +2064,12 @@ window.__ModuleLoader__.load({
 			if (state.status === "error") {
 				/* v8 ignore next -- an error status always carries text; the fallback satisfies the nullable type */
 				const errorText = state.error ?? "";
-				return (0, react_jsx_runtime.jsxs)("div", {
+				return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 					className: ModelsSection_module_css_default["section"],
-					children: [(0, react_jsx_runtime.jsx)("p", {
+					children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["error"],
 						children: `${t("loadFailed")}: ${errorText}`
-					}), (0, react_jsx_runtime.jsx)("button", {
+					}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 						type: "button",
 						className: ModelsSection_module_css_default["secondaryButton"],
 						onClick: () => {
@@ -2123,36 +2118,36 @@ window.__ModuleLoader__.load({
 				};
 			})();
 			const addRow = draft === void 0 ? void 0 : state.rows.find((row) => row.entry.provider === draft.target.provider);
-			return (0, react_jsx_runtime.jsxs)("div", {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 				className: ModelsSection_module_css_default["section"],
 				children: [
-					(0, react_jsx_runtime.jsx)("h2", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("h2", {
 						className: ModelsSection_module_css_default["title"],
 						children: t("title")
 					}),
-					!state.writable && state.status === "ready" ? (0, react_jsx_runtime.jsx)("p", {
+					!state.writable && state.status === "ready" ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["notice"],
 						children: t("readOnly")
 					}) : null,
-					savedIdentity === void 0 ? null : (0, react_jsx_runtime.jsx)("p", {
+					savedIdentity === void 0 ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: ModelsSection_module_css_default["savedNotice"],
 						role: "status",
 						"aria-live": "polite",
 						children: providerCopy(t("savedProvider"), savedIdentity)
 					}),
-					(0, react_jsx_runtime.jsx)("ul", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("ul", {
 						className: ModelsSection_module_css_default["rows"],
 						children: configured.map((row) => {
 							const target = targetOf(row);
 							const namespace = state.namespaces.get(target.settingsNs);
 							/* v8 ignore next -- the join marks a row configured only when its namespace resolved */
 							if (namespace === void 0) return null;
-							const error = row.entry.error === void 0 ? null : (0, react_jsx_runtime.jsx)("p", {
+							const error = row.entry.error === void 0 ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 								role: "alert",
 								className: ModelsSection_module_css_default["error"],
 								children: row.entry.error
 							});
-							if (needsSetup(row, anyUsable) && !dismissedSetup.has(row.entry.provider)) return (0, react_jsx_runtime.jsxs)("li", {
+							if (needsSetup(row, anyUsable) && !dismissedSetup.has(row.entry.provider)) return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("li", {
 								className: ModelsSection_module_css_default["setupCard"],
 								children: [
 									error,
@@ -2166,7 +2161,7 @@ window.__ModuleLoader__.load({
 										onClose: (changed) => {
 											closeSetup(changed, target);
 										},
-										...(row.entry.accountProvider === true ? { liveModels: row.liveModels } : {})
+										...row.entry.provider === "deepseek-account" ? { liveModels: row.liveModels } : {}
 									}),
 									renderSlot("settings.models.provider-card", {
 										provider: row.entry,
@@ -2178,37 +2173,37 @@ window.__ModuleLoader__.load({
 							const open = !addOpen && editing?.provider === row.entry.provider;
 							const credentialConfigured = row.credential?.configured === true;
 							const credentialMissing = !credentialConfigured && row.apiKeyEnv !== void 0 && row.credential?.configured === false;
-							return (0, react_jsx_runtime.jsxs)("li", {
+							return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("li", {
 								className: ModelsSection_module_css_default["rowCard"],
 								children: [
-									(0, react_jsx_runtime.jsxs)("div", {
+									/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 										className: ModelsSection_module_css_default["rowHead"],
-										children: [(0, react_jsx_runtime.jsxs)("span", {
+										children: [/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("span", {
 											className: ModelsSection_module_css_default["rowIdentity"],
 											children: [
-												(0, react_jsx_runtime.jsx)("span", {
+												/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 													className: ModelsSection_module_css_default["rowName"],
 													children: row.entry.displayName
 												}),
-												row.entry.declared === true ? (0, react_jsx_runtime.jsx)("span", {
+												row.entry.declared === true ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 													className: ModelsSection_module_css_default["rowTag"],
 													children: t("customTag")
 												}) : null,
-												credentialConfigured ? (0, react_jsx_runtime.jsx)("span", {
+												credentialConfigured ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 													className: `${ModelsSection_module_css_default["credentialDot"]} ${ModelsSection_module_css_default["credentialDotConfigured"]}`,
 													role: "img",
 													"aria-label": t("credentialConfigured"),
 													title: t("credentialConfigured")
-												}) : credentialMissing ? (0, react_jsx_runtime.jsx)("span", {
+												}) : credentialMissing ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 													className: `${ModelsSection_module_css_default["credentialDot"]} ${ModelsSection_module_css_default["credentialDotMissing"]}`,
 													role: "img",
 													"aria-label": t("credentialMissing"),
 													title: t("credentialMissing")
 												}) : null
 											]
-										}), (0, react_jsx_runtime.jsxs)("span", {
+										}), /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("span", {
 											className: ModelsSection_module_css_default["rowActions"],
-											children: [(0, react_jsx_runtime.jsx)("button", {
+											children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 												type: "button",
 												className: ModelsSection_module_css_default["secondaryButton"],
 												"aria-label": providerCopy(t("editProvider"), target),
@@ -2218,7 +2213,7 @@ window.__ModuleLoader__.load({
 													setEditing(open ? void 0 : target);
 												},
 												children: t("edit")
-											}), row.removable ? (0, react_jsx_runtime.jsx)("button", {
+											}), row.removable ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 												type: "button",
 												className: ModelsSection_module_css_default["dangerButton"],
 												"aria-label": providerCopy(t("removeProvider"), target),
@@ -2243,7 +2238,7 @@ window.__ModuleLoader__.load({
 										onClose: (changed) => {
 											closeEditor(changed, target);
 										},
-										...(row.entry.accountProvider === true ? { liveModels: row.liveModels } : {}),
+										...row.entry.provider === "deepseek-account" ? { liveModels: row.liveModels } : {},
 										cardOwner: {
 											provider: row.entry,
 											configured: row.configured,
@@ -2258,14 +2253,14 @@ window.__ModuleLoader__.load({
 							}, row.entry.provider);
 						})
 					}),
-					(0, react_jsx_runtime.jsx)("div", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 						className: ModelsSection_module_css_default["addBlock"],
-						children: addOpen ? (0, react_jsx_runtime.jsxs)("div", {
+						children: addOpen ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 							className: ModelsSection_module_css_default["addCard"],
 							children: [
-								(0, react_jsx_runtime.jsxs)("div", {
+								/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 									className: ModelsSection_module_css_default["addModes"],
-									children: [bothOffered ? (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.SegmentedControl, {
+									children: [bothOffered ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.SegmentedControl, {
 										id: addId,
 										label: t("addMode"),
 										value: mode,
@@ -2283,20 +2278,20 @@ window.__ModuleLoader__.load({
 										}],
 										onChange: (next) => {
 											setAddMode(next);
-											setVisited((previous) => new Set([...previous, next]));
+											setVisited((previous) => /* @__PURE__ */ new Set([...previous, next]));
 										}
-									}) : (0, react_jsx_runtime.jsx)("div", {
+									}) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 										className: ModelsSection_module_css_default["editorHeader"],
-										children: (0, react_jsx_runtime.jsx)("span", {
+										children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 											className: ModelsSection_module_css_default["editorTitle"],
 											children: t(mode === "catalog" ? "addCatalog" : "addCustom")
 										})
-									}), (0, react_jsx_runtime.jsx)("p", {
+									}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 										className: ModelsSection_module_css_default["advancedHint"],
 										children: t(mode === "catalog" ? "addCatalogHint" : "addCustomHint")
 									})]
 								}),
-								mounted("catalog") && draft !== void 0 ? (0, react_jsx_runtime.jsxs)("div", {
+								mounted("catalog") && draft !== void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 									id: `${addId}-catalog-panel`,
 									...bothOffered ? {
 										role: "tabpanel",
@@ -2305,12 +2300,12 @@ window.__ModuleLoader__.load({
 									hidden: mode !== "catalog",
 									className: ModelsSection_module_css_default["addPanel"],
 									children: [
-										(0, react_jsx_runtime.jsxs)("div", {
+										/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 											className: ModelsSection_module_css_default["field"],
-											children: [(0, react_jsx_runtime.jsx)("span", {
+											children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 												className: ModelsSection_module_css_default["fieldLabel"],
 												children: t("provider")
-											}), (0, react_jsx_runtime.jsx)("select", {
+											}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("select", {
 												className: `${ModelsSection_module_css_default["input"]} ${ModelsSection_module_css_default["selectInput"]}`,
 												value: draft.target.provider,
 												"aria-label": t("provider"),
@@ -2321,13 +2316,13 @@ window.__ModuleLoader__.load({
 													if (picked === void 0) return;
 													setEditing(targetOf(picked.row));
 												},
-												children: addable.map(({ row }) => (0, react_jsx_runtime.jsx)("option", {
+												children: addable.map(({ row }) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("option", {
 													value: row.entry.provider,
 													children: row.entry.displayName
 												}, row.entry.provider))
 											})]
 										}),
-										(0, react_jsx_runtime.jsx)(ProviderEditor, {
+										/* @__PURE__ */ (0, react_jsx_runtime.jsx)(ProviderEditor, {
 											provider: draft.target.provider,
 											displayName: draft.target.displayName,
 											hideTitle: true,
@@ -2349,7 +2344,7 @@ window.__ModuleLoader__.load({
 										}, { entryKey: addRow.entry.settingsNs })
 									]
 								}) : null,
-								mounted("custom") && piAi !== void 0 ? (0, react_jsx_runtime.jsx)("div", {
+								mounted("custom") && piAi !== void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 									id: `${addId}-custom-panel`,
 									...bothOffered ? {
 										role: "tabpanel",
@@ -2357,7 +2352,7 @@ window.__ModuleLoader__.load({
 									} : {},
 									hidden: mode !== "custom",
 									className: ModelsSection_module_css_default["addPanel"],
-									children: (0, react_jsx_runtime.jsx)(CustomProviderCard, {
+									children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)(CustomProviderCard, {
 										taken: state.rows.map((row) => row.entry.provider),
 										protocols,
 										revision: piAi.revision,
@@ -2372,9 +2367,9 @@ window.__ModuleLoader__.load({
 									})
 								}) : null
 							]
-						}) : catalogOffered || customOffered ? (0, react_jsx_runtime.jsx)("div", {
+						}) : catalogOffered || customOffered ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 							className: ModelsSection_module_css_default["addActions"],
-							children: (0, react_jsx_runtime.jsxs)("button", {
+							children: /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("button", {
 								type: "button",
 								className: ModelsSection_module_css_default["addButton"],
 								disabled: !state.writable || !catalogEnabled && !customEnabled,
@@ -2384,35 +2379,35 @@ window.__ModuleLoader__.load({
 									setSavedTarget(void 0);
 									setEditing(first === void 0 ? void 0 : targetOf(first.row));
 									setAddMode(initial);
-									setVisited(new Set([initial]));
+									setVisited(/* @__PURE__ */ new Set([initial]));
 									setAddOpen(true);
 								},
-								children: [(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconPlusOutlineRegular, { size: 14 }), t("add")]
+								children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconPlusOutlineRegular, { size: 14 }), t("add")]
 							})
 						}) : null
 					}),
 					renderSlot("settings.models.footer", {}),
-					(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
 						open: deleteTarget !== void 0,
 						onClose: closeDelete,
 						title: deleteTarget === void 0 ? "" : providerCopy(t("deleteTitle"), deleteTarget),
 						closeLabel: t("close"),
 						description: deleteTarget === void 0 ? "" : providerCopy(deleteTarget.credentialRef === void 0 ? t("deleteDescription") : t("deleteDescriptionWithCredential"), deleteTarget),
 						className: ModelsSection_module_css_default["deleteDialog"],
-						footer: (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+						footer: /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 							variant: "outline",
 							"data-modal-autofocus": true,
 							disabled: deleting,
 							onClick: closeDelete,
 							children: t("cancel")
-						}), (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 							variant: "outline",
 							className: ModelsSection_module_css_default["deleteConfirm"],
 							disabled: deleting,
 							onClick: confirmDelete,
 							children: deleteTarget === void 0 ? "" : providerCopy(deleting ? t("deleting") : t("deleteConfirm"), deleteTarget)
 						})] }),
-						children: deleteFailure === void 0 ? null : (0, react_jsx_runtime.jsx)("p", {
+						children: deleteFailure === void 0 ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 							className: ModelsSection_module_css_default["error"],
 							children: deleteFailure
 						})
@@ -2421,8 +2416,8 @@ window.__ModuleLoader__.load({
 			});
 		}
 		//#endregion
-		//#region \0dsh-css:/Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/deep-seek-harness-plugin/dsh-plugin-account-hub/packages/ui-settings-models/src/client/OnboardingModal.module.css.mjs
-		const css$1 = "._9kr4IW_dialog{width:min(600px,100%);max-height:100%;padding:0}._9kr4IW_content{box-sizing:border-box;flex-direction:column;min-height:0;padding:28px;display:flex;overflow-y:auto}._9kr4IW_title{color:var(--dsw-alias-label-primary);outline:none;margin:0;font-size:20px;font-weight:500;line-height:28px}._9kr4IW_body{margin-top:20px}@media (width<=560px){._9kr4IW_content{padding:24px}}";
+		//#region \0dsh-css:/Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/deep-seek-harness-plugin/packages/dsh-plugin-account-hub/packages/ui-settings-models/src/client/OnboardingModal.module.css.mjs
+		const css$1 = ".SxllnG_dialog{width:min(600px,100%);max-height:100%;padding:0}.SxllnG_content{box-sizing:border-box;flex-direction:column;min-height:0;padding:28px;display:flex;overflow-y:auto}.SxllnG_title{color:var(--dsw-alias-label-primary);outline:none;margin:0;font-size:20px;font-weight:500;line-height:28px}.SxllnG_body{margin-top:20px}@media (width<=560px){.SxllnG_content{padding:24px}}";
 		const tagId$1 = "@dsh/ui-settings-models/OnboardingModal.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$1) + "]") === null) {
 			const tag = document.createElement("style");
@@ -2432,13 +2427,13 @@ window.__ModuleLoader__.load({
 			document.head.appendChild(tag);
 		}
 		var OnboardingModal_module_css_default = {
-			"body": "_9kr4IW_body",
-			"content": "_9kr4IW_content",
-			"dialog": "_9kr4IW_dialog",
-			"title": "_9kr4IW_title"
+			"body": "SxllnG_body",
+			"content": "SxllnG_content",
+			"dialog": "SxllnG_dialog",
+			"title": "SxllnG_title"
 		};
 		//#endregion
-		//#region lib/types/client/OnboardingModal.js
+		//#region src/client/OnboardingModal.tsx
 		/** Shared modal chrome for every step registered by this onboarding plugin. */
 		const ignoreImplicitDismiss = () => {};
 		/**
@@ -2462,20 +2457,20 @@ window.__ModuleLoader__.load({
 			(0, react.useEffect)(() => {
 				if (focusTitle) titleRef.current?.focus();
 			}, [focusTitle]);
-			return (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
 				open: true,
 				title,
 				onClose: ignoreImplicitDismiss,
 				headless: true,
 				className: OnboardingModal_module_css_default.dialog,
-				children: (0, react_jsx_runtime.jsxs)("div", {
+				children: /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 					className: OnboardingModal_module_css_default.content,
-					children: [(0, react_jsx_runtime.jsx)("h2", {
+					children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("h2", {
 						ref: titleRef,
 						className: OnboardingModal_module_css_default.title,
 						tabIndex: focusTitle ? -1 : void 0,
 						children: title
-					}), (0, react_jsx_runtime.jsx)("div", {
+					}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 						className: OnboardingModal_module_css_default.body,
 						children
 					})]
@@ -2483,8 +2478,8 @@ window.__ModuleLoader__.load({
 			});
 		}
 		//#endregion
-		//#region \0dsh-css:/Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/deep-seek-harness-plugin/dsh-plugin-account-hub/packages/ui-settings-models/src/client/WelcomeNotice.module.css.mjs
-		const css = ".j03VbG_copy{color:var(--dsw-alias-label-secondary);font-size:14px;line-height:24px}.j03VbG_copy p{margin:0}.j03VbG_copy p+p{margin-top:12px}.j03VbG_error{color:var(--dsw-alias-state-error-primary);margin:16px 0 0;font-size:14px;line-height:22px}.j03VbG_actions{justify-content:flex-end;margin-top:24px;display:flex}.j03VbG_primary{min-width:120px}@media (width<=560px){.j03VbG_primary{width:100%}}";
+		//#region \0dsh-css:/Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/deep-seek-harness-plugin/packages/dsh-plugin-account-hub/packages/ui-settings-models/src/client/WelcomeNotice.module.css.mjs
+		const css = ".CZN43q_copy{color:var(--dsw-alias-label-secondary);font-size:14px;line-height:24px}.CZN43q_copy p{margin:0}.CZN43q_copy p+p{margin-top:12px}.CZN43q_error{color:var(--dsw-alias-state-error-primary);margin:16px 0 0;font-size:14px;line-height:22px}.CZN43q_actions{justify-content:flex-end;margin-top:24px;display:flex}.CZN43q_primary{min-width:120px}@media (width<=560px){.CZN43q_primary{width:100%}}";
 		const tagId = "@dsh/ui-settings-models/WelcomeNotice.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
 			const tag = document.createElement("style");
@@ -2494,13 +2489,13 @@ window.__ModuleLoader__.load({
 			document.head.appendChild(tag);
 		}
 		var WelcomeNotice_module_css_default = {
-			"actions": "j03VbG_actions",
-			"copy": "j03VbG_copy",
-			"error": "j03VbG_error",
-			"primary": "j03VbG_primary"
+			"actions": "CZN43q_actions",
+			"copy": "CZN43q_copy",
+			"error": "CZN43q_error",
+			"primary": "CZN43q_primary"
 		};
 		//#endregion
-		//#region lib/types/client/WelcomeNotice.js
+		//#region src/client/WelcomeNotice.tsx
 		/** Product-wide, versioned preview notice. */
 		/**
 		* Render the current notice until its exact copy version is acknowledged.
@@ -2527,22 +2522,22 @@ window.__ModuleLoader__.load({
 				if (await controller.acknowledge()) finish();
 			};
 			const paragraphs = t("welcomeBody").split("\n\n");
-			return (0, react_jsx_runtime.jsxs)(OnboardingModal, {
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(OnboardingModal, {
 				title: t("welcomeTitle"),
 				focusTitle: true,
 				children: [
-					(0, react_jsx_runtime.jsx)("div", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 						className: WelcomeNotice_module_css_default.copy,
-						children: paragraphs.map((paragraph) => (0, react_jsx_runtime.jsx)("p", { children: paragraph }, paragraph))
+						children: paragraphs.map((paragraph) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", { children: paragraph }, paragraph))
 					}),
-					state.error === null ? null : (0, react_jsx_runtime.jsx)("p", {
+					state.error === null ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 						className: WelcomeNotice_module_css_default.error,
 						role: "alert",
 						children: t("welcomeError")
 					}),
-					(0, react_jsx_runtime.jsx)("div", {
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 						className: WelcomeNotice_module_css_default.actions,
-						children: (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+						children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 							variant: "primary",
 							className: WelcomeNotice_module_css_default.primary,
 							disabled: state.status === "saving",
@@ -2556,7 +2551,7 @@ window.__ModuleLoader__.load({
 			});
 		}
 		//#endregion
-		//#region lib/types/onboarding-copy.js
+		//#region src/onboarding-copy.ts
 		/** Durable settings namespace for product-wide GUI onboarding facts. */
 		const WELCOME_NOTICE_SETTINGS_NAMESPACE = "ui-settings-general";
 		/** Field storing the last welcome notice version the user acknowledged. */
@@ -2567,7 +2562,7 @@ window.__ModuleLoader__.load({
 		*/
 		const WELCOME_NOTICE_VERSION = "2026-09-28.1";
 		//#endregion
-		//#region lib/types/client/welcome-store.js
+		//#region src/client/welcome-store.ts
 		/**
 		* Welcome-notice state derived from the welcome settings scope. The scope is
 		* the transport: a loopback browser follows the durable Host section, while a
@@ -2683,13 +2678,7 @@ window.__ModuleLoader__.load({
 			}
 		};
 		//#endregion
-		//#region lib/types/client/operations.js
-		/**
-		* The Host reads and writes the Models cards perform, as callbacks built in the
-		* plugin body. Cards receive these instead of a context: the outcomes name what
-		* a card renders — a stored view, a stale revision, a refusal message — so the
-		* failure codes and Remote namespaces stay in the apply world.
-		*/
+		//#region src/client/operations.ts
 		/**
 		* Bind the page's Host operations to the plugin's own Remote namespaces.
 		* @param ctx - the page plugin's context, which declares `remote.credentials`,
@@ -2738,7 +2727,7 @@ window.__ModuleLoader__.load({
 			};
 		}
 		//#endregion
-		//#region lib/types/client/schema-operations.js
+		//#region src/client/schema-operations.ts
 		/**
 		* Hide the Cordis service identity behind bound schema callbacks.
 		* @param service - settings-owned schema service available in the apply context.
@@ -2756,7 +2745,7 @@ window.__ModuleLoader__.load({
 			};
 		}
 		//#endregion
-		//#region lib/types/client/locales.js
+		//#region src/client/locales.ts
 		/** Copy dictionaries for the Models settings section. */
 		/** English strings (the key-set source of truth for this pair). */
 		const en = {
@@ -2991,7 +2980,7 @@ window.__ModuleLoader__.load({
 			keyRequired: "请输入 API 密钥后继续。"
 		};
 		//#endregion
-		//#region lib/types/client/index.js
+		//#region src/client/index.ts
 		/** Dictionary namespace owned by this plugin. */
 		const NS = "settings.models";
 		/**
@@ -3016,6 +3005,8 @@ window.__ModuleLoader__.load({
 			"remote.llm",
 			"remote.settings",
 			"remote.session",
+			"remote.account",
+			"remote.accountHub",
 			"configForms",
 			"settingsSchema"
 		];
@@ -3057,8 +3048,7 @@ window.__ModuleLoader__.load({
 					}),
 					ctx.remote.$on("credentials/record-updated", refreshModels),
 					ctx.remote.$on("credentials/reference-updated", refreshModels),
-					ctx.remote.$on("llm/adapters-updated", refreshModels),
-					ctx.on("connection/reset", refreshModels)
+					ctx.remote.$on("llm/adapters-updated", refreshModels)
 				];
 				return () => {
 					welcomeController.dispose();

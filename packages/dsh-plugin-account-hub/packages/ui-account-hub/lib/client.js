@@ -881,6 +881,7 @@ window.__ModuleLoader__.load({
 		function Loaded({ face, renderSlot }) {
 			const [rows, setRows] = (0, react.useState)([]);
 			const [failed, setFailed] = (0, react.useState)(null);
+			const [official, setOfficial] = (0, react.useState)(face.official?.getSnapshot());
 			(0, react.useEffect)(() => {
 				let alive = true;
 				const refresh = () => {
@@ -895,19 +896,117 @@ window.__ModuleLoader__.load({
 				};
 				refresh();
 				const dispose = face.subscribe(refresh);
+				const stopOfficial = face.official?.subscribe(() => setOfficial(face.official?.getSnapshot()));
 				return () => {
 					alive = false;
 					dispose();
+					stopOfficial?.();
 				};
 			}, [face]);
-			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", { children: failed !== null ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("p", { children: [
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", { children: [face.official !== void 0 && official !== void 0 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(HubAccountCard, {
+				t: face.t,
+				row: {
+					id: "deepseek-official",
+					displayName: "DeepSeek账号",
+					settingsNs: "deepseek-account",
+					type: "chat",
+					card: { fields: official.signingIn ? [{
+						key: "authorize",
+						kind: "button",
+						surface: "account",
+						action: "open-authorize",
+						label: "打开授权页"
+					}, {
+						key: "cancel",
+						kind: "button",
+						surface: "account",
+						action: "cancel",
+						label: "取消",
+						tone: "primary",
+						busyLabel: "取消中…"
+					}] : [
+						{
+							key: "signIn",
+							kind: "button",
+							surface: "account",
+							when: "signed-out",
+							action: "sign-in",
+							label: "登录",
+							tone: "primary",
+							busyLabel: "等待浏览器授权…"
+						},
+						{
+							key: "signOut",
+							kind: "button",
+							surface: "account",
+							when: "signed-in",
+							action: "sign-out",
+							label: "退出登录",
+							tone: "primary",
+							busyLabel: "退出中…"
+						},
+						{
+							key: "console",
+							kind: "button",
+							surface: "account",
+							when: "signed-in",
+							action: "open-console",
+							label: "控制台"
+						}
+					] },
+					state: {
+						signedIn: official.signedIn,
+						signingIn: false,
+						text: official.text,
+						level: official.level,
+						brand: {
+							logoUrl: "data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjNEQ2QkZFIiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+RGVlcFNlZWs8L3RpdGxlPjxwYXRoIGQ9Ik0yMy43NDggNC42NTFjLS4yNTQtLjEyNC0uMzY0LjExMy0uNTEyLjIzMy0uMDUxLjA0LS4wOTQuMDktLjEzNy4xMzctLjM3Mi4zOTctLjgwNi42NTctMS4zNzMuNjI2LS44MjktLjA0Ni0xLjUzNy4yMTQtMi4xNjMuODQ4LS4xMzMtLjc4Mi0uNTc1LTEuMjQ4LTEuMjQ3LTEuNTQ4LS4zNTItLjE1NS0uNzA4LS4zMTEtLjk1NS0uNjUtLjE3Mi0uMjQtLjIxOS0uNTA5LS4zMDUtLjc3NC0uMDU1LS4xNi0uMTEtLjMyMy0uMjkzLS4zNS0uMi0uMDMxLS4yNzguMTM2LS4zNTYuMjc2LS4zMTMuNTcyLS40MzQgMS4yMDItLjQyMiAxLjg0LjAyNyAxLjQzNi42MzMgMi41OCAxLjgzOCAzLjM5My4xMzcuMDk0LjE3Mi4xODcuMTI5LjMyMy0uMDgyLjI4LS4xOC41NTMtLjI2Ni44MzMtLjA1NS4xNzktLjEzNy4yMTgtLjMyOC4xNGE1LjUgNS41IDAgMCAxLTEuNzM3LTEuMTc5Yy0uODU3LS44MjgtMS42MzEtMS43NDMtMi41OTctMi40NmExMiAxMiAwIDAgMC0uNjg5LS40N2MtLjk4NS0uOTU3LjEzLTEuNzQzLjM4Ny0xLjgzNi4yNy0uMDk4LjA5NC0uNDMzLS43NzgtLjQyOC0uODcyLjAwMy0xLjY3LjI5NS0yLjY4Ny42ODVhMyAzIDAgMCAxLS40NjUuMTM2IDkuNiA5LjYgMCAwIDAtMi44ODMtLjEwMWMtMS44ODUuMjEtMy4zOSAxLjEtNC40OTcgMi42MjJDLjA4MiA4Ljc3Ni0uMjMxIDEwLjg1NC4xNTIgMTMuMDJjLjQwMyAyLjI4NCAxLjU2OCA0LjE3NSAzLjM2IDUuNjUzIDEuODU3IDEuNTMzIDMuOTk3IDIuMjg0IDYuNDM4IDIuMTQgMS40ODItLjA4NSAzLjEzMi0uMjg0IDQuOTk0LTEuODYuNDcuMjM0Ljk2Mi4zMjggMS43OC4zOTguNjI5LjA1OCAxLjIzNS0uMDMxIDEuNzA1LS4xMjkuNzM1LS4xNTUuNjg0LS44MzYuNDE4LS45NjEtMi4xNTUtMS4wMDQtMS42ODItLjU5NS0yLjExMi0uOTI2IDEuMDk1LTEuMjk1IDIuNzY4LTMuNTk4IDMuMjg0LTYuNzMzLjA1LS4zNDYuMTE1LS44MzQuMTA4LTEuMTE0LS4wMDQtLjE3MS4wMzUtLjIzOC4yMy0uMjU3YTQuMiA0LjIgMCAwIDAgMS41NDUtLjQ3NWMxLjM5Ny0uNzYzIDEuOTYtMi4wMTYgMi4wOTMtMy41MTcuMDItLjIzLS4wMDQtLjQ2Ny0uMjQ3LS41ODhNMTEuNTggMTguMTY4Yy0yLjA4OC0xLjY0Mi0zLjEwMS0yLjE4My0zLjUyLTIuMTYtLjM5LjAyNC0uMzIuNDcyLS4yMzQuNzYzLjA5LjI4OC4yMDcuNDg3LjM3MS43NC4xMTQuMTY3LjE5Mi40MTYtLjExMy42MDMtLjY3My40MTYtMS44NDItLjE0LTEuODk3LS4xNjgtMS4zNjEtLjgwMS0yLjUtMS44Ni0zLjMwMS0zLjMwNi0uNzc1LTEuMzkzLTEuMjI1LTIuODg4LTEuMjk5LTQuNDgyLS4wMi0uMzg1LjA5NC0uNTIyLjQ3Ny0uNTkyYTQuNyA0LjcgMCAwIDEgMS41My0uMDM4YzIuMTMxLjMxMSAzLjk0NiAxLjI2NCA1LjQ2NyAyLjc3NC44NjguODYgMS41MjUgMS44ODcgMi4yMDIgMi44OS43MiAxLjA2NiAxLjQ5NCAyLjA4MiAyLjQ4IDIuOTE1LjM0OC4yOTEuNjI2LjUxMy44OTIuNjc3LS44MDIuMDktMi4xNC4xMDktMy4wNTUtLjYxNXptMS4wMDEtNi40NGEuMzA2LjMwNiAwIDAgMSAuNDE1LS4yODcuMy4zIDAgMCAxIC4xMTMuMDc0LjMuMyAwIDAgMSAuMDg2LjIxNGMwIC4xNy0uMTM2LjMwNy0uMzA4LjMwN2EuMzAzLjMwMyAwIDAgMS0uMzA2LS4zMDdtMy4xMSAxLjU5NmMtLjIuMDgxLS40LjE1MS0uNTkxLjE2YTEuMjUgMS4yNSAwIDAgMS0uNzk4LS4yNTRjLS4yNzQtLjIzLS40Ny0uMzU4LS41NTEtLjc1OGExLjcgMS43IDAgMCAxIC4wMTUtLjU4OGMuMDctLjMyNy0uMDA3LS41MzctLjIzOC0uNzI3LS4xODgtLjE1Ni0uNDI2LS4xOTktLjY4OS0uMTk5YS42LjYgMCAwIDEtLjI1NC0uMDc4LjI1My4yNTMgMCAwIDEtLjExNC0uMzU4IDEgMSAwIDAgMSAuMTkyLS4yMWMuMzU2LS4yMDIuNzY3LS4xMzYgMS4xNDYuMDE2LjM1Mi4xNDQuNjE4LjQwOCAxLjAwMS43ODIuMzkyLjQ1MS40NjIuNTc2LjY4NS45MTUuMTc2LjI2NC4zMzYuNTM2LjQ0Ni44NDguMDY2LjE5NC0uMDIuMzUzLS4yNS40NSIvPjwvc3ZnPg==",
+							name: "DeepSeek账号"
+						},
+						identity: {
+							name: official.name,
+							contact: official.contact,
+							avatarUrl: official.avatarUrl
+						},
+						balance: { rows: official.rows.length > 0 ? official.rows : [{
+							label: "余额",
+							value: official.signedIn ? "加载中…" : "未登录"
+						}] }
+					}
+				},
+				invoke: async (method) => {
+					if (method === "sign-in") {
+						await face.official?.signIn();
+						return { message: "已发起登录，请完成浏览器授权。" };
+					}
+					if (method === "sign-out") {
+						await face.official?.signOut();
+						return {};
+					}
+					if (method === "open-console") {
+						face.official?.openConsole();
+						return {};
+					}
+					if (method === "cancel") {
+						await face.official?.cancel();
+						return {};
+					}
+					if (method === "open-authorize") {
+						face.official?.openAuthorize();
+						return {};
+					}
+					return {};
+				},
+				readParams: async () => ({}),
+				commitParams: async () => {}
+			}), failed !== null ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("p", { children: [
 				face.t("loadFailed"),
 				" — ",
 				failed
-			] }) : rows.length === 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", { children: face.t("empty") }) : groups.length <= 1 ? rows.map(({ row }) => renderRow(row)) : groups.map((group) => /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", { children: [group.rows.length > 1 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
+			] }) : rows.length === 0 && face.official === void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", { children: face.t("empty") }) : groups.length <= 1 ? rows.map(({ row }) => renderRow(row)) : groups.map((group) => /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", { children: [group.rows.length > 1 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 				style: GROUP_HEADING,
 				children: face.t(GROUP_KEYS[group.type])
-			}), group.rows.map(({ row }) => renderRow(row))] }, group.type)) });
+			}), group.rows.map(({ row }) => renderRow(row))] }, group.type))] });
 			/** Render one row: the declarative card, or the plugin's own slot row. */
 			function renderRow(row) {
 				return row.card !== void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(HubAccountCard, {
@@ -956,9 +1055,11 @@ window.__ModuleLoader__.load({
 				};
 				refresh();
 				const dispose = face.subscribe(refresh);
+				const stopOfficial = face.official?.subscribe(() => setOfficial(face.official?.getSnapshot()));
 				return () => {
 					alive = false;
 					dispose();
+					stopOfficial?.();
 				};
 			}, [face, settingsNs]);
 			if (!settled || row === null) return null;
@@ -975,6 +1076,19 @@ window.__ModuleLoader__.load({
 		}
 		//#endregion
 		//#region src/client/index.ts
+		/** One registered account as the section renders it. */
+		/** 官方余额格式：两位小数、不足一分显示 <¥0.01、负数接近 0 显示 -¥0.01，其余向下截断。 */
+		function formatBalance(amount, symbol) {
+			const raw = String(amount).trim();
+			if (raw === "" || Number.isNaN(Number(raw))) return `${symbol}0.00`;
+			const negative = raw.startsWith("-");
+			const [integerPart = "0", fractionRaw = ""] = (negative ? raw.slice(1) : raw).split(".");
+			const fraction = (fractionRaw + "00").slice(0, 2);
+			if (/^0*$/.test(integerPart) && /^0*$/.test(fraction)) return `${symbol}0.00`;
+			if (/^0*$/.test(integerPart) && Number(`0.${fractionRaw}`) < .01) return negative ? `-${symbol}0.01` : `<${symbol}0.01`;
+			const grouped = Number(integerPart.replace(/^0+(?=\d)/, "") || "0").toLocaleString("en-US");
+			return `${negative ? "-" : ""}${symbol}${grouped}.${fraction}`;
+		}
 		/** @returns the localized display name for the section nav. */
 		function sectionLabel(t) {
 			return t("nav");
@@ -988,6 +1102,7 @@ window.__ModuleLoader__.load({
 			"locale",
 			"remote",
 			"remote.accountHub",
+			"remote.account",
 			"theme"
 		];
 		/**
@@ -1002,7 +1117,194 @@ window.__ModuleLoader__.load({
 				zh
 			}), "accountHub: dictionaries");
 			const t = ctx.locale.bind("settings.accountHub");
+			let official;
+			try {
+				const account = ctx.remote.account;
+				let activeAttemptId;
+				let openedAuthorize = "";
+				let officialState = {
+					signedIn: false,
+					text: "未登录",
+					level: "warn",
+					name: "DeepSeek 账号",
+					contact: "",
+					avatarUrl: "",
+					consoleUrl: "",
+					signingIn: false,
+					expired: false,
+					authorizeUrl: "",
+					rows: []
+				};
+				const officialListeners = /* @__PURE__ */ new Set();
+				const publishOfficial = (patch) => {
+					officialState = {
+						...officialState,
+						...patch
+					};
+					for (const listener of officialListeners) listener();
+				};
+				const clientMeta = () => ({
+					version: globalThis.DSH_CLIENT_VERSION ?? "0.2.1-rc.3",
+					locale: ctx.locale.getSnapshot().active,
+					timezoneOffsetSeconds: -(/* @__PURE__ */ new Date()).getTimezoneOffset() * 60
+				});
+				const readProfile = async () => {
+					if (account === void 0) return;
+					try {
+						const [profile, balance] = await Promise.all([account.getProfile(clientMeta()).catch(() => void 0), account.getBalance(clientMeta()).catch(() => void 0)]);
+						const p = profile?.ok === true && profile.value !== null && typeof profile.value === "object" ? profile.value.value ?? {} : {};
+						const balanceDetails = balance?.ok === true && balance.value !== null && typeof balance.value === "object" ? balance.value : void 0;
+						const name = typeof p["name"] === "string" ? p["name"] : typeof p["nickname"] === "string" ? p["nickname"] : "DeepSeek 账号";
+						const contact = typeof p["email"] === "string" ? p["email"] : typeof p["phone"] === "string" ? p["phone"] : "";
+						const avatarUrl = typeof p["avatarUrl"] === "string" ? p["avatarUrl"] : "";
+						const rows = [];
+						const wallets = Array.isArray(balanceDetails?.value) ? balanceDetails.value : [];
+						for (const wallet of wallets) {
+							const currency = typeof wallet["currency"] === "string" ? wallet["currency"] : "CNY";
+							const amount = wallet["balance"] ?? wallet["amount"];
+							if (typeof amount === "string" || typeof amount === "number") rows.push({
+								label: "余额",
+								value: formatBalance(amount, currency === "CNY" ? "¥" : "$")
+							});
+						}
+						const bonusWallets = Array.isArray(balanceDetails?.bonusWallets) ? balanceDetails.bonusWallets : [];
+						for (const wallet of bonusWallets) {
+							const currency = typeof wallet["currency"] === "string" ? wallet["currency"] : "CNY";
+							const amount = wallet["balance"] ?? wallet["amount"];
+							if ((typeof amount === "string" || typeof amount === "number") && Number(amount) > 0) rows.push({
+								label: "赠金",
+								value: formatBalance(amount, currency === "CNY" ? "¥" : "$")
+							});
+						}
+						publishOfficial({
+							name,
+							contact,
+							avatarUrl,
+							rows,
+							signedIn: true,
+							level: "ok",
+							text: "已登录"
+						});
+					} catch {}
+				};
+				if (account !== void 0) ctx.effect(() => {
+					const controller = new AbortController();
+					try {
+						const stream = ctx.remote.$stream({
+							name: "account",
+							open: (signal) => account.watch(signal),
+							ended: () => /* @__PURE__ */ new Error("account stream ended")
+						});
+						(async () => {
+							try {
+								for await (const frame of stream) {
+									const view = frame.value;
+									const signedIn = view.status === "credential-stored";
+									const phase = view.attempt?.phase ?? "";
+									if (typeof view.attempt?.id === "string") activeAttemptId = view.attempt.id;
+									if (typeof view.attempt?.authorizeUrl === "string" && view.attempt.authorizeUrl !== "" && view.attempt.authorizeUrl !== officialState.authorizeUrl) publishOfficial({ authorizeUrl: view.attempt.authorizeUrl });
+									if (phase === "waiting-browser" && typeof view.attempt?.authorizeUrl === "string" && view.attempt.authorizeUrl !== "" && view.attempt.authorizeUrl !== openedAuthorize) {
+										openedAuthorize = view.attempt.authorizeUrl;
+										try {
+											globalThis.open(view.attempt.authorizeUrl, "_blank", "noopener,noreferrer");
+										} catch {}
+									}
+									const rawConsole = view.links?.usageUrl;
+									if (typeof rawConsole === "string" && rawConsole !== "") try {
+										publishOfficial({ consoleUrl: new URL(rawConsole, globalThis.location.origin).href });
+									} catch {}
+									if (signedIn) publishOfficial({
+										signedIn: true,
+										signingIn: false,
+										expired: false,
+										authorizeUrl: "",
+										level: "ok",
+										text: "已登录"
+									});
+									else if ([
+										"initializing",
+										"waiting-browser",
+										"exchanging",
+										"committing"
+									].includes(phase)) publishOfficial({
+										signedIn: false,
+										signingIn: true,
+										expired: false,
+										level: "warn",
+										text: "已发起登录，请完成浏览器授权……"
+									});
+									else if (phase === "expired") publishOfficial({
+										signedIn: false,
+										signingIn: false,
+										expired: true,
+										authorizeUrl: "",
+										level: "error",
+										text: "登录已过期。",
+										name: "DeepSeek 账号",
+										contact: "",
+										avatarUrl: "",
+										rows: []
+									});
+									else publishOfficial({
+										signedIn: false,
+										signingIn: false,
+										expired: false,
+										level: "warn",
+										text: "未登录",
+										name: "DeepSeek 账号",
+										contact: "",
+										avatarUrl: "",
+										rows: []
+									});
+									frame.accept();
+									if (signedIn) readProfile();
+								}
+							} catch {}
+						})();
+					} catch (error) {
+						console.warn("[account-hub] official account stream unavailable", error);
+					}
+					return () => {
+						controller.abort();
+					};
+				}, "accountHub: official account stream");
+				official = account === void 0 ? void 0 : {
+					getSnapshot: () => ({
+						...officialState,
+						rows: [...officialState.rows]
+					}),
+					subscribe: (onChange) => {
+						officialListeners.add(onChange);
+						return () => {
+							officialListeners.delete(onChange);
+						};
+					},
+					signIn: async () => {
+						const transport = globalThis.__DSH_TRANSPORT__;
+						const origin = transport?.streamBaseUrl !== void 0 ? new URL(transport.streamBaseUrl).origin : globalThis.location.origin;
+						if ((await account.startSignIn(clientMeta(), origin, "desktop")).ok !== true) throw new Error("官方账号登录启动失败");
+					},
+					openConsole: () => {
+						const url = officialState.consoleUrl !== "" ? officialState.consoleUrl : "https://platform.deepseek.com";
+						globalThis.open(url, "_blank", "noopener,noreferrer");
+					},
+					signOut: async () => {
+						if ((await account.signOut(clientMeta())).ok !== true) throw new Error("官方账号退出失败");
+					},
+					openAuthorize: () => {
+						if (officialState.authorizeUrl === "") return;
+						globalThis.open(officialState.authorizeUrl, "_blank", "noopener,noreferrer");
+					},
+					cancel: async () => {
+						if (activeAttemptId === void 0) return;
+						await account.cancelSignIn(activeAttemptId);
+					}
+				};
+			} catch (error) {
+				console.warn("[account-hub] official account bridge unavailable", error);
+			}
 			const face = {
+				official,
 				t,
 				list: async () => {
 					const result = await ctx.remote.accountHub.list();

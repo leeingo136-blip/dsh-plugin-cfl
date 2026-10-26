@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "RAG 知识库工具",
+    "description": "knowledge_add / knowledge_search / knowledge_delete 三个工具，加一个运行时注册的使用技能。"
+  }
+}

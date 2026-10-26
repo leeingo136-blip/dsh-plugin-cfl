@@ -20,3 +20,6 @@ models/
 # on the local-only branch `local-workbuddy-main`; pushes touching it are
 # rejected by scripts/hooks/pre-push.
 packages/dsh-connect-workbuddy/
+
+# Local working copy of the future persona plugin (not a workspace member)
+drafts/

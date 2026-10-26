@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "RAG 知识库",
+    "description": "RAG 知识库：连接卡片 + knowledge_add / knowledge_search / knowledge_delete 三个工具，以及随激活出现的 rag-knowledge 技能。"
+  }
+}

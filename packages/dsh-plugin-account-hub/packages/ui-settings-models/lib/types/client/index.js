@@ -24,7 +24,7 @@ export function refreshIfLoaded(controller) {
  * constrained; registration depends on each slot through `slots.inject()`.
  */
 export const inject = [
-    'slots', 'locale', 'remote', 'remote.credentials', 'remote.llm', 'remote.settings', 'remote.session',
+    'slots', 'locale', 'remote', 'remote.credentials', 'remote.llm', 'remote.settings', 'remote.session', 'remote.account', 'remote.accountHub',
     'configForms', 'settingsSchema',
 ];
 /**
@@ -70,7 +70,6 @@ export function apply(ctx) {
             ctx.remote.$on('credentials/record-updated', refreshModels),
             ctx.remote.$on('credentials/reference-updated', refreshModels),
             ctx.remote.$on('llm/adapters-updated', refreshModels),
-            ctx.on('connection/reset', refreshModels),
         ];
         return () => {
             welcomeController.dispose();

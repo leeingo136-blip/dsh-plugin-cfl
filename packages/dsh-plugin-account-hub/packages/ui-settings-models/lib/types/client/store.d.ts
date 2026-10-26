@@ -19,7 +19,6 @@ export interface ProviderDirectoryEntry {
     readonly settingsPath: readonly string[];
     readonly active: boolean;
     readonly declared?: boolean;
-    readonly accountProvider?: boolean;
     readonly error?: string;
 }
 /**
@@ -34,6 +33,15 @@ export declare function joinProviderDirectory(registered: readonly LlmProviderIn
 export interface ProviderRow {
     /** Account route has usable credentials for the configured inference origin. */
     accountAvailable?: boolean;
+    /** The models the session catalog currently advertises for this route, if
+     *  any. The account editor falls back to these as its inherited rows: a
+     *  signed-in account that never adopted still broadcasts its built-in
+     *  defaults to the home selector, and the card must show the same rows or
+     *  the two surfaces disagree (an empty card under a visible selector API). */
+    liveModels?: readonly {
+        id: string;
+        name?: string;
+    }[];
     /** The directory entry (route id, display name, settings address, live state). */
     entry: ProviderDirectoryEntry;
     /** Whether any layer configures this provider (its profile resolves). */

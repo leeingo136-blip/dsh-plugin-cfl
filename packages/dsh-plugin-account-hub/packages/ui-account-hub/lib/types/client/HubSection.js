@@ -8,6 +8,17 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  */
 import { useEffect, useState } from 'react';
 import { HubAccountCard } from "./HubAccountCard.js";
+/** Display order of the capability groups; a group with no rows renders nothing. */
+const GROUP_ORDER = ['chat', 'embedding', 'tts', 'asr'];
+/** The locale key of each group's heading. */
+const GROUP_KEYS = {
+    chat: 'groupChat',
+    embedding: 'groupEmbedding',
+    tts: 'groupTts',
+    asr: 'groupAsr',
+};
+/** Style of the group heading shown only when several families coexist. */
+const GROUP_HEADING = { margin: '10px 0 4px', fontSize: 12, fontWeight: 500, opacity: 0.65 };
 /**
  * Render the settings account column: the registry read lives here, row
  * content is delegated per account to the `account.hub.row` slot.
@@ -45,10 +56,21 @@ function Loaded({ face, renderSlot }) {
     }, [face]);
     return (_jsx("div", { children: failed !== null ? _jsxs("p", { children: [face.t('loadFailed'), ' — ', failed] })
             : rows.length === 0 ? _jsx("p", { children: face.t('empty') })
-                : rows.map(({ row }) => row.card !== undefined ? (_jsx(HubAccountCard, { t: face.t, row: row, invoke: (method, args) => face.invoke(row.id, method, args), readParams: () => face.readParams(row.id), commitParams: ops => face.commitParams(row.id, ops) }, row.id)) : renderSlot('account.hub.row', {
-                    accountId: row.id, displayName: row.displayName, state: row.state,
-                    invoke: (method, args) => face.invoke(row.id, method, args),
-                }, { entryKey: row.id })) }));
+                : groups.length <= 1 ? rows.map(({ row }) => renderRow(row))
+                    : groups.map(group => (_jsxs("div", { children: [group.rows.length > 1 && (_jsx("p", { style: GROUP_HEADING, children: face.t(GROUP_KEYS[group.type]) })), group.rows.map(({ row }) => renderRow(row))] }, group.type))) }));
+    /** Render one row: the declarative card, or the plugin's own slot row. */
+    function renderRow(row) {
+        return row.card !== undefined ? (_jsx(HubAccountCard, { t: face.t, row: row, invoke: (method, args) => face.invoke(row.id, method, args), readParams: () => face.readParams(row.id), commitParams: ops => face.commitParams(row.id, ops) }, row.id)) : renderSlot('account.hub.row', {
+            accountId: row.id, displayName: row.displayName, state: row.state,
+            invoke: (method, args) => face.invoke(row.id, method, args),
+        }, { entryKey: row.id });
+    }
+    /** Group the rows by resolved capability family, in display order. */
+    function groups() {
+        return GROUP_ORDER
+            .map(type => ({ type, rows: rows.filter(({ row }) => (row.type ?? 'chat') === type) }))
+            .filter(group => group.rows.length > 0);
+    }
 }
 /**
  * Draw one account's models-page provider card. The seat renders for every

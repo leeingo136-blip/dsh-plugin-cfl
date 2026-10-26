@@ -1,7 +1,7 @@
 # API 接口开发文档（外部账号插件可调用的官方接口全集）
 
 > 配套阅读《账号插件开发文档.md》（协议与总线设计）。本文件只讲**接口**：插件能调用什么、必须实现什么、参数与返回的确切形态。  
-> 所有示例取自已通过端到端验证的两个实现：`dsh-plugin-deepseek-account/`（credential-inject）与 `dsh-plugin-account-testcode/`（direct）。
+> 所有示例取自已通过端到端验证的实现：`dsh-plugin-account-testcode/`（direct）与 `dsh-plugin-z.ai-account/`（credential-inject）。
 
 ---
 

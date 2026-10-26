@@ -64,6 +64,10 @@ export function HubAccountCard(props) {
     const [initial, setInitial] = useState({});
     const [values, setValues] = useState({});
     const [options, setOptions] = useState({});
+    // Search text per searchable select field, keyed by field key.
+    const [filters, setFilters] = useState({});
+    // The currently opened filterable dropdown, by field key (one at a time).
+    const [openKey, setOpenKey] = useState(null);
     const [notice, setNotice] = useState(null);
     const [busy, setBusy] = useState(null);
     // The open dialog field, its live input values, and its own notice line.
@@ -136,6 +140,26 @@ export function HubAccountCard(props) {
         && !sameValue(initial[field.key], values[field.key]));
     const setValue = (key, value) => {
         setValues(previous => ({ ...previous, [key]: value }));
+    };
+    // autoSave selects commit the picked value straight into the stored params,
+    // so the card reopens with the saved choice pre-selected — no save press.
+    const autoSaveValue = (field, value) => {
+        const op = value === undefined || value === ''
+            ? { op: 'unset', path: [field.key] }
+            : { op: 'set', path: [field.key], value };
+        void (async () => {
+            try {
+                await commitParams([op]);
+                if (!alive.current)
+                    return;
+                setInitial(previous => ({ ...previous, [field.key]: value }));
+                setValues(previous => ({ ...previous, [field.key]: value }));
+            }
+            catch (error) {
+                if (alive.current)
+                    setNotice({ tone: 'error', text: `${t('saveFailed')}: ${messageOf(error)}` });
+            }
+        })();
     };
     const save = () => {
         void (async () => {
@@ -295,12 +319,37 @@ export function HubAccountCard(props) {
                     const current = bound !== undefined
                         ? asString(bound.access.getPath([bound.path]))
                         : asString(values[field.key]);
-                    return (_jsxs("select", { id: domId, className: css.select, value: current, onChange: (event) => {
-                            if (bound !== undefined)
-                                bound.access.setPath([bound.path], event.target.value);
-                            else
-                                setValue(field.key, event.target.value);
-                        }, children: [current === '' && _jsx("option", { value: "", children: t('selectPlaceholder') }), choices.map(choice => (_jsx("option", { value: choice.value, children: choice.label }, choice.value)))] }));
+                    const pick = (value) => {
+                        if (bound !== undefined)
+                            bound.access.setPath([bound.path], value);
+                        else if (field.autoSave === true)
+                            autoSaveValue(field, value);
+                        else
+                            setValue(field.key, value);
+                        setFilters(previous => ({ ...previous, [field.key]: '' }));
+                        setOpenKey(null);
+                    };
+                    // Filterable dropdown: the trigger opens a panel whose top input
+                    // narrows the choices by label or value (case-insensitive). The
+                    // current choice always stays in the list, so a saved value never
+                    // reads as "nothing chosen" while its label is filtered away.
+                    if (field.searchable === true) {
+                        const query = asString(filters[field.key]).trim().toLowerCase();
+                        const filtered = query === '' ? choices : choices.filter(choice => choice.label.toLowerCase().includes(query) || choice.value.toLowerCase().includes(query));
+                        const visible = current === '' || query === ''
+                            || filtered.some(choice => choice.value === current)
+                            ? filtered
+                            : [choices.find(choice => choice.value === current), ...filtered]
+                                .filter((choice) => choice !== undefined);
+                        const open = openKey === field.key;
+                        const currentChoice = choices.find(choice => choice.value === current);
+                        return (_jsxs("div", { className: css.combo, children: [_jsxs("button", { type: "button", id: domId, className: css.comboTrigger, onClick: () => { setOpenKey(open ? null : field.key); }, children: [_jsx("span", { className: currentChoice === undefined && current === '' ? css.comboPlaceholder : css.comboValue, children: currentChoice?.label ?? (current === '' ? t('selectPlaceholder') : current) }), _jsx("span", { className: css.comboCaret, children: "\u25BE" })] }), open && (_jsxs(Fragment, { children: [_jsx("div", { className: css.comboBackdrop, onClick: () => { setOpenKey(null); } }), _jsxs("div", { className: css.comboPanel, children: [_jsx(Input, { type: "text", value: asString(filters[field.key]), placeholder: t('selectSearchPlaceholder'), autoComplete: "off", onChange: (event) => { setFilters(previous => ({ ...previous, [field.key]: event.target.value })); } }), _jsx("div", { className: css.comboList, children: visible.length === 0
+                                                        ? _jsx("div", { className: css.comboEmpty, children: t('selectNoMatch') })
+                                                        : visible.map(choice => (_jsx("button", { type: "button", className: choice.value === current
+                                                                ? `${css.comboOption} ${css.comboOptionActive}`
+                                                                : css.comboOption, onClick: () => { pick(choice.value); }, children: choice.label }, choice.value))) })] })] }))] }));
+                    }
+                    return (_jsxs("select", { id: domId, className: css.select, value: current, onChange: (event) => { pick(event.target.value); }, children: [current === '' && _jsx("option", { value: "", children: t('selectPlaceholder') }), choices.map(choice => (_jsx("option", { value: choice.value, children: choice.label }, choice.value)))] }));
                 }
                 case 'button':
                     return renderButtonControl(field);
@@ -313,19 +362,23 @@ export function HubAccountCard(props) {
     // dialog trigger, so all three render the same modal.
     const dialogModal = dialogField?.dialog === undefined ? null : (_jsxs(Modal, { open: true, onClose: closeDialog, title: dialogField.dialog.title ?? dialogField.label, closeLabel: t('cancel'), footer: (_jsxs(_Fragment, { children: [_jsx(Button, { variant: "outline", size: "sm", disabled: dialogBusy, onClick: closeDialog, children: t('cancel') }), _jsx(Button, { variant: "primary", size: "sm", disabled: dialogBusy, onClick: runDialogSubmit, children: dialogBusy
                         ? (dialogField.busyLabel ?? t('busy'))
-                        : (dialogField.dialog.submitLabel ?? dialogField.label) })] })), children: [dialogField.dialog.fields.map((input, index) => (_jsxs("div", { className: css.field, children: [_jsx("label", { className: css.label, htmlFor: `account-hub-dialog-${row.id}-${input.key}`, children: input.label }), _jsx(Input, { id: `account-hub-dialog-${row.id}-${input.key}`, type: input.kind, value: asString(dialogValues[input.key]), placeholder: input.placeholder, autoComplete: "off", "data-modal-autofocus": index === 0 ? '' : undefined, onChange: (event) => { setDialogValues(previous => ({ ...previous, [input.key]: event.target.value })); } })] }, input.key))), dialogNotice !== null && (_jsx("p", { className: dialogNotice.tone === 'error' ? css.error : css.notice, children: dialogNotice.text }))] }));
+                        : (dialogField.dialog.submitLabel ?? dialogField.label) })] })), children: [dialogField.dialog.fields.map((input, index) => (_jsxs("div", { className: css.field, children: [_jsx("label", { className: css.label, htmlFor: `account-hub-dialog-${row.id}-${input.key}`, children: input.label }), input.kind === 'select' ? (_jsxs("select", { id: `account-hub-dialog-${row.id}-${input.key}`, className: css.select, value: asString(dialogValues[input.key]), autoComplete: "off", "data-modal-autofocus": index === 0 ? '' : undefined, onChange: (event) => { setDialogValues(previous => ({ ...previous, [input.key]: event.target.value })); }, children: [asString(dialogValues[input.key]) === '' && _jsx("option", { value: "" }), (input.options ?? []).filter(option => input.dependsOn === undefined
+                                || option.when === undefined
+                                || asString(dialogValues[input.dependsOn]) === option.when).map(option => (_jsx("option", { value: option.value, children: option.label }, option.value)))] })) : (_jsx(Input, { id: `account-hub-dialog-${row.id}-${input.key}`, type: input.kind, value: asString(dialogValues[input.key]), placeholder: input.placeholder, autoComplete: "off", "data-modal-autofocus": index === 0 ? '' : undefined, onChange: (event) => { setDialogValues(previous => ({ ...previous, [input.key]: event.target.value })); } }))] }, input.key))), dialogNotice !== null && (_jsx("p", { className: dialogNotice.tone === 'error' ? css.error : css.notice, children: dialogNotice.text }))] }));
     // The signed-in account column draws the built-in account layout: an
     // identity card (avatar, name, contact, platform link) and a balance card,
     // both fed by the plugin's state. The plain descriptor form remains the
     // signed-out and models-page rendering.
     const identity = asRecord(status.identity);
     const balance = asRecord(status.balance);
+    const details = asRecord(status.details);
     const showRich = surface !== 'models' && status.signedIn === true
         && (asString(identity.name) !== '' || asString(identity.contact) !== ''
             || asString(identity.avatarUrl) !== '' || asString(identity.infoUrl) !== '');
     if (showRich) {
         const balanceRows = Array.isArray(balance.rows) ? balance.rows : [];
         const moreRows = Array.isArray(balance.more) ? balance.more : [];
+        const detailRows = Array.isArray(details.rows) ? details.rows : [];
         const buttons = visibleFields.filter(field => field.kind === 'button' || field.kind === 'dialog');
         const rowLink = (raw) => {
             const link = asRecord(raw);
@@ -339,9 +392,12 @@ export function HubAccountCard(props) {
                                                 ? _jsx("img", { className: css.avatarBrand, src: brandLogo, alt: "" })
                                                 : asString(identity.avatarUrl) !== ''
                                                     ? _jsx("img", { className: css.avatarImage, src: asString(identity.avatarUrl), alt: "", referrerPolicy: "no-referrer" })
-                                                    : _jsx(IconUserOutlineMedium, { size: 16 }) }), _jsxs("div", { className: css.identityCopy, children: [_jsx("span", { className: css.nameLine, children: asString(identity.name) !== '' ? asString(identity.name) : t('signedIn') }), _jsx("span", { className: css.statusLine, role: "status", children: asString(identity.contact) })] })] }), _jsxs("div", { className: css.rowEnd, children: [buttons.map(renderButtonControl), asString(identity.infoUrl) !== '' && (_jsxs("a", { className: css.accountInfo, href: asString(identity.infoUrl), target: "_blank", rel: "noopener noreferrer", children: [asString(identity.infoLabel) !== '' ? asString(identity.infoLabel) : t('accountInfo'), _jsx(IconRightUpOutlineRegular, { size: 12 })] }))] })] }), (balanceRows.length > 0 || moreRows.length > 0) && _jsx("div", { className: css.divider }), balanceRows.map((raw, index) => {
+                                                    : _jsx(IconUserOutlineMedium, { size: 16 }) }), _jsxs("div", { className: css.identityCopy, children: [_jsx("span", { className: css.nameLine, children: asString(identity.name) !== '' ? asString(identity.name) : t('signedIn') }), _jsx("span", { className: css.statusLine, role: "status", children: asString(identity.contact) })] })] }), _jsxs("div", { className: css.rowEnd, children: [buttons.map(renderButtonControl), asString(identity.infoUrl) !== '' && (_jsxs("a", { className: css.accountInfo, href: asString(identity.infoUrl), target: "_blank", rel: "noopener noreferrer", children: [asString(identity.infoLabel) !== '' ? asString(identity.infoLabel) : t('accountInfo'), _jsx(IconRightUpOutlineRegular, { size: 12 })] }))] })] }), (detailRows.length > 0 || balanceRows.length > 0 || moreRows.length > 0) && _jsx("div", { className: css.divider }), detailRows.map((raw, index) => {
+                            const d = asRecord(raw);
+                            return (_jsxs(Fragment, { children: [index > 0 && _jsx("div", { className: css.divider }), _jsxs("div", { className: css.bRow, children: [_jsx("span", { children: asString(d.label) }), _jsx("span", { children: asString(d.value) })] })] }, `detail-${index}`));
+                        }), balanceRows.map((raw, index) => {
                             const r = asRecord(raw);
-                            return (_jsxs(Fragment, { children: [index > 0 && _jsx("div", { className: css.divider }), _jsxs("div", { className: css.bRow, children: [_jsx("span", { children: asString(r.label) }), asString(r.value) !== ''
+                            return (_jsxs(Fragment, { children: [(index > 0 || detailRows.length > 0) && _jsx("div", { className: css.divider }), _jsxs("div", { className: css.bRow, children: [_jsx("span", { children: asString(r.label) }), asString(r.value) !== ''
                                                 ? _jsx("span", { className: css.amount, children: asString(r.value) })
                                                 : r.loading === true
                                                     ? _jsx("span", { className: css.unavailable, children: t('loading') })
@@ -351,7 +407,7 @@ export function HubAccountCard(props) {
                             const links = Array.isArray(m.links) ? m.links : [];
                             if (links.length === 0)
                                 return null;
-                            return (_jsxs(Fragment, { children: [_jsx("div", { className: css.divider }), _jsxs("div", { className: css.bRow, children: [_jsx("span", { className: css.secondary, children: asString(m.label) }), _jsx("div", { className: css.links, children: links.map((rawLink, linkIndex) => {
+                            return (_jsxs(Fragment, { children: [(index > 0 || detailRows.length > 0 || balanceRows.length > 0) && _jsx("div", { className: css.divider }), _jsxs("div", { className: css.bRow, children: [_jsx("span", { className: css.secondary, children: asString(m.label) }), _jsx("div", { className: css.links, children: links.map((rawLink, linkIndex) => {
                                                     const link = asRecord(rawLink);
                                                     const href = asString(link.href);
                                                     const action = asString(link.action);
@@ -400,6 +456,11 @@ export function HubAccountCard(props) {
             return null;
         return _jsx(_Fragment, { children: visibleFields.map(renderField) });
     }
-    return (_jsxs("div", { className: surface === 'models' ? css.plain : css.card, children: [surface !== 'models' && (_jsxs("div", { className: css.head, children: [_jsx("span", { className: css.name, children: row.displayName }), statusText !== '' && (_jsx("span", { className: [css.status, statusLevel === null ? undefined : css[statusLevel]].join(' '), children: statusText }))] })), visibleFields.map(renderField), notice !== null && (_jsx("p", { className: notice.tone === 'error' ? css.error : css.notice, children: notice.text })), visibleFields.some(field => isValueField(field) && !isDraftBound(field)) && (_jsx("div", { className: css.actions, children: _jsx(Button, { variant: "primary", size: "sm", disabled: !dirty || busy !== null, onClick: () => { save(); }, children: busy === 'save' ? t('saving') : t('save') }) })), dialogModal] }));
+    return (
+    // The models-page card renders inside the provider editor, which carries
+    // the frame already (title, save controls, layout): the card itself lays
+    // flat there. Only the account column keeps the bordered card.
+    _jsxs("div", { className: surface === 'models' ? css.plain : css.card, children: [surface !== 'models' && (_jsxs("div", { className: css.head, children: [_jsx("span", { className: css.name, children: row.displayName }), statusText !== '' && (_jsx("span", { className: [css.status, statusLevel === null ? undefined : css[statusLevel]].join(' '), children: statusText }))] })), visibleFields.map(renderField), notice !== null && (_jsx("p", { className: notice.tone === 'error' ? css.error : css.notice, children: notice.text })), visibleFields.some(field => isValueField(field) && !isDraftBound(field)
+                && field.autoSave !== true) && (_jsx("div", { className: css.actions, children: _jsx(Button, { variant: "primary", size: "sm", disabled: !dirty || busy !== null, onClick: () => { save(); }, children: busy === 'save' ? t('saving') : t('save') }) })), dialogModal] }));
 }
 //# sourceMappingURL=HubAccountCard.js.map

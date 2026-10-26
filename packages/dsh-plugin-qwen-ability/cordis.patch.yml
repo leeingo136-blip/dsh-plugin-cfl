@@ -170,16 +170,11 @@
                   maxRounds: 64
           # 每个工具须在 config 中绑定「记忆回想」卡片名称才会注入会话工具清单，
           # 留空 = 不注入。卡片在 设置 → 记忆回想 中创建（名称唯一）。
-          - id: memory-recall-tools
-            name: '@dsh/memory-recall-tools'
+          - id: rag-knowledge-tools
+            name: '@dsh/rag-knowledge-tools'
             inject: [tools]
             config:
-              knowledge_add: ''
-              knowledge_search: ''
-              knowledge_delete: ''
-              memory_recall: ''
-              memory_add: ''
-              dream: false
+              knowledge: ''
           - id: tool-ask-user
             name: '@deepseek-ai/dsh-tool-ask-user'
           - id: tool-todo

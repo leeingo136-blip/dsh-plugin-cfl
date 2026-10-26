@@ -6,5 +6,8 @@
     "lightningcss": "^1.33.0",
     "tsdown": "^0.23.1",
     "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "test:memory": "node --test packages/dsh-plugin-memory-echo/tests/*.test.mjs"
   }
 }

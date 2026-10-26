@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Knowledge Service",
+    "description": "Connection-card registry plus the retrieval, scoring and vector read/write primitives."
+  }
+}

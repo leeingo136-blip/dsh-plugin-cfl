@@ -12,10 +12,16 @@ export const en = {
     optionsFailed: 'Loading options failed',
     busy: 'Working…',
     selectPlaceholder: 'Select…',
+    selectSearchPlaceholder: 'Search…',
+    selectNoMatch: 'No matches',
     signedIn: 'Signed in',
     accountInfo: 'Account info',
     loading: 'Loading…',
     cancel: 'Cancel',
+    groupChat: 'Chat models',
+    groupEmbedding: 'Embedding models',
+    groupTts: 'Text-to-speech',
+    groupAsr: 'Speech recognition',
 };
 /** Chinese strings (same keys as {@link en}). */
 export const zh = {
@@ -30,9 +36,15 @@ export const zh = {
     optionsFailed: '选项加载失败',
     busy: '处理中…',
     selectPlaceholder: '请选择…',
+    selectSearchPlaceholder: '搜索…',
+    selectNoMatch: '无匹配项',
     signedIn: '已登录',
     accountInfo: '账号信息',
     loading: '加载中…',
     cancel: '取消',
+    groupChat: '对话模型',
+    groupEmbedding: '向量模型',
+    groupTts: '语音合成',
+    groupAsr: '语音识别',
 };
 //# sourceMappingURL=locales.js.map

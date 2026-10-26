@@ -252,7 +252,20 @@ export function ProviderEditor(props) {
      */
     const inheritedModels = () => {
         const pinned = schema.getPath(namespace.base, [...settingsPath, 'models']);
-        return pinned ?? schema.nodeAtPath(root, [...settingsPath, 'models'])?.meta.default;
+        if (pinned !== undefined)
+            return pinned;
+        const declared = schema.nodeAtPath(root, [...settingsPath, 'models'])?.meta.default;
+        if (declared !== undefined)
+            return declared;
+        // End of the chain: the live catalog's rows. An account plugin without a
+        // schema default broadcasts its built-in defaults to the home selector
+        // while never adopted; mirroring them here (as inherited rows the reset
+        // restores) is what keeps the card and the selector showing the same
+        // thing. Absent live rows the chain still ends in nothing, as before.
+        return props.liveModels?.map(model => ({
+            id: model.id,
+            ...(typeof model.name === 'string' && model.name.length > 0 ? { name: model.name } : {}),
+        }));
     };
     /** Whether the route's schema declares a model catalog at `models`: the
      *  unknown layout then renders the shared catalog editor and the footer

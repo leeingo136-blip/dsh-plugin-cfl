@@ -1,0 +1,18 @@
+{
+  "cards": [
+    {
+      "plan": "dafeiyu4",
+      "address": "/Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/deep-seek-harness-plugin/packages/dsh-plugin-memory-echo/packages/memory-api/data/memory-echo/databases/dafeiyu4.sqlite",
+      "embeddingModel": "bge-small-zh-v1.5-q8_0",
+      "basePreset": "dafeiyu3",
+      "injectGroups": 10
+    },
+    {
+      "plan": "deepseekchan",
+      "address": "/Users/infinite/Projects/DeepSeekHarnessPrivatePlugin/deep-seek-harness-plugin/packages/dsh-plugin-memory-echo/packages/memory-api/data/memory-echo/databases/deepseekchan.sqlite",
+      "embeddingModel": "bge-small-zh-v1.5-q8_0",
+      "basePreset": "standard",
+      "injectGroups": 10
+    }
+  ]
+}

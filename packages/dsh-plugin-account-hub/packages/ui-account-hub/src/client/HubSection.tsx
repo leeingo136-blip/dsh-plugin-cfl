@@ -9,9 +9,10 @@ import { useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import type { ProviderCardExtrasOwnerProps } from '@dsh/ui-settings-models/client'
 import type { AccountHubType } from '@dsh/api-account-hub'
-import type { AccountHubRowOwnerProps, AccountHubSectionFace, AccountRow } from './index.ts'
+import type { AccountHubRowOwnerProps, AccountHubSectionFace, AccountRow, OfficialAccountSnapshot } from './index.ts'
 import type { AccountHubKey } from './locales.ts'
 import { HubAccountCard } from './HubAccountCard.tsx'
+import { DEEPSEEK_LOGO } from './logo.ts'
 
 /** Display order of the capability groups; a group with no rows renders nothing. */
 const GROUP_ORDER: readonly AccountHubType[] = ['chat', 'embedding', 'tts', 'asr']
@@ -55,6 +56,7 @@ export function AccountHubSection(props: { face?: AccountHubSectionFace; renderS
 function Loaded({ face, renderSlot }: { face: AccountHubSectionFace; renderSlot: AccountHubRenderSlot }): ReactNode {
   const [rows, setRows] = useState<readonly RowState[]>([])
   const [failed, setFailed] = useState<string | null>(null)
+  const [official, setOfficial] = useState<OfficialAccountSnapshot | undefined>(face.official?.getSnapshot())
   useEffect(() => {
     let alive = true
     const refresh = (): void => {
@@ -71,12 +73,59 @@ function Loaded({ face, renderSlot }: { face: AccountHubSectionFace; renderSlot:
     }
     refresh()
     const dispose = face.subscribe(refresh)
-    return () => { alive = false; dispose() }
+    const stopOfficial = face.official?.subscribe(() => setOfficial(face.official?.getSnapshot()))
+    return () => { alive = false; dispose(); stopOfficial?.() }
   }, [face])
   return (
     <div>
+      {face.official !== undefined && official !== undefined && (
+        <HubAccountCard
+          t={face.t}
+          row={{
+            id: 'deepseek-official',
+            displayName: 'DeepSeek账号',
+            settingsNs: 'deepseek-account',
+            type: 'chat',
+            card: {
+              fields: official.signingIn
+                ? [
+                    { key: 'authorize', kind: 'button', surface: 'account', action: 'open-authorize', label: '打开授权页' },
+                    { key: 'cancel', kind: 'button', surface: 'account', action: 'cancel', label: '取消', tone: 'primary', busyLabel: '取消中…' },
+                  ]
+                : [
+                    { key: 'signIn', kind: 'button', surface: 'account', when: 'signed-out', action: 'sign-in', label: '登录', tone: 'primary', busyLabel: '等待浏览器授权…' },
+                    { key: 'signOut', kind: 'button', surface: 'account', when: 'signed-in', action: 'sign-out', label: '退出登录', tone: 'primary', busyLabel: '退出中…' },
+                    { key: 'console', kind: 'button', surface: 'account', when: 'signed-in', action: 'open-console', label: '控制台' },
+                  ],
+            },
+            state: {
+              signedIn: official.signedIn,
+              signingIn: false,
+              text: official.text,
+              level: official.level,
+              brand: { logoUrl: DEEPSEEK_LOGO, name: 'DeepSeek账号' },
+              identity: {
+                name: official.name,
+                contact: official.contact,
+                avatarUrl: official.avatarUrl,
+              },
+              balance: { rows: official.rows.length > 0 ? official.rows : [{ label: '余额', value: official.signedIn ? '加载中…' : '未登录' }] },
+            },
+          }}
+          invoke={async (method: string) => {
+            if (method === 'sign-in') { await face.official?.signIn(); return { message: '已发起登录，请完成浏览器授权。' } }
+            if (method === 'sign-out') { await face.official?.signOut(); return {} }
+            if (method === 'open-console') { face.official?.openConsole(); return {} }
+            if (method === 'cancel') { await face.official?.cancel(); return {} }
+            if (method === 'open-authorize') { face.official?.openAuthorize(); return {} }
+            return {}
+          }}
+          readParams={async () => ({})}
+          commitParams={async () => {}}
+        />
+      )}
       {failed !== null ? <p>{face.t('loadFailed')}{' — '}{failed}</p>
-        : rows.length === 0 ? <p>{face.t('empty')}</p>
+        : rows.length === 0 && face.official === undefined ? <p>{face.t('empty')}</p>
           : groups.length <= 1 ? rows.map(({ row }) => renderRow(row))
             : groups.map(group => (
               <div key={group.type}>
@@ -148,7 +197,8 @@ export function ProviderModelsCard(props: ProviderModelsCardProps): ReactNode {
     }
     refresh()
     const dispose = face.subscribe(refresh)
-    return () => { alive = false; dispose() }
+    const stopOfficial = face.official?.subscribe(() => setOfficial(face.official?.getSnapshot()))
+    return () => { alive = false; dispose(); stopOfficial?.() }
   }, [face, settingsNs])
   if (!settled || row === null) return null
   return (

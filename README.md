@@ -11,7 +11,6 @@ External plugins for the DeepSeek Harness, kept standalone from the harness repo
 | 目录 | 说明 | 依赖 account-hub |
 |---|---|---|
 | `dsh-plugin-account-hub` | 账号管理枢纽（官方宿主适配：hub API / 桌面 shim / UI 组件 ×2） | ——（本体） |
-| `dsh-plugin-deepseek-account` | DeepSeek 官方账号插件（credential-inject 模式） | ✅ 必须 |
 | `dsh-plugin-account-testcode` | TestCode 测试账号插件（direct 模式） | ✅ 必须 |
 | `dsh-plugin-llama-local` | 本地 GGUF 推理插件：xLAM-2-3B-fc-r（函数调用）/ Qwen3-0.6B 兜底，node-llama-cpp 引擎，工具调用走别名注入 + 解析回环 | ✅ 必须 |
 | `dsh-plugin-zcode-ability` | ZCode 移植容器：persona / skills / plan / workflow / environment（zCode之剑 预设）+ z.ai-account 账号 + 8 个技能 | ⚠️ 仅 z.ai-account |
@@ -53,14 +52,17 @@ containers do not depend on hub.
 因此安装任何账号插件前，先安装 account-hub / Install account-hub first, then the
 account plugins.
 
-> **安装 account-hub 前注意**：hub 会屏蔽 dsh 自带的 DeepSeek 账号，并屏蔽模型中的
-> 默认 DeepSeek API 模型组——请先确认默认模型组的 API 记录已保存、DeepSeek 账号已
-> 登出，再安装；如需 DeepSeek 登录功能，请安装 `dsh-plugin-deepseek-account`。详见
-> [account-hub README](./packages/dsh-plugin-account-hub/README.md)。
->
-> **Before installing account-hub**: it hides the built-in DeepSeek account and the
-> default DeepSeek API model group. Save those API records and sign out first; for
-> DeepSeek sign-in install `dsh-plugin-deepseek-account`.
+### account-hub 与官方 DeepSeek 账号
+
+当前版本使用 **官方 DeepSeek 账号宿主**（`dsh-deepseek-account-platform` +
+`account-controller`），account-hub 只接管账号页与模型页 UI：
+
+- 账号页由 hub 绘制，DeepSeek 卡片通过官方 `remote.account` 读取/登录/退出
+- 模型页由 hub 承载（rc3 页面），DeepSeek 账号模型卡使用官方 provider 数据
+- 未登录账号、未加载的本地模型不会显示模型卡片
+- 官方「DeepSeek API（API Key）」模型组仍被禁用
+
+DeepSeek 复刻插件 `dsh-plugin-deepseek-account` 已删除，不再需要安装。
 
 ## ⚠️ 账号风险警告 / Account risk warning
 

@@ -1,0 +1,23 @@
+# 记忆回想容器：三个安装级组件行，无条件插入。
+#
+# 本容器不提供任何 agent 预设。工具的启用完全由使用者自己在预设树里声明
+# memory-echo-tools 一行（两个开关）决定；这里只负责让组件存在。
+# - memory-api：宿主服务（RAG 连接卡片注册表）与 memory-echo 远程面
+# - memory-mount：client 面独立挂载组件（只挂 memory-echo 远程贡献，inject ['remote']；
+#   与官方 account-hub-mount 同构——挂载与消费分离，消费方注入 remote.memory-echo 命名空间
+#   服务以 park 到挂载完成）
+# - ui-memory-echo：设置中新增「记忆回想」一栏（settings.section 槽位）
+# - memory-echo-tools（不在此插入）：读工具 + 轮末写入组件，由使用者在自己的
+#   预设树里声明。两个开关，各自绑定方案名称：
+#     knowledge: <方案名> → knowledge_add / knowledge_search / knowledge_delete
+#     memory:    <方案名> → memory_recall + 轮末自动写入 + 空闲 5 分钟后的「梦境」整理
+#   开关留空即整组关闭（工具不注册、writer 不订阅会话事件）。
+# 本容器不 retarget 任何官方行。
+
+- insert:
+    - id: memory-echo-api
+      name: '@dsh/api-memory-echo'
+    - id: memory-echo-mount
+      name: '@dsh/memory-echo-mount'
+    - id: ui-memory-echo
+      name: '@dsh/ui-memory-echo'

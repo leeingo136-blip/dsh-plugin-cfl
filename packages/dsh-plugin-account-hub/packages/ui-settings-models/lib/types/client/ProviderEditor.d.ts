@@ -32,6 +32,17 @@ export interface ProviderEditorProps {
     provider: string;
     /** Display name for the card title. */
     displayName: string;
+    /** The models the session catalog currently advertises for this route,
+     *  supplied for account rows. The inherited-models chain ends in these:
+     *  an account that never adopted still broadcasts its built-in defaults
+     *  to the home selector, and the card's list must show the same rows —
+     *  a chain ending in "nothing" would render an empty list under a
+     *  visible selector API. Only id/name survive the host projection, so
+     *  inherited rows lack per-model caps until adopted or edited. */
+    liveModels?: readonly {
+        id: string;
+        name?: string;
+    }[];
     /** Hide the title row (the add card renders its own provider select). */
     hideTitle?: boolean;
     /**

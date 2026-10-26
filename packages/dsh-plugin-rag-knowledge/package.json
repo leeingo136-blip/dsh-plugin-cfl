@@ -1,0 +1,12 @@
+{
+  "name": "dsh-plugin-rag-knowledge",
+  "description": "RAG 知识库：连接卡片 + knowledge_add / knowledge_search / knowledge_delete 三个工具，以及按需可见的使用技能。不写对话记忆、不做梦——那属于人格插件。",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

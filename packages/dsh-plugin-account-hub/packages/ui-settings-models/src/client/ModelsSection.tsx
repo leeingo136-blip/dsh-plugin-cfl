@@ -169,7 +169,7 @@ export async function removeProviderProfile(
 export function needsSetup(row: ProviderRow, anyUsable: boolean): boolean {
   // Account-backed routes draw their card inside the opened editor through
   // the provider-card seat; a bare key editor is meaningless for them.
-  if (anyUsable || row.entry.accountProvider === true) return false
+  if (anyUsable || row.entry.provider === 'deepseek-account') return false
   if (row.entry.settingsPath.length > 0) return false
   return row.credential?.configured !== true
 }
@@ -418,7 +418,7 @@ function Loaded({ injected, renderSlot }: { injected: ModelsSectionFace; renderS
                   t,
                   readOnly: !state.writable,
                   onClose: (changed) => { closeSetup(changed, target) },
-                  ...(row.entry.accountProvider === true ? { liveModels: row.liveModels } : {}),
+                  ...(row.entry.provider === 'deepseek-account' ? { liveModels: row.liveModels } : {}),
                 })}
                 {renderSlot(
                   'settings.models.provider-card',
@@ -509,7 +509,7 @@ function Loaded({ injected, renderSlot }: { injected: ModelsSectionFace; renderS
                   t,
                   readOnly: !state.writable,
                   onClose: (changed) => { closeEditor(changed, target) },
-                  ...(row.entry.accountProvider === true ? { liveModels: row.liveModels } : {}),
+                  ...(row.entry.provider === 'deepseek-account' ? { liveModels: row.liveModels } : {}),
                   // The provider-card seat is dispatched inside the opened
                   // editor with draft access: a registrant's card renders
                   // there and may bind controls to the draft, riding this

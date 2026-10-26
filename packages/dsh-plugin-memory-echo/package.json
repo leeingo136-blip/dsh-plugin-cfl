@@ -1,0 +1,12 @@
+{
+  "name": "dsh-plugin-memory-echo",
+  "description": "心灵回响：人格记忆的存储、回想与梦境（不含知识库工具）。",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

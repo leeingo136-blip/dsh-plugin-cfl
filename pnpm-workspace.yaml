@@ -4,7 +4,8 @@ packages:
   - packages/dsh-plugin-account-hub/packages/*
   - packages/dsh-plugin-digital-hands/packages/*
   - packages/dsh-plugin-skill-book/packages/*
-  - packages/dsh-plugin-memory-recall/packages/*
+  - packages/dsh-plugin-rag-knowledge/packages/*
+  - packages/dsh-plugin-memory-echo/packages/*
 allowBuilds:
   esbuild: true
   node-llama-cpp: true
@@ -14,6 +15,40 @@ allowBuilds:
 # node_modules. The runtime (getLlama) auto-detects process.platform/arch/GPU
 # and loads the matching backend, so one node_modules tree serves both macOS
 # and Windows hosts without reinstalling.
+minimumReleaseAgeExclude:
+  - '@deepseek-ai/dsh-anonymous-user-id@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-atomic-write@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-attachment@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-authorization@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-brand@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-credentials@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-deepseek-llm-api-extensions@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-fs@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-home-paths@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-launch-environment@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-llm-deepseek@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-llm@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-native-command@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-sandbox@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-scope@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-session@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-timeout@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-typert-protocol@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-util-crypto@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-util-values@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-agent@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-app-boot@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-config-editor@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-llm-pi-ai@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-package-manifest@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-ptc-runtime@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-sandbox-policy@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-session-projection@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-settings@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-system-prompt@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-tools@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-user-approval@0.2.1-rc.3'
+  - '@deepseek-ai/dsh-working-directory@0.2.1-rc.3'
 patchedDependencies:
   '@earendil-works/pi-ai@1.1.0': patches/@earendil-works__pi-ai@1.1.0.patch
 supportedArchitectures:
